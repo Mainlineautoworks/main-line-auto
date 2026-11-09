@@ -36,7 +36,7 @@ function arrowNav(buttons, select) {
 // box = where the shade layer sits in the photo: [x, y, width, height]; size defaults to 1200x900.
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261109g';
+const ASSET_V = '20261109i';
 const toLin = v => Math.pow(v / 255, 2.2);
 const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
 const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
@@ -64,9 +64,21 @@ function createPainter({ view, img, canvas, stage, vehicles, initial, color }) {
     canvas.width = t.width; canvas.height = t.height;
     out = ctx.createImageData(t.width, t.height);
   }
+  let cur_v = null;
+  // fit the photo stage inside the frame at the photo's own shape (letterboxed, never cropped),
+  // so the paint layer always sits exactly on the photo
+  function fit() {
+    if (!stage || !cur_v) return;
+    const [W, H] = cur_v.size || [1200, 900], vw = view.clientWidth, vh = view.clientHeight;
+    if (!vw || !vh) return;
+    const pr = W / H, vr = vw / vh;
+    stage.style.width = (pr > vr ? 100 : pr / vr * 100) + '%';
+    stage.style.height = (pr > vr ? vr / pr * 100 : 100) + '%';
+  }
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(view);
   function place(v) {
     const [x, y, w, h] = v.box, [W, H] = v.size || [1200, 900];
-    if (stage) stage.style.setProperty('--ar', `${W} / ${H}`);
+    cur_v = v; fit();
     img.width = W; img.height = H;
     Object.assign(canvas.style, { left: x / W * 100 + '%', top: y / H * 100 + '%', width: w / W * 100 + '%', height: h / H * 100 + '%' });
   }
@@ -198,8 +210,9 @@ const wrapPaint = createPainter({
   view: document.getElementById('wrap-view'), img: document.getElementById('wrap-img'), canvas: document.getElementById('wrap-paint'),
   stage: document.getElementById('wrap-stage'), initial: 'sedan', color: '#C8102E',
   vehicles: {
-    sedan: { img: asset('wrap-panamera.webp'), shade: asset('wrap-panamera-shade.png'), box: [18, 341, 1150, 349], alt: 'Porsche sport sedan with its body wrapped in the selected color' },
-    suv:   { img: asset('wrap-cayenne.webp'),  shade: asset('wrap-cayenne-shade.png'),  box: [0, 316, 1194, 392], alt: 'Porsche SUV coupe with its body wrapped in the selected color' }
+    sedan: { img: asset('wrap-panamera.webp'), shade: asset('wrap-panamera-shade.png'), box: [19, 342, 1148, 348], alt: 'Sedan with its body wrapped in the selected color' },
+    suv:   { img: asset('wrap-cayenne.webp'),  shade: asset('wrap-cayenne-shade.png'),  box: [0, 317, 1193, 395], alt: 'SUV with its body wrapped in the selected color' },
+    truck: { img: asset('wrap-truck.webp'),    shade: asset('wrap-truck-shade.png'),    box: [80, 242, 1163, 296], size: [1320, 668], alt: 'Pickup truck with its body wrapped in the selected color' }
   }
 });
 wirePickers(document.getElementById('wraps'), wrapPaint);
