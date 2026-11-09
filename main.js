@@ -15,25 +15,6 @@ if (toggle && mobileNav) {
   }));
 }
 
-// Services: photo follows the service you're looking at
-const serviceImg = document.getElementById('service-img');
-const services = document.querySelectorAll('.service-list li');
-function showService(li) {
-  services.forEach(s => s.classList.toggle('active', s === li));
-  const src = li.dataset.img;
-  if (!serviceImg || !src) return;
-  serviceImg.style.objectPosition = li.dataset.pos || '50% 50%';
-  if (serviceImg.getAttribute('src') !== src) {
-    serviceImg.style.opacity = 0;
-    setTimeout(() => { serviceImg.src = src; serviceImg.style.opacity = 1; }, 150);
-  }
-}
-services.forEach(li => {
-  li.addEventListener('mouseenter', () => showService(li));
-  li.addEventListener('focus', () => showService(li));
-});
-if (services[0]) services[0].classList.add('active');
-
 // Tint picker: film opacity = light the film blocks (1 - VLT)
 const notes = {
   70: '70%: barely there. Takes the edge off glare and blocks UV without changing the look.',
