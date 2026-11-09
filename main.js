@@ -36,7 +36,7 @@ function arrowNav(buttons, select) {
 // box = where the shade layer sits in the photo: [x, y, width, height]; size defaults to 1200x900.
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261109j';
+const ASSET_V = '20261109k';
 const toLin = v => Math.pow(v / 255, 2.2);
 const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
 const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
@@ -208,11 +208,11 @@ wirePickers(document.getElementById('calipers'), caliperPaint, {
 // Wraps: full-body color change on real cars
 const wrapPaint = createPainter({
   view: document.getElementById('wrap-view'), img: document.getElementById('wrap-img'), canvas: document.getElementById('wrap-paint'),
-  stage: document.getElementById('wrap-stage'), initial: 'sedan', color: '#C8102E',
+  stage: document.getElementById('wrap-stage'), initial: 'sports', color: '#C8102E',
   vehicles: {
-    sedan: { img: asset('wrap-panamera.webp'), shade: asset('wrap-panamera-shade.png'), box: [19, 342, 1148, 348], alt: 'Sedan with its body wrapped in the selected color' },
-    suv:   { img: asset('wrap-cayenne.webp'),  shade: asset('wrap-cayenne-shade.png'),  box: [0, 317, 1193, 395], alt: 'SUV with its body wrapped in the selected color' },
-    truck: { img: asset('wrap-truck.webp'),    shade: asset('wrap-truck-shade.png'),    box: [80, 242, 1163, 296], size: [1320, 668], alt: 'Pickup truck with its body wrapped in the selected color' }
+    sports: { img: asset('wrap-sports.webp'), shade: asset('wrap-sports-shade.png'), box: [30, 229, 1262, 532], size: [1320, 833], alt: 'Porsche sports car with its body wrapped in the selected color' },
+    suv: { img: asset('wrap-suv.webp'), shade: asset('wrap-suv-shade.png'), box: [4, 162, 1298, 545], size: [1320, 790], alt: 'BMW SUV with its body wrapped in the selected color' },
+    truck: { img: asset('wrap-truck.webp'), shade: asset('wrap-truck-shade.png'), box: [35, 117, 1243, 496], size: [1320, 812], alt: 'Ford F-250 pickup with its body wrapped in the selected color' }
   }
 });
 wirePickers(document.getElementById('wraps'), wrapPaint);
@@ -240,5 +240,19 @@ function setShade(btn) {
 arrowNav(shadeButtons, setShade);
 const initial = document.querySelector('.shade-picker [aria-checked="true"]');
 if (initial) setShade(initial);
+
+// Ceramic packages: choosing a package lights up its coverage on the diagram
+(() => {
+  const svg = document.getElementById('coat-svg'), fig = svg && svg.closest('.coat-diagram'), now = document.getElementById('coat-now');
+  const cards = Array.from(document.querySelectorAll('.coat-card'));
+  if (!svg || !cards.length) return;
+  function pick(card) {
+    cards.forEach(c => { const on = c === card; c.classList.toggle('is-active', on); c.querySelector('.coat-select').setAttribute('aria-pressed', String(on)); });
+    svg.dataset.on = card.dataset.cover; fig.dataset.on = card.dataset.cover;
+    now.textContent = `${card.querySelector('.coat-level').textContent}: ${card.querySelector('h4').textContent}`;
+  }
+  cards.forEach(c => c.querySelector('.coat-select').addEventListener('click', () => pick(c)));
+  pick(cards.find(c => c.classList.contains('is-featured')) || cards[0]);
+})();
 
 document.getElementById('year').textContent = new Date().getFullYear();
