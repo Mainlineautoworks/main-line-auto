@@ -45,9 +45,9 @@ let presetColor = 'red';
 // on top, alpha = the caliper outline. Any color is lit by that photo's own light.
 // box = where the shade layer sits in the 1200x900 photo: [x, y, width, height].
 const VEHICLES = {
-  sedan:   { img: 'assets/img/caliper-real.webp',    shade: 'assets/img/caliper-real-shade.png',    box: [327, 303, 193, 347], alt: 'Gloss black wheel on a grey sedan' },
-  sports:  { img: 'assets/img/caliper-sports.webp',  shade: 'assets/img/caliper-sports-shade.png',  box: [674, 422, 98, 218],  alt: 'Black wheel on a red sports car' },
-  truck:   { img: 'assets/img/caliper-truck.webp',   shade: 'assets/img/caliper-truck-shade.png',   box: [632, 430, 65, 147],  alt: 'Gloss black wheel on a grey pickup truck' },
+  sports:  { img: 'assets/img/caliper-sports.webp',  shade: 'assets/img/caliper-sports-shade.png',  box: [687, 299, 121, 271], alt: 'Black wheel on a red sports car' },
+  sedan:   { img: 'assets/img/caliper-sedan.webp',   shade: 'assets/img/caliper-sedan-shade.png',   box: [303, 207, 209, 378], alt: 'Gloss black wheel on a grey sedan' },
+  truck:   { img: 'assets/img/caliper-truck.webp',   shade: 'assets/img/caliper-truck-shade.png',   box: [710, 346, 72, 165],  alt: 'Gloss black wheel on a grey pickup truck' },
   closeup: { img: 'assets/img/caliper-closeup.webp', shade: 'assets/img/caliper-closeup-shade.png', box: [47, 0, 334, 900],    alt: 'Close-up of a brake caliper beside a drilled rotor' }
 };
 const paint = (() => {
@@ -120,7 +120,7 @@ const paint = (() => {
     };
     anim = requestAnimationFrame(step);
   }
-  setVehicle('sedan', true);
+  setVehicle('sports', true);
   // warm the other vehicles once the section is near, so switching is instant
   new IntersectionObserver((es, obs) => {
     if (!es[0].isIntersecting) return;
