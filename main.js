@@ -46,12 +46,12 @@ let presetColor = 'red';
 // box = where the shade layer sits in the 1200x900 photo: [x, y, width, height].
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261109c';
+const ASSET_V = '20261109d';
 const VEHICLES = {
-  sports:  { img: 'assets/img/caliper-sports.webp?v=' + ASSET_V,  shade: 'assets/img/caliper-sports-shade.png?v=' + ASSET_V,  box: [687, 299, 121, 271], alt: 'Black wheel on a red sports car' },
-  sedan:   { img: 'assets/img/caliper-sedan.webp?v=' + ASSET_V,   shade: 'assets/img/caliper-sedan-shade.png?v=' + ASSET_V,   box: [360, 484, 211, 380], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
+  sports:  { img: 'assets/img/caliper-sports.webp?v=' + ASSET_V,  shade: 'assets/img/caliper-sports-shade.png?v=' + ASSET_V,  box: [683, 294, 128, 316], alt: 'Black wheel on a red sports car' },
+  sedan:   { img: 'assets/img/caliper-sedan.webp?v=' + ASSET_V,   shade: 'assets/img/caliper-sedan-shade.png?v=' + ASSET_V,   box: [361, 484, 212, 379], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
   truck:   { img: 'assets/img/caliper-truck.webp?v=' + ASSET_V,   shade: 'assets/img/caliper-truck-shade.png?v=' + ASSET_V,   box: [710, 346, 72, 165],  alt: 'Gloss black wheel on a grey pickup truck' },
-  closeup: { img: 'assets/img/caliper-closeup.webp?v=' + ASSET_V, shade: 'assets/img/caliper-closeup-shade.png?v=' + ASSET_V, box: [127, 25, 301, 842], alt: 'Close-up of a brake caliper beside a drilled rotor' }
+  closeup: { img: 'assets/img/caliper-closeup.webp?v=' + ASSET_V, shade: 'assets/img/caliper-closeup-shade.png?v=' + ASSET_V, box: [128, 24, 307, 843], alt: 'Close-up of a brake caliper beside a drilled rotor' }
 };
 const paint = (() => {
   const cv = document.getElementById('caliper-paint');
