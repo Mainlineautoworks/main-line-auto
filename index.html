@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=202611091730">
+<link rel="stylesheet" href="styles.css?v=202611091740">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -141,7 +141,15 @@
       <div class="calipers-copy">
         <h2 id="calipers-h">Caliper color change</h2>
         <p>The detail people notice at a stoplight. We refinish your brake calipers in high-heat, professional-grade paint, in the color you choose.</p>
-        <div class="color-picker" role="radiogroup" aria-label="Caliper color">
+        <p class="picker-label" id="vehicle-label">Vehicle</p>
+        <div class="vehicle-picker" role="radiogroup" aria-labelledby="vehicle-label">
+          <button role="radio" aria-checked="true" data-vehicle="sedan">Sedan</button>
+          <button role="radio" aria-checked="false" data-vehicle="sports">Sports car</button>
+          <button role="radio" aria-checked="false" data-vehicle="truck">Truck</button>
+          <button role="radio" aria-checked="false" data-vehicle="closeup">Close-up</button>
+        </div>
+        <p class="picker-label" id="color-label">Caliper color</p>
+        <div class="color-picker" role="radiogroup" aria-labelledby="color-label">
           <button role="radio" aria-checked="true" data-color="red" style="--c:#CD1620"><span class="sr-only">Red</span></button>
           <button role="radio" aria-checked="false" data-color="yellow" style="--c:#F0BE14"><span class="sr-only">Yellow</span></button>
           <button role="radio" aria-checked="false" data-color="orange" style="--c:#F06E14"><span class="sr-only">Orange</span></button>
@@ -363,6 +371,6 @@
 </footer>
 
 <script src="caliper-3d.js?v=202611091725" defer></script>
-<script src="main.js?v=202611091730" defer></script>
+<script src="main.js?v=202611091740" defer></script>
 </body>
 </html>

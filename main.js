@@ -40,9 +40,16 @@ const modeButtons = Array.from(document.querySelectorAll('.cv-mode button'));
 const viewer = () => window.CaliperViewer;
 let presetColor = 'red';
 
-// Live repaint of the calipers in the real photo.
-// caliper-real-shade.png is cut from that photo: R = how brightly the paint is lit, G = the white
-// highlights on top of it, alpha = the caliper outline. Any color is lit by the photo's own light.
+// Live repaint of the calipers in real shop photos, one per vehicle.
+// Each *-shade.png is cut from its photo: R = how brightly the paint is lit, G = white highlights
+// on top, alpha = the caliper outline. Any color is lit by that photo's own light.
+// box = where the shade layer sits in the 1200x900 photo: [x, y, width, height].
+const VEHICLES = {
+  sedan:   { img: 'assets/img/caliper-real.webp',    shade: 'assets/img/caliper-real-shade.png',    box: [327, 303, 193, 347], alt: 'Gloss black wheel on a grey sedan' },
+  sports:  { img: 'assets/img/caliper-sports.webp',  shade: 'assets/img/caliper-sports-shade.png',  box: [674, 422, 98, 218],  alt: 'Black wheel on a red sports car' },
+  truck:   { img: 'assets/img/caliper-truck.webp',   shade: 'assets/img/caliper-truck-shade.png',   box: [632, 430, 65, 147],  alt: 'Gloss black wheel on a grey pickup truck' },
+  closeup: { img: 'assets/img/caliper-closeup.webp', shade: 'assets/img/caliper-closeup-shade.png', box: [47, 0, 334, 900],    alt: 'Close-up of a brake caliper beside a drilled rotor' }
+};
 const paint = (() => {
   const cv = document.getElementById('caliper-paint');
   if (!cv || !caliperView || !caliperImg) return null;
@@ -51,11 +58,15 @@ const paint = (() => {
   const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
   // finish: how much of the lighting contrast and how much of the shine survive
   const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };
-  let lit = null, hi = null, alpha = null, out = null, mean = 0.1;
+  let lit = null, hi = null, alpha = null, out = null, mean = 0.1, loadId = 0;
   let cur = hexLin('#CD1620'), goal = cur, fin = FIN.gloss, goalFin = fin, metal = 0, anim = 0;
-  const img = new Image();
-  img.onload = () => {
-    const t = document.createElement('canvas'); t.width = cv.width; t.height = cv.height;
+  const cache = {};
+  function loadShade(src) {
+    if (!cache[src]) cache[src] = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+    return cache[src];
+  }
+  function decode(img) {
+    const t = document.createElement('canvas'); t.width = img.naturalWidth; t.height = img.naturalHeight;
     const tc = t.getContext('2d'); tc.drawImage(img, 0, 0);
     const d = tc.getImageData(0, 0, t.width, t.height).data, n = d.length / 4;
     lit = new Float32Array(n); hi = new Float32Array(n); alpha = new Uint8ClampedArray(n);
@@ -65,11 +76,27 @@ const paint = (() => {
       if (alpha[i] > 128) { sum += lit[i]; cnt++; }
     }
     mean = cnt ? sum / cnt : 0.1;
-    out = ctx.createImageData(cv.width, cv.height);
-    caliperView.classList.add('paint-ready');
+    cv.width = t.width; cv.height = t.height;
+    out = ctx.createImageData(t.width, t.height);
+  }
+  function place(box) {
+    const [x, y, w, h] = box;
+    Object.assign(cv.style, { left: x / 12 + '%', top: y / 9 + '%', width: w / 12 + '%', height: h / 9 + '%' });
+  }
+  async function setVehicle(id, first) {
+    const v = VEHICLES[id]; if (!v) return;
+    const my = ++loadId;
+    if (!first) caliperView.classList.add('switching');
+    const photo = new Image(); photo.src = v.img;
+    const [shadeImg] = await Promise.all([loadShade(v.shade), photo.decode ? photo.decode().catch(() => {}) : null]);
+    if (my !== loadId) return;
+    await new Promise(r => setTimeout(r, first ? 0 : 120));
+    decode(shadeImg); place(v.box);
+    caliperImg.src = v.img; caliperImg.alt = v.alt;
     render();
-  };
-  img.src = 'assets/img/caliper-real-shade.png';
+    caliperView.classList.add('paint-ready');
+    caliperView.classList.remove('switching');
+  }
   function render() {
     if (!lit) return;
     const o = out.data, [con, shine] = fin, hiGain = shine * (metal ? 1.6 : 1);
@@ -93,11 +120,26 @@ const paint = (() => {
     };
     anim = requestAnimationFrame(step);
   }
+  setVehicle('sedan', true);
+  // warm the other vehicles once the section is near, so switching is instant
+  new IntersectionObserver((es, obs) => {
+    if (!es[0].isIntersecting) return;
+    Object.values(VEHICLES).forEach(v => { loadShade(v.shade); const i = new Image(); i.src = v.img; });
+    obs.disconnect();
+  }, { rootMargin: '400px' }).observe(caliperView);
   return {
+    setVehicle,
     setColor(hex, opts = {}) { goal = hexLin(hex).map(v => opts.metallic ? v * 0.7 : v); metal = opts.metallic ? 1 : 0; animate(); },
     setFinish(name) { goalFin = FIN[name] || FIN.gloss; animate(); }
   };
 })();
+
+const vehicleButtons = Array.from(document.querySelectorAll('.vehicle-picker button'));
+arrowNav(vehicleButtons, btn => {
+  vehicleButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
+  if (paint) paint.setVehicle(btn.dataset.vehicle);
+  setMode('photo');
+});
 
 function setMode(mode) {
   if (!caliperView) return;
@@ -111,7 +153,6 @@ function setColor(btn) {
   if (customSwatch) customSwatch.classList.remove('is-active');
   const label = btn.textContent.trim();
   presetColor = btn.dataset.color;
-  caliperImg.alt = `Gloss black wheel with brake calipers shown in ${label.toLowerCase()}`;
   colorName.textContent = label;
   const hex = getComputedStyle(btn).getPropertyValue('--c').trim(), opts = { metallic: btn.dataset.metallic === 'true' };
   if (viewer()) viewer().setColor(hex, opts);
@@ -125,7 +166,6 @@ if (customColor) {
     customSwatch.classList.add('is-active');
     customSwatch.style.setProperty('--c', customColor.value);
     colorName.textContent = `Custom ${customColor.value.toUpperCase()}`;
-    caliperImg.alt = `Gloss black wheel with brake calipers shown in a custom color`;
     if (viewer()) viewer().setColor(customColor.value);
     if (paint) paint.setColor(customColor.value); else setMode('3d');
   };
