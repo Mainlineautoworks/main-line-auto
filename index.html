@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=202611091650">
+<link rel="stylesheet" href="styles.css?v=202611091700">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -121,8 +121,21 @@
 
   <section class="calipers" id="calipers" aria-labelledby="calipers-h">
     <div class="wrap calipers-grid">
-      <div class="caliper-view">
+      <div class="caliper-view" id="caliper-view" data-mode="3d">
+        <canvas id="caliper-canvas" tabindex="0" role="img" aria-label="3D model of a wheel and brake caliper in the selected color. Drag, or use the arrow keys, to change the angle."></canvas>
         <img id="caliper-img" src="assets/img/caliper-red.webp" alt="Brake caliper shown in red behind a black wheel" width="720" height="540" loading="lazy">
+        <p class="cv-hint" aria-hidden="true"><span class="cv-hint-icon"></span>Drag to rotate</p>
+        <div class="cv-mode" role="group" aria-label="View">
+          <button type="button" data-mode="3d" aria-pressed="true">3D</button>
+          <button type="button" data-mode="photo" aria-pressed="false">Real photo</button>
+        </div>
+        <div class="cv-angles" role="group" aria-label="Viewing angle">
+          <button type="button" data-view="front" aria-pressed="false">Front</button>
+          <button type="button" data-view="three" aria-pressed="true">3/4</button>
+          <button type="button" data-view="low" aria-pressed="false">Low</button>
+          <button type="button" data-view="close" aria-pressed="false">Close-up</button>
+        </div>
+        <p class="cv-photo-note">Real photo of our work</p>
       </div>
       <div class="calipers-copy">
         <h2 id="calipers-h">Caliper color change</h2>
@@ -132,10 +145,19 @@
           <button role="radio" aria-checked="false" data-color="yellow" style="--c:#F0BE14"><span class="sr-only">Yellow</span></button>
           <button role="radio" aria-checked="false" data-color="orange" style="--c:#F06E14"><span class="sr-only">Orange</span></button>
           <button role="radio" aria-checked="false" data-color="blue" style="--c:#195AD2"><span class="sr-only">Blue</span></button>
-          <button role="radio" aria-checked="false" data-color="silver" style="--c:#B9BEC4"><span class="sr-only">Silver</span></button>
+          <button role="radio" aria-checked="false" data-color="silver" data-metallic="true" style="--c:#B9BEC4"><span class="sr-only">Silver</span></button>
           <button role="radio" aria-checked="false" data-color="black" style="--c:#1C1C1E"><span class="sr-only">Gloss black</span></button>
+          <label class="custom-swatch" title="Pick any color">
+            <input type="color" id="custom-color" value="#2FBF71">
+            <span class="sr-only">Custom color</span>
+          </label>
         </div>
         <p class="color-name" id="color-name" aria-live="polite">Red</p>
+        <div class="finish-picker" role="radiogroup" aria-label="Finish">
+          <button role="radio" aria-checked="true" data-finish="gloss">Gloss</button>
+          <button role="radio" aria-checked="false" data-finish="satin">Satin</button>
+          <button role="radio" aria-checked="false" data-finish="matte">Matte</button>
+        </div>
         <ul class="ticks ticks-dark">
           <li>Any color, matched to your wrap or factory trim</li>
           <li>High-heat finish built for brake temperatures</li>
@@ -339,6 +361,7 @@
   </div>
 </footer>
 
-<script src="main.js?v=202611091335" defer></script>
+<script src="caliper-3d.js?v=202611091700" defer></script>
+<script src="main.js?v=202611091700" defer></script>
 </body>
 </html>
