@@ -40,6 +40,62 @@ const modeButtons = Array.from(document.querySelectorAll('.cv-mode button'));
 const viewer = () => window.CaliperViewer;
 let presetColor = 'red';
 
+// Live repaint of the caliper in the real photo.
+// caliper-shade.png holds the caliper's lighting (RGB) and outline (alpha), cut from our own photos;
+// any paint color is multiplied through that lighting, so reflections and shadows stay real.
+const paint = (() => {
+  const cv = document.getElementById('caliper-paint');
+  if (!cv || !caliperView || !caliperImg) return null;
+  const ctx = cv.getContext('2d');
+  const toLin = v => Math.pow(v / 255, 2.2);
+  const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
+  const FIN = { gloss: 1, satin: 0.72, matte: 0.45 };   // how much of the lighting contrast survives
+  let shade = null, alpha = null, out = null, cur = hexLin('#CD1620'), goal = cur, metal = 0, contrast = 1, goalContrast = 1, anim = 0;
+  const img = new Image();
+  img.onload = () => {
+    const t = document.createElement('canvas'); t.width = cv.width; t.height = cv.height;
+    const tc = t.getContext('2d'); tc.drawImage(img, 0, 0);
+    const d = tc.getImageData(0, 0, t.width, t.height).data;
+    shade = new Float32Array(d.length / 4); alpha = new Uint8ClampedArray(d.length / 4);
+    for (let i = 0; i < shade.length; i++) { shade[i] = toLin(d[i * 4]); alpha[i] = d[i * 4 + 3]; }
+    out = ctx.createImageData(cv.width, cv.height);
+    caliperImg.src = 'assets/img/caliper-black.webp';
+    caliperView.classList.add('paint-ready');
+    render();
+  };
+  img.src = 'assets/img/caliper-shade.png';
+  const MID = 0.2;
+  function render() {
+    if (!shade) return;
+    const o = out.data;
+    for (let i = 0; i < shade.length; i++) {
+      let s = shade[i];
+      s = MID + (s - MID) * contrast;                     // satin/matte flatten the highlights
+      if (metal) s = s * 0.8 + Math.max(0, shade[i] - MID) * 0.9;  // metallic: stronger, whiter highlights
+      for (let c = 0; c < 3; c++) o[i * 4 + c] = Math.round(255 * Math.pow(Math.min(1, Math.max(0, cur[c] * s)), 1 / 2.2));
+      o[i * 4 + 3] = alpha[i];
+    }
+    ctx.putImageData(out, 0, 0);
+  }
+  function animate() {
+    cancelAnimationFrame(anim);
+    const from = cur.slice(), c0 = contrast, start = performance.now();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const step = t => {
+      const k = reduce ? 1 : Math.min((t - start) / 260, 1), e = k * k * (3 - 2 * k);
+      cur = from.map((v, i) => v + (goal[i] - v) * e);
+      contrast = c0 + (goalContrast - c0) * e;
+      render();
+      if (k < 1) anim = requestAnimationFrame(step);
+    };
+    anim = requestAnimationFrame(step);
+  }
+  return {
+    setColor(hex, opts = {}) { goal = hexLin(hex).map(v => opts.metallic ? v * 0.75 : v); metal = opts.metallic ? 1 : 0; animate(); },
+    setFinish(name) { goalContrast = FIN[name] || 1; animate(); }
+  };
+})();
+
 function setMode(mode) {
   if (!caliperView) return;
   caliperView.dataset.mode = mode;
@@ -52,15 +108,16 @@ function setColor(btn) {
   if (customSwatch) customSwatch.classList.remove('is-active');
   const label = btn.textContent.trim();
   presetColor = btn.dataset.color;
-  caliperImg.src = `assets/img/caliper-${presetColor}.webp`;
+  if (!paint) caliperImg.src = `assets/img/caliper-${presetColor}.webp`;
   caliperImg.alt = `Brake caliper shown in ${label.toLowerCase()} behind a black wheel`;
   colorName.textContent = label;
-  if (caliperView) caliperView.classList.remove('custom-color');
-  if (viewer()) viewer().setColor(getComputedStyle(btn).getPropertyValue('--c').trim(), { metallic: btn.dataset.metallic === 'true' });
+  const hex = getComputedStyle(btn).getPropertyValue('--c').trim(), opts = { metallic: btn.dataset.metallic === 'true' };
+  if (viewer()) viewer().setColor(hex, opts);
+  if (paint) paint.setColor(hex, opts);
 }
 arrowNav(colorButtons, setColor);
-if (caliperImg) {
-  // Preload the photos once the section is close, so the photo view swaps instantly
+if (caliperImg && !document.getElementById('caliper-paint')) {
+  // No live repaint: preload the photos once the section is close, so swaps are instant
   new IntersectionObserver((es, obs) => {
     if (!es[0].isIntersecting) return;
     colorButtons.forEach(b => { const i = new Image(); i.src = `assets/img/caliper-${b.dataset.color}.webp`; });
@@ -74,10 +131,9 @@ if (customColor) {
     customSwatch.classList.add('is-active');
     customSwatch.style.setProperty('--c', customColor.value);
     colorName.textContent = `Custom ${customColor.value.toUpperCase()}`;
-    // We only have shop photos for the preset colors, so a custom color shows in 3D
-    if (caliperView) caliperView.classList.add('custom-color');
-    setMode('3d');
+    caliperImg.alt = `Brake caliper shown in a custom color behind a black wheel`;
     if (viewer()) viewer().setColor(customColor.value);
+    if (paint) paint.setColor(customColor.value); else setMode('3d');
   };
   customColor.addEventListener('input', applyCustom);
   customColor.addEventListener('change', applyCustom);
@@ -88,7 +144,7 @@ const finishButtons = Array.from(document.querySelectorAll('.finish-picker butto
 arrowNav(finishButtons, btn => {
   finishButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
   if (viewer()) viewer().setFinish(btn.dataset.finish);
-  setMode('3d');
+  if (paint) paint.setFinish(btn.dataset.finish); else setMode('3d');
 });
 
 // Tint picker: film opacity = light the film blocks (1 - VLT)

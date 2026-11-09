@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=202611091700">
+<link rel="stylesheet" href="styles.css?v=202611091725">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -121,13 +121,14 @@
 
   <section class="calipers" id="calipers" aria-labelledby="calipers-h">
     <div class="wrap calipers-grid">
-      <div class="caliper-view" id="caliper-view" data-mode="3d">
+      <div class="caliper-view" id="caliper-view" data-mode="photo">
         <canvas id="caliper-canvas" tabindex="0" role="img" aria-label="3D model of a wheel and brake caliper in the selected color. Drag, or use the arrow keys, to change the angle."></canvas>
         <img id="caliper-img" src="assets/img/caliper-red.webp" alt="Brake caliper shown in red behind a black wheel" width="720" height="540" loading="lazy">
+        <canvas id="caliper-paint" width="104" height="320" aria-hidden="true"></canvas>
         <p class="cv-hint" aria-hidden="true"><span class="cv-hint-icon"></span>Drag to rotate</p>
         <div class="cv-mode" role="group" aria-label="View">
-          <button type="button" data-mode="3d" aria-pressed="true">3D</button>
-          <button type="button" data-mode="photo" aria-pressed="false">Real photo</button>
+          <button type="button" data-mode="photo" aria-pressed="true">Real car</button>
+          <button type="button" data-mode="3d" aria-pressed="false">3D angles</button>
         </div>
         <div class="cv-angles" role="group" aria-label="Viewing angle">
           <button type="button" data-view="front" aria-pressed="false">Front</button>
@@ -135,7 +136,7 @@
           <button type="button" data-view="low" aria-pressed="false">Low</button>
           <button type="button" data-view="close" aria-pressed="false">Close-up</button>
         </div>
-        <p class="cv-photo-note">Real photo of our work</p>
+        <p class="cv-photo-note">Real car, repainted live</p>
       </div>
       <div class="calipers-copy">
         <h2 id="calipers-h">Caliper color change</h2>
@@ -361,7 +362,7 @@
   </div>
 </footer>
 
-<script src="caliper-3d.js?v=202611091720" defer></script>
-<script src="main.js?v=202611091700" defer></script>
+<script src="caliper-3d.js?v=202611091725" defer></script>
+<script src="main.js?v=202611091725" defer></script>
 </body>
 </html>
