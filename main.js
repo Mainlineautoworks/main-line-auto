@@ -46,7 +46,7 @@ let presetColor = 'red';
 // box = where the shade layer sits in the 1200x900 photo: [x, y, width, height].
 const VEHICLES = {
   sports:  { img: 'assets/img/caliper-sports.webp',  shade: 'assets/img/caliper-sports-shade.png',  box: [687, 299, 121, 271], alt: 'Black wheel on a red sports car' },
-  sedan:   { img: 'assets/img/caliper-sedan.webp',   shade: 'assets/img/caliper-sedan-shade.png',   box: [364, 264, 168, 302], alt: 'Gloss black wheel on a grey sedan' },
+  sedan:   { img: 'assets/img/caliper-sedan.webp',   shade: 'assets/img/caliper-sedan-shade.png',   box: [360, 484, 211, 380], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
   truck:   { img: 'assets/img/caliper-truck.webp',   shade: 'assets/img/caliper-truck-shade.png',   box: [710, 346, 72, 165],  alt: 'Gloss black wheel on a grey pickup truck' },
   closeup: { img: 'assets/img/caliper-closeup.webp', shade: 'assets/img/caliper-closeup-shade.png', box: [127, 25, 301, 842], alt: 'Close-up of a brake caliper beside a drilled rotor' }
 };
@@ -79,9 +79,12 @@ const paint = (() => {
     cv.width = t.width; cv.height = t.height;
     out = ctx.createImageData(t.width, t.height);
   }
-  function place(box) {
-    const [x, y, w, h] = box;
-    Object.assign(cv.style, { left: x / 12 + '%', top: y / 9 + '%', width: w / 12 + '%', height: h / 9 + '%' });
+  const stage = document.getElementById('cv-stage');
+  function place(v) {
+    const [x, y, w, h] = v.box, [W, H] = v.size || [1200, 900];
+    if (stage) stage.style.setProperty('--ar', `${W} / ${H}`);
+    caliperImg.width = W; caliperImg.height = H;
+    Object.assign(cv.style, { left: x / W * 100 + '%', top: y / H * 100 + '%', width: w / W * 100 + '%', height: h / H * 100 + '%' });
   }
   async function setVehicle(id, first) {
     const v = VEHICLES[id]; if (!v) return;
@@ -91,7 +94,7 @@ const paint = (() => {
     const [shadeImg] = await Promise.all([loadShade(v.shade), photo.decode ? photo.decode().catch(() => {}) : null]);
     if (my !== loadId) return;
     await new Promise(r => setTimeout(r, first ? 0 : 120));
-    decode(shadeImg); place(v.box);
+    decode(shadeImg); place(v);
     caliperImg.src = v.img; caliperImg.alt = v.alt;
     render();
     caliperView.classList.add('paint-ready');

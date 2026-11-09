@@ -196,7 +196,10 @@ p { margin: 0 0 1em; }
 .caliper-view canvas:focus-visible { box-shadow: inset 0 0 0 3px var(--red); }
 /* 3D mode (only once WebGL is running); otherwise the photo stays */
 .caliper-view.gl-ready[data-mode="3d"] canvas { display: block; }
-.caliper-view.gl-ready[data-mode="3d"] img { display: none; }
+.caliper-view.gl-ready[data-mode="3d"] .cv-stage { display: none; }
+/* Photo stage: keeps each photo at its own shape, centred in the frame */
+.cv-stage { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); height: 100%; max-width: 100%; aspect-ratio: var(--ar, 4 / 3); }
+.cv-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .cv-hint, .cv-mode, .cv-angles, .cv-photo-note { display: none; }
 .caliper-view.gl-ready .cv-mode { display: flex; }
 .caliper-view.gl-ready[data-mode="3d"] .cv-angles { display: flex; }
