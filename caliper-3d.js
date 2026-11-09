@@ -115,7 +115,7 @@
     bolt:    { color: hexToLinear('#c9cdd1'), spec: 0.9, shin: 90, env: 0.7, metal: 1 },
     lug:     { color: hexToLinear('#8e9297'), spec: 0.8, shin: 80, env: 0.6, metal: 1 },
     caliper: { color: hexToLinear('#CD1620'), spec: 1.0, shin: 140, env: 1.0, metal: 0 },
-    plate:   { color: hexToLinear('#CD1620'), spec: 1.0, shin: 140, env: 1.0, metal: 0, logo: 1 }
+    plate:   { color: hexToLinear('#CD1620'), spec: 1.0, shin: 140, env: 1.0, metal: 0 }
   };
   const FINISH = {
     gloss: { spec: 1.0, shin: 140, env: 1.0 },
@@ -323,30 +323,7 @@
   });
   gl.enable(gl.DEPTH_TEST);
 
-  // Brand lettering for the caliper face, drawn once into a texture.
-  // Text runs along the arc: texture x = radius, y = angle.
-  const logoTex = gl.createTexture();
-  function drawLogo() {
-    const tc = document.createElement('canvas'); tc.width = 256; tc.height = 1024;
-    const g = tc.getContext('2d');
-    g.scale(2, 2); g.translate(64, 256); g.rotate(Math.PI / 2);
-    g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = '600 52px Michroma, Saira, Arial, sans-serif';
-    g.fillText('MAIN LINE', 0, 4, 470);
-    gl.bindTexture(gl.TEXTURE_2D, logoTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tc);
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    const aniso = gl.getExtension('EXT_texture_filter_anisotropic');
-    if (aniso) gl.texParameterf(gl.TEXTURE_2D, aniso.TEXTURE_MAX_ANISOTROPY_EXT, 8);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.uniform1i(loc('uTex'), 0);
-    dirty = true;
-  }
   let dirty = true;
-  drawLogo();
-  if (document.fonts) document.fonts.load('600 52px Michroma').then(drawLogo, () => {});
 
   // ---------- camera & views ----------
   const VIEWS = {
