@@ -36,7 +36,7 @@ function arrowNav(buttons, select) {
 // box = where the shade layer sits in the photo: [x, y, width, height]; size defaults to 1200x900.
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261109f';
+const ASSET_V = '20261109g';
 const toLin = v => Math.pow(v / 255, 2.2);
 const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
 const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
@@ -198,8 +198,8 @@ const wrapPaint = createPainter({
   view: document.getElementById('wrap-view'), img: document.getElementById('wrap-img'), canvas: document.getElementById('wrap-paint'),
   stage: document.getElementById('wrap-stage'), initial: 'sedan', color: '#C8102E',
   vehicles: {
-    sedan: { img: asset('wrap-panamera.webp'), shade: asset('wrap-panamera-shade.png'), box: [19, 346, 1149, 341], alt: 'Porsche sport sedan with its body wrapped in the selected color' },
-    suv:   { img: asset('wrap-cayenne.webp'),  shade: asset('wrap-cayenne-shade.png'),  box: [8, 316, 1186, 394], alt: 'Porsche SUV coupe with its body wrapped in the selected color' }
+    sedan: { img: asset('wrap-panamera.webp'), shade: asset('wrap-panamera-shade.png'), box: [18, 341, 1150, 349], alt: 'Porsche sport sedan with its body wrapped in the selected color' },
+    suv:   { img: asset('wrap-cayenne.webp'),  shade: asset('wrap-cayenne-shade.png'),  box: [0, 316, 1194, 392], alt: 'Porsche SUV coupe with its body wrapped in the selected color' }
   }
 });
 wirePickers(document.getElementById('wraps'), wrapPaint);
