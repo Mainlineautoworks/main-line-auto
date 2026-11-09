@@ -490,3 +490,25 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .color-picker { gap: 10px; }
   .color-picker button, .custom-swatch { width: 40px; height: 40px; }
 }
+
+/* Wrap visualizer (light section) */
+.wrap-tool { min-width: 0; }
+.wrap-view { background: #DADFE3; }
+.wrap-view .cv-photo-note { display: block; }
+.wrap-view #wrap-paint { display: block; position: absolute; pointer-events: none; }
+.wrap-view:not(.paint-ready) #wrap-paint { display: none; }
+.wrap-view #wrap-img, .wrap-view #wrap-paint { transition: opacity .25s; }
+.wrap-view.switching #wrap-img, .wrap-view.switching #wrap-paint { opacity: 0; }
+.wrap-controls { display: flex; flex-wrap: wrap; gap: 4px 28px; }
+.wraps .picker-label { color: var(--text-mid); margin-top: 20px; }
+.wraps .vehicle-picker button { color: var(--graphite); border-color: rgba(29,33,37,.25); }
+.wraps .vehicle-picker button:hover { border-color: var(--graphite); color: var(--graphite); }
+.wraps .vehicle-picker button[aria-checked="true"] { background: var(--graphite); border-color: var(--graphite); color: var(--pearl); }
+.wraps .finish-picker { border-color: rgba(29,33,37,.2); margin: 0; }
+.wraps .finish-picker button { color: var(--text-mid); }
+.wraps .finish-picker button[aria-checked="true"] { background: var(--graphite); color: var(--pearl); }
+.wraps .color-picker button, .wraps .custom-swatch { border-color: rgba(29,33,37,.18); }
+.wraps .color-picker button[aria-checked="true"], .wraps .custom-swatch.is-active { outline-color: var(--graphite); border-color: var(--graphite); }
+.wraps .color-picker .sw-original { background: linear-gradient(135deg, #f4f5f6 0 49%, #b9bec4 51% 100%); }
+.wraps .color-name { color: var(--graphite); }
+.wrap-more { margin: 6px 0 0; font-size: .95rem; color: var(--text-mid); }

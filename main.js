@@ -29,48 +29,30 @@ function arrowNav(buttons, select) {
   });
 }
 
-// Caliper picker: repaints the 3D caliper (caliper-3d.js) and swaps the real photo
-const caliperView = document.getElementById('caliper-view');
-const caliperImg = document.getElementById('caliper-img');
-const colorName = document.getElementById('color-name');
-const colorButtons = Array.from(document.querySelectorAll('.color-picker button'));
-const customColor = document.getElementById('custom-color');
-const customSwatch = customColor && customColor.closest('.custom-swatch');
-const modeButtons = Array.from(document.querySelectorAll('.cv-mode button'));
-const viewer = () => window.CaliperViewer;
-let presetColor = 'red';
-
-// Live repaint of the calipers in real shop photos, one per vehicle.
+// ---------------------------------------------------------------------------------------------
+// Live repaint of real shop photos (calipers and wraps share this).
 // Each *-shade.png is cut from its photo: R = how brightly the paint is lit, G = white highlights
-// on top, alpha = the caliper outline. Any color is lit by that photo's own light.
-// box = where the shade layer sits in the 1200x900 photo: [x, y, width, height].
+// on top, alpha = the painted area. Any color is lit by that photo's own light.
+// box = where the shade layer sits in the photo: [x, y, width, height]; size defaults to 1200x900.
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261109e';
-const VEHICLES = {
-  sports:  { img: 'assets/img/caliper-sports.webp?v=' + ASSET_V,  shade: 'assets/img/caliper-sports-shade.png?v=' + ASSET_V,  box: [659, 274, 170, 358], alt: 'Black wheel on a red sports car' },
-  sedan:   { img: 'assets/img/caliper-sedan.webp?v=' + ASSET_V,   shade: 'assets/img/caliper-sedan-shade.png?v=' + ASSET_V,   box: [361, 484, 212, 379], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
-  truck:   { img: 'assets/img/caliper-truck.webp?v=' + ASSET_V,   shade: 'assets/img/caliper-truck-shade.png?v=' + ASSET_V,   box: [710, 346, 72, 165],  alt: 'Gloss black wheel on a grey pickup truck' },
-  closeup: { img: 'assets/img/caliper-closeup.webp?v=' + ASSET_V, shade: 'assets/img/caliper-closeup-shade.png?v=' + ASSET_V, box: [128, 24, 307, 843], alt: 'Close-up of a brake caliper beside a drilled rotor' }
-};
-const paint = (() => {
-  const cv = document.getElementById('caliper-paint');
-  if (!cv || !caliperView || !caliperImg) return null;
-  const ctx = cv.getContext('2d');
-  const toLin = v => Math.pow(v / 255, 2.2);
-  const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
-  // finish: how much of the lighting contrast and how much of the shine survive
-  const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };
-  let lit = null, hi = null, alpha = null, out = null, mean = 0.1, loadId = 0;
-  let cur = hexLin('#CD1620'), goal = cur, fin = FIN.gloss, goalFin = fin, metal = 0, anim = 0;
-  const cache = {};
-  function loadShade(src) {
-    if (!cache[src]) cache[src] = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
-    return cache[src];
-  }
-  function decode(img) {
-    const t = document.createElement('canvas'); t.width = img.naturalWidth; t.height = img.naturalHeight;
-    const tc = t.getContext('2d'); tc.drawImage(img, 0, 0);
+const ASSET_V = '20261109f';
+const toLin = v => Math.pow(v / 255, 2.2);
+const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
+const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
+const shadeCache = {};
+function loadShade(src) {
+  if (!shadeCache[src]) shadeCache[src] = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+  return shadeCache[src];
+}
+function createPainter({ view, img, canvas, stage, vehicles, initial, color }) {
+  if (!canvas || !view || !img) return null;
+  const ctx = canvas.getContext('2d');
+  let lit = null, hi = null, alpha = null, out = null, mean = 0.1, loadId = 0, hidden = false;
+  let cur = hexLin(color), goal = cur, fin = FIN.gloss, goalFin = fin, metal = 0, anim = 0;
+  function decode(im) {
+    const t = document.createElement('canvas'); t.width = im.naturalWidth; t.height = im.naturalHeight;
+    const tc = t.getContext('2d'); tc.drawImage(im, 0, 0);
     const d = tc.getImageData(0, 0, t.width, t.height).data, n = d.length / 4;
     lit = new Float32Array(n); hi = new Float32Array(n); alpha = new Uint8ClampedArray(n);
     let sum = 0, cnt = 0;
@@ -79,32 +61,32 @@ const paint = (() => {
       if (alpha[i] > 128) { sum += lit[i]; cnt++; }
     }
     mean = cnt ? sum / cnt : 0.1;
-    cv.width = t.width; cv.height = t.height;
+    canvas.width = t.width; canvas.height = t.height;
     out = ctx.createImageData(t.width, t.height);
   }
-  const stage = document.getElementById('cv-stage');
   function place(v) {
     const [x, y, w, h] = v.box, [W, H] = v.size || [1200, 900];
     if (stage) stage.style.setProperty('--ar', `${W} / ${H}`);
-    caliperImg.width = W; caliperImg.height = H;
-    Object.assign(cv.style, { left: x / W * 100 + '%', top: y / H * 100 + '%', width: w / W * 100 + '%', height: h / H * 100 + '%' });
+    img.width = W; img.height = H;
+    Object.assign(canvas.style, { left: x / W * 100 + '%', top: y / H * 100 + '%', width: w / W * 100 + '%', height: h / H * 100 + '%' });
   }
   async function setVehicle(id, first) {
-    const v = VEHICLES[id]; if (!v) return;
+    const v = vehicles[id]; if (!v) return;
     const my = ++loadId;
-    if (!first) caliperView.classList.add('switching');
+    if (!first) view.classList.add('switching');
     const photo = new Image(); photo.src = v.img;
     const [shadeImg] = await Promise.all([loadShade(v.shade), photo.decode ? photo.decode().catch(() => {}) : null]);
     if (my !== loadId) return;
     await new Promise(r => setTimeout(r, first ? 0 : 120));
     decode(shadeImg); place(v);
-    caliperImg.src = v.img; caliperImg.alt = v.alt;
+    img.src = v.img; img.alt = v.alt;
     render();
-    caliperView.classList.add('paint-ready');
-    caliperView.classList.remove('switching');
+    view.classList.add('paint-ready');
+    view.classList.remove('switching');
   }
   function render() {
     if (!lit) return;
+    canvas.style.visibility = hidden ? 'hidden' : '';
     const o = out.data, [con, shine] = fin, hiGain = shine * (metal ? 1.6 : 1);
     for (let i = 0; i < lit.length; i++) {
       const s = Math.max(0, mean + (lit[i] - mean) * con), h = hi[i] * hiGain;
@@ -126,66 +108,101 @@ const paint = (() => {
     };
     anim = requestAnimationFrame(step);
   }
-  setVehicle('sports', true);
-  // warm the other vehicles once the section is near, so switching is instant
+  setVehicle(initial, true);
+  // warm the other photos once the section is near, so switching is instant
   new IntersectionObserver((es, obs) => {
     if (!es[0].isIntersecting) return;
-    Object.values(VEHICLES).forEach(v => { loadShade(v.shade); const i = new Image(); i.src = v.img; });
+    Object.values(vehicles).forEach(v => { loadShade(v.shade); const i = new Image(); i.src = v.img; });
     obs.disconnect();
-  }, { rootMargin: '400px' }).observe(caliperView);
+  }, { rootMargin: '400px' }).observe(view);
   return {
     setVehicle,
-    setColor(hex, opts = {}) { goal = hexLin(hex).map(v => opts.metallic ? v * 0.7 : v); metal = opts.metallic ? 1 : 0; animate(); },
+    showOriginal(on) { hidden = on; render(); },
+    setColor(hex, opts = {}) { hidden = false; goal = hexLin(hex).map(v => opts.metallic ? v * 0.7 : v); metal = opts.metallic ? 1 : 0; animate(); },
     setFinish(name) { goalFin = FIN[name] || FIN.gloss; animate(); }
   };
-})();
+}
+const asset = (name) => `assets/img/${name}?v=${ASSET_V}`;
 
-const vehicleButtons = Array.from(document.querySelectorAll('.vehicle-picker button'));
-arrowNav(vehicleButtons, btn => {
-  vehicleButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
-  if (paint) paint.setVehicle(btn.dataset.vehicle);
-  setMode('photo');
-});
+// Wire one section's pickers (vehicle, color swatches, custom color, finish) to its painter.
+function wirePickers(section, painter, { onColor, onFinish, onVehicle } = {}) {
+  if (!section) return;
+  const colorName = section.querySelector('.color-name');
+  const colorButtons = Array.from(section.querySelectorAll('.color-picker button'));
+  const custom = section.querySelector('.custom-swatch input');
+  const customSwatch = custom && custom.closest('.custom-swatch');
+  const vehicleButtons = Array.from(section.querySelectorAll('.vehicle-picker button'));
+  const finishButtons = Array.from(section.querySelectorAll('.finish-picker button'));
+  arrowNav(vehicleButtons, btn => {
+    vehicleButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
+    if (painter) painter.setVehicle(btn.dataset.vehicle);
+    if (onVehicle) onVehicle(btn);
+  });
+  arrowNav(colorButtons, btn => {
+    colorButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
+    if (customSwatch) customSwatch.classList.remove('is-active');
+    if (colorName) colorName.textContent = btn.textContent.trim();
+    if (btn.dataset.original === 'true') { if (painter) painter.showOriginal(true); return; }
+    const hex = getComputedStyle(btn).getPropertyValue('--c').trim(), opts = { metallic: btn.dataset.metallic === 'true' };
+    if (painter) painter.setColor(hex, opts);
+    if (onColor) onColor(hex, opts);
+  });
+  if (custom) {
+    const applyCustom = () => {
+      colorButtons.forEach(b => b.setAttribute('aria-checked', 'false'));
+      customSwatch.classList.add('is-active');
+      customSwatch.style.setProperty('--c', custom.value);
+      if (colorName) colorName.textContent = `Custom ${custom.value.toUpperCase()}`;
+      if (painter) painter.setColor(custom.value);
+      if (onColor) onColor(custom.value, {});
+    };
+    custom.addEventListener('input', applyCustom);
+    custom.addEventListener('change', applyCustom);
+    customSwatch.style.setProperty('--c', custom.value);
+  }
+  arrowNav(finishButtons, btn => {
+    finishButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
+    if (painter) painter.setFinish(btn.dataset.finish);
+    if (onFinish) onFinish(btn.dataset.finish);
+  });
+}
 
+// Calipers: real photos plus the 3D wheel (caliper-3d.js)
+const caliperView = document.getElementById('caliper-view');
+const modeButtons = Array.from(document.querySelectorAll('#caliper-view .cv-mode button'));
+const viewer = () => window.CaliperViewer;
 function setMode(mode) {
   if (!caliperView) return;
   caliperView.dataset.mode = mode;
   modeButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
 }
 modeButtons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
-
-function setColor(btn) {
-  colorButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
-  if (customSwatch) customSwatch.classList.remove('is-active');
-  const label = btn.textContent.trim();
-  presetColor = btn.dataset.color;
-  colorName.textContent = label;
-  const hex = getComputedStyle(btn).getPropertyValue('--c').trim(), opts = { metallic: btn.dataset.metallic === 'true' };
-  if (viewer()) viewer().setColor(hex, opts);
-  if (paint) paint.setColor(hex, opts);
-}
-arrowNav(colorButtons, setColor);
-
-if (customColor) {
-  const applyCustom = () => {
-    colorButtons.forEach(b => b.setAttribute('aria-checked', 'false'));
-    customSwatch.classList.add('is-active');
-    customSwatch.style.setProperty('--c', customColor.value);
-    colorName.textContent = `Custom ${customColor.value.toUpperCase()}`;
-    if (viewer()) viewer().setColor(customColor.value);
-    if (paint) paint.setColor(customColor.value); else setMode('3d');
-  };
-  customColor.addEventListener('input', applyCustom);
-  customColor.addEventListener('change', applyCustom);
-  customSwatch.style.setProperty('--c', customColor.value);
-}
-
-const finishButtons = Array.from(document.querySelectorAll('.finish-picker button'));
-arrowNav(finishButtons, btn => {
-  finishButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
-  if (viewer()) viewer().setFinish(btn.dataset.finish);
-  if (paint) paint.setFinish(btn.dataset.finish); else setMode('3d');
+const caliperPaint = createPainter({
+  view: caliperView, img: document.getElementById('caliper-img'), canvas: document.getElementById('caliper-paint'),
+  stage: document.getElementById('cv-stage'), initial: 'sports', color: '#CD1620',
+  vehicles: {
+    sports:  { img: asset('caliper-sports.webp'),  shade: asset('caliper-sports-shade.png'),  box: [659, 274, 170, 358], alt: 'Black wheel on a red sports car' },
+    sedan:   { img: asset('caliper-sedan.webp'),   shade: asset('caliper-sedan-shade.png'),   box: [361, 484, 212, 379], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
+    truck:   { img: asset('caliper-truck.webp'),   shade: asset('caliper-truck-shade.png'),   box: [710, 346, 72, 165],  alt: 'Gloss black wheel on a grey pickup truck' },
+    closeup: { img: asset('caliper-closeup.webp'), shade: asset('caliper-closeup-shade.png'), box: [128, 24, 307, 843], alt: 'Close-up of a brake caliper beside a drilled rotor' }
+  }
 });
+wirePickers(document.getElementById('calipers'), caliperPaint, {
+  onVehicle: () => setMode('photo'),
+  onColor: (hex, opts) => { if (viewer()) viewer().setColor(hex, opts); },
+  onFinish: f => { if (viewer()) viewer().setFinish(f); }
+});
+
+// Wraps: full-body color change on real cars
+const wrapPaint = createPainter({
+  view: document.getElementById('wrap-view'), img: document.getElementById('wrap-img'), canvas: document.getElementById('wrap-paint'),
+  stage: document.getElementById('wrap-stage'), initial: 'sedan', color: '#C8102E',
+  vehicles: {
+    sedan: { img: asset('wrap-panamera.webp'), shade: asset('wrap-panamera-shade.png'), box: [19, 346, 1149, 341], alt: 'Porsche sport sedan with its body wrapped in the selected color' },
+    suv:   { img: asset('wrap-cayenne.webp'),  shade: asset('wrap-cayenne-shade.png'),  box: [8, 316, 1186, 394], alt: 'Porsche SUV coupe with its body wrapped in the selected color' }
+  }
+});
+wirePickers(document.getElementById('wraps'), wrapPaint);
 
 // Tint picker: film opacity = light the film blocks (1 - VLT)
 const notes = {
