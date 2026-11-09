@@ -103,12 +103,14 @@
 
   // ---------- materials ----------
   const MAT = {
-    tire:    { color: hexToLinear('#18191b'), spec: 0.12, shin: 14, env: 0.04, metal: 0 },
-    rim:     { color: hexToLinear('#3a3e44'), spec: 0.6, shin: 60, env: 0.6, metal: 1 },
+    tire:    { color: hexToLinear('#1a1b1d'), spec: 0.18, shin: 18, env: 0.06, metal: 0, kind: 1 },
+    shadow:  { color: [0, 0, 0], spec: 0, shin: 1, env: 0, metal: 0, kind: 4 },
+    rim:     { color: hexToLinear('#2f3237'), spec: 0.6, shin: 60, env: 0.55, metal: 1, kind: 3 },
     rimLip:  { color: hexToLinear('#55595e'), spec: 0.7, shin: 90, env: 0.8, metal: 1 },
     barrel:  { color: hexToLinear('#141517'), spec: 0.2, shin: 20, env: 0.1, metal: 1 },
     well:    { color: hexToLinear('#08090a'), spec: 0.0, shin: 1, env: 0.0, metal: 0 },
     rotor:   { color: hexToLinear('#6c7075'), spec: 0.4, shin: 36, env: 0.3, metal: 1, pattern: 1 },
+    vane:    { color: hexToLinear('#3b3e42'), spec: 0.2, shin: 20, env: 0.1, metal: 1 },
     hat:     { color: hexToLinear('#4b4e52'), spec: 0.3, shin: 30, env: 0.25, metal: 1 },
     bolt:    { color: hexToLinear('#c9cdd1'), spec: 0.9, shin: 90, env: 0.7, metal: 1 },
     lug:     { color: hexToLinear('#8e9297'), spec: 0.8, shin: 80, env: 0.6, metal: 1 },
@@ -131,19 +133,27 @@
 
   // tyre: superellipse cross-section
   {
-    const prof = [], n = 3.2, steps = 56;
+    const prof = [], n = 3.2, steps = 80;
     for (let k = 0; k < steps; k++) {
       const t = TAU * k / steps, c = Math.cos(t), s = Math.sin(t);
       prof.push([0.858 + 0.118 * Math.sign(c) * Math.pow(Math.abs(c), 2 / n), 0.235 * Math.sign(s) * Math.pow(Math.abs(s), 2 / n)]);
     }
-    lathe(add(MAT.tire), prof, 120, 0, TAU, { closed: true, smooth: 0.5 });
+    lathe(add(MAT.tire), prof, 200, 0, TAU, { closed: true, smooth: 0.5 });
   }
   // rim barrel (inside) and polished front lip
   lathe(add(MAT.barrel), [[0.705, -0.26], [0.705, 0.17]], 96, 0, TAU);
   lathe(add(MAT.rimLip), [[0.705, 0.17], [0.715, 0.205], [0.735, 0.228], [0.758, 0.236], [0.772, 0.228], [0.768, 0.212], [0.75, 0.2]], 120, 0, TAU, { smooth: 0.5 });
 
   // rotor + hat
-  lathe(add(MAT.rotor), roundRect(0.2, 0.6, -0.035, 0.035, 0.008, 2), 120, 0, TAU, { closed: true });
+  const rotor = add(MAT.rotor);
+  lathe(rotor, roundRect(0.2, 0.6, 0.011, 0.038, 0.006, 2), 160, 0, TAU, { closed: true });
+  lathe(rotor, roundRect(0.3, 0.6, -0.038, -0.011, 0.006, 2), 160, 0, TAU, { closed: true });
+  const vanes = add(MAT.vane);
+  for (let k = 0; k < 40; k++) {
+    const t0 = TAU * k / 40, t1 = t0 + 0.035, a = 0.31, b = 0.595, z0 = -0.012, z1 = 0.012;
+    const q = (r, t, z) => [r * Math.cos(t + (r - a) * 0.6), r * Math.sin(t + (r - a) * 0.6), z];
+    prism(vanes, [q(a, t0, z1), q(b, t0, z1), q(b, t1, z1), q(a, t1, z1)], [q(a, t0, z0), q(b, t0, z0), q(b, t1, z0), q(a, t1, z0)]);
+  }
   lathe(add(MAT.hat), roundRect(0.08, 0.235, -0.04, 0.12, 0.015, 3), 64, 0, TAU, { closed: true });
 
   // caliper body (sector wrapped over the rotor edge at 3 o'clock), raised face plate, bolts
@@ -159,16 +169,18 @@
   // spokes: five split "Y" spokes, concave from hub to rim
   const spokes = add(MAT.rim);
   const spoke = (ai, ao) => {
-    const ri = 0.14, ro = 0.712, zi = 0.258, zo = 0.196, depth = 0.075, wi = 0.092, wo = 0.074;
+    const ri = 0.14, ro = 0.712, zi = 0.258, zo = 0.196, depth = 0.075, wi = 0.096, wo = 0.088;
     const ci = [ri * Math.cos(ai), ri * Math.sin(ai), zi], co = [ro * Math.cos(ao), ro * Math.sin(ao), zo];
     const d = v3.sub(co, ci), s = v3.norm([-d[1], d[0], 0]);
     const fi = [v3.add(ci, v3.scale(s, wi / 2)), v3.add(ci, v3.scale(s, -wi / 2))];
     const fo = [v3.add(co, v3.scale(s, -wo / 2)), v3.add(co, v3.scale(s, wo / 2))];
     const f = [fi[0], fi[1], fo[0], fo[1]];
     const b = f.map(p => [p[0], p[1], p[2] - depth]);
-    // soften the front edges a touch by insetting the front face slightly
-    const fIn = f.map((p, k) => { const o = k < 2 ? ci : co; return v3.add(o, v3.scale(v3.sub(p, o), 0.86)); }).map(p => [p[0], p[1], p[2] + 0.006]);
-    prism(spokes, fIn, f);
+    // raised centre ridge: two sloped faces that catch light differently, like a real cast spoke
+    const ciR = [ci[0], ci[1], ci[2] + 0.016], coR = [co[0], co[1], co[2] + 0.012];
+    const face = (a, b2, c, d) => { const n = v3.norm(v3.cross(v3.sub(b2, a), v3.sub(c, a))); tri(spokes, a, b2, c, n); tri(spokes, a, c, d, n); };
+    face(f[0], ciR, coR, f[3]);
+    face(ciR, f[1], f[2], coR);
     prism(spokes, f, b);
   };
   for (let k = 0; k < 5; k++) {
@@ -185,6 +197,11 @@
   }
   lathe(add(MAT.rimLip), [[0.05, 0.276], [0.05, 0.284], [0.044, 0.29], [0, 0.29]], 40, 0, TAU, { smooth: 0.5 });
 
+  {
+    const sh = add(MAT.shadow), y = -0.985, n = [0, 1, 0];
+    tri(sh, [-1.5, y, -0.9], [1.5, y, -0.9], [1.5, y, 0.9], n); tri(sh, [-1.5, y, -0.9], [1.5, y, 0.9], [-1.5, y, 0.9], n);
+  }
+
   // ---------- GL setup ----------
   const vs = `
     attribute vec3 aPos; attribute vec3 aNrm;
@@ -195,7 +212,7 @@
     precision highp float;
     varying vec3 vP, vN;
     uniform vec3 uCam, uColor;
-    uniform float uSpec, uShin, uEnv, uMetal, uPattern, uLogo, uSpan;
+    uniform float uSpec, uShin, uEnv, uMetal, uPattern, uLogo, uSpan, uKind;
     uniform vec3 uInk;
     uniform sampler2D uTex;
     vec3 env(vec3 R){
@@ -216,12 +233,42 @@
       vec3 N = normalize(vN);
       vec3 V = normalize(uCam - vP);
       if (dot(N, V) < 0.0) N = -N;
+      if (uKind > 3.5) { // contact shadow
+        float d = length(vec2(vP.x / 1.25, vP.z / 0.55));
+        float a = (1.0 - smoothstep(0.15, 1.0, d)) * 0.75;
+        gl_FragColor = vec4(0.0, 0.0, 0.0, a);
+        return;
+      }
       vec3 base = uColor;
       float ink = 0.0;
+      float rr = length(vP.xy), ang = atan(vP.y, vP.x);
+      // cheap ambient occlusion: the deeper inside the wheel, the less light reaches
+      float ao = mix(0.28, 1.0, smoothstep(-0.26, 0.2, vP.z));
+      if (uKind > 0.5 && uKind < 1.5) { // tyre: tread grooves, sipes, sidewall rings
+        ao = 1.0;
+        if (rr > 0.95 && abs(N.z) < 0.6) {
+          float g = 1.0 - smoothstep(0.035, 0.06, abs(fract(vP.z * 7.0 + 0.5) - 0.5));
+          float sipe = 1.0 - smoothstep(0.02, 0.06, abs(fract(ang * 38.0) - 0.5));
+          base *= 1.0 - 0.75 * max(g, sipe * 0.5 * step(0.08, abs(vP.z)));
+          N = normalize(N + vec3(0.0, 0.0, 0.25 * g * sign(fract(vP.z * 7.0 + 0.5) - 0.5)));
+        } else if (abs(N.z) > 0.55) {
+          float ring = 1.0 - smoothstep(0.0015, 0.004, abs(rr - 0.785));
+          ring = max(ring, 1.0 - smoothstep(0.0015, 0.004, abs(rr - 0.955)));
+          base = mix(base, vec3(0.03), ring);
+          base *= 0.92 + 0.08 * sin(rr * 260.0);
+        }
+      }
+      if (uKind > 2.5 && uKind < 3.5) { // two-tone wheel: diamond-cut face on the spokes
+        if (N.z > 0.72 && rr > 0.13) {
+          base = vec3(0.115, 0.12, 0.13);
+          ao = 1.0;
+        }
+      }
       if (uPattern > 0.5) {
         float r = length(vP.xy);
         base *= 0.88 + 0.12 * sin(r * 900.0) * sin(r * 37.0);
         base *= 1.0 - 0.35 * smoothstep(0.585, 0.6, r) - 0.25 * (1.0 - smoothstep(0.3, 0.32, r));
+        base *= 1.0 - 0.55 * (1.0 - smoothstep(0.6, 0.72, abs(atan(vP.y, vP.x)))) * smoothstep(0.4, 0.45, r);
         // cross-drilled holes on the friction face, three staggered rows
         if (abs(N.z) > 0.8 && r > 0.33) {
           float a = atan(vP.y, vP.x);
@@ -249,6 +296,7 @@
       float F = 0.04 + 0.96 * pow(1.0 - ndv, 5.0);
       vec3 e = env(R);
       c += mix(e * F, e * base * (0.5 + 0.5 * F), uMetal) * uEnv;
+      c *= ao;
       c = (c * (2.51 * c + 0.03)) / (c * (2.43 * c + 0.59) + 0.14);
       c = mix(c, uInk * (0.9 + 0.5 * pow(max(dot(N, normalize(normalize(vec3(-0.45, 0.75, 0.6)) + V)), 0.0), 40.0)), ink);
       gl_FragColor = vec4(pow(clamp(c, 0.0, 1.0), vec3(1.0/2.2)), 1.0);
@@ -264,7 +312,7 @@
   } catch (e) { view.classList.add('no-gl'); return; }
   gl.useProgram(prog);
   const loc = n => gl.getUniformLocation(prog, n);
-  const U = { logo: loc('uLogo'), span: loc('uSpan'), ink: loc('uInk'), tex: loc('uTex'), proj: loc('uProj'), view: loc('uView'), cam: loc('uCam'), color: loc('uColor'), spec: loc('uSpec'), shin: loc('uShin'), env: loc('uEnv'), metal: loc('uMetal'), pattern: loc('uPattern') };
+  const U = { logo: loc('uLogo'), span: loc('uSpan'), ink: loc('uInk'), tex: loc('uTex'), proj: loc('uProj'), view: loc('uView'), cam: loc('uCam'), color: loc('uColor'), spec: loc('uSpec'), shin: loc('uShin'), env: loc('uEnv'), metal: loc('uMetal'), pattern: loc('uPattern'), kind: loc('uKind') };
   const aPos = gl.getAttribLocation(prog, 'aPos'), aNrm = gl.getAttribLocation(prog, 'aNrm');
   gl.enableVertexAttribArray(aPos); gl.enableVertexAttribArray(aNrm);
   meshes.forEach(m => {
@@ -279,15 +327,18 @@
   // Text runs along the arc: texture x = radius, y = angle.
   const logoTex = gl.createTexture();
   function drawLogo() {
-    const tc = document.createElement('canvas'); tc.width = 128; tc.height = 512;
+    const tc = document.createElement('canvas'); tc.width = 256; tc.height = 1024;
     const g = tc.getContext('2d');
-    g.translate(64, 256); g.rotate(Math.PI / 2);
+    g.scale(2, 2); g.translate(64, 256); g.rotate(Math.PI / 2);
     g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.font = '600 52px Michroma, Saira, Arial, sans-serif';
     g.fillText('MAIN LINE', 0, 4, 470);
     gl.bindTexture(gl.TEXTURE_2D, logoTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tc);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    const aniso = gl.getExtension('EXT_texture_filter_anisotropic');
+    if (aniso) gl.texParameterf(gl.TEXTURE_2D, aniso.TEXTURE_MAX_ANISOTROPY_EXT, 8);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.uniform1i(loc('uTex'), 0);
@@ -308,8 +359,10 @@
   let tween = null, interacted = false, visible = true, colorTween = null;
 
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
+    let dpr = Math.min((window.devicePixelRatio || 1) * 1.5, 3);
+    const maxPx = 5e6, cw = canvas.clientWidth, ch = canvas.clientHeight;
+    if (cw * ch * dpr * dpr > maxPx) dpr = Math.sqrt(maxPx / (cw * ch));
+    const w = Math.round(cw * dpr), h = Math.round(ch * dpr);
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; dirty = true; }
   }
   function draw(t) {
@@ -329,11 +382,14 @@
       gl.uniform3fv(U.color, s.color);
       gl.uniform1f(U.spec, s.spec); gl.uniform1f(U.shin, s.shin); gl.uniform1f(U.env, s.env);
       gl.uniform1f(U.metal, s.metal); gl.uniform1f(U.pattern, s.pattern || 0);
-      gl.uniform1f(U.logo, s.logo || 0); gl.uniform1f(U.span, PLATE);
+      gl.uniform1f(U.logo, s.logo || 0); gl.uniform1f(U.span, PLATE); gl.uniform1f(U.kind, s.kind || 0);
+      const isShadow = s.kind === 4;
+      if (isShadow) { gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false); }
       gl.uniform3fv(U.ink, inkColor());
       gl.bindBuffer(gl.ARRAY_BUFFER, m.pb); gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 0, 0);
       gl.bindBuffer(gl.ARRAY_BUFFER, m.nb); gl.vertexAttribPointer(aNrm, 3, gl.FLOAT, false, 0, 0);
       gl.drawArrays(gl.TRIANGLES, 0, m.count);
+      if (isShadow) { gl.disable(gl.BLEND); gl.depthMask(true); }
     });
   }
   function inkColor() {
