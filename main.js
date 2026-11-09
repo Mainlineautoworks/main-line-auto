@@ -15,6 +15,35 @@ if (toggle && mobileNav) {
   }));
 }
 
+// Radio-group arrow keys, shared by both pickers
+function arrowNav(buttons, select) {
+  buttons.forEach((btn, i) => {
+    btn.addEventListener('click', () => select(btn));
+    btn.addEventListener('keydown', e => {
+      const dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault();
+      const next = buttons[(i + dir + buttons.length) % buttons.length];
+      next.focus(); select(next);
+    });
+  });
+}
+
+// Caliper picker: swap to the pre-rendered photo in that color
+const caliperImg = document.getElementById('caliper-img');
+const colorName = document.getElementById('color-name');
+const colorButtons = Array.from(document.querySelectorAll('.color-picker button'));
+// Preload so swaps are instant
+colorButtons.forEach(b => { const i = new Image(); i.src = `assets/img/caliper-${b.dataset.color}.webp`; });
+function setColor(btn) {
+  colorButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
+  const label = btn.textContent.trim();
+  caliperImg.src = `assets/img/caliper-${btn.dataset.color}.webp`;
+  caliperImg.alt = `Brake caliper shown in ${label.toLowerCase()} behind a black wheel`;
+  colorName.textContent = label;
+}
+arrowNav(colorButtons, setColor);
+
 // Tint picker: film opacity = light the film blocks (1 - VLT)
 const notes = {
   70: '70%: barely there. Takes the edge off glare and blocks UV without changing the look.',
@@ -26,7 +55,7 @@ const notes = {
 const film = document.getElementById('film');
 const readout = document.getElementById('vlt-readout');
 const note = document.getElementById('shade-note');
-const shadeButtons = document.querySelectorAll('.shade-picker button');
+const shadeButtons = Array.from(document.querySelectorAll('.shade-picker button'));
 function setShade(btn) {
   const vlt = Number(btn.dataset.vlt);
   shadeButtons.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
@@ -35,16 +64,7 @@ function setShade(btn) {
   readout.textContent = vlt;
   note.textContent = notes[vlt];
 }
-shadeButtons.forEach((btn, i) => {
-  btn.addEventListener('click', () => setShade(btn));
-  btn.addEventListener('keydown', e => {
-    const dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
-    if (!dir) return;
-    e.preventDefault();
-    const next = shadeButtons[(i + dir + shadeButtons.length) % shadeButtons.length];
-    next.focus(); setShade(next);
-  });
-});
+arrowNav(shadeButtons, setShade);
 const initial = document.querySelector('.shade-picker [aria-checked="true"]');
 if (initial) setShade(initial);
 

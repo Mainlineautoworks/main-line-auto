@@ -3,18 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Main Line Auto Works | Paint Protection Film, Ceramic Coating &amp; Window Tint in West Chester, PA</title>
-<meta name="description" content="Paint protection film (PPF), ceramic coating, window tint and brake caliper color change in West Chester, PA. Serving the Main Line and Chester County, with pick-up and drop-off available.">
+<title>Main Line Auto Works | Vinyl Wraps, Caliper Color Change, PPF &amp; Tint in West Chester, PA</title>
+<meta name="description" content="Vinyl wraps, brake caliper color change, paint protection film, ceramic coating and window tint in West Chester, PA. Serving the Main Line and Chester County, with pick-up and drop-off available.">
 <link rel="canonical" href="https://mainlineautoworks.com/">
-<meta property="og:title" content="Main Line Auto Works | PPF, Ceramic Coating &amp; Tint">
-<meta property="og:description" content="Paint protection film, ceramic coating and window tint in West Chester, PA. Pick-up and drop-off available.">
+<meta property="og:title" content="Main Line Auto Works | Wraps, Calipers, PPF &amp; Tint">
+<meta property="og:description" content="Vinyl wraps, caliper color change, PPF, ceramic coating and window tint in West Chester, PA.">
 <meta property="og:image" content="assets/img/hero-audi.webp">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="assets/img/favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">
 {
@@ -34,10 +32,11 @@
   },
   "areaServed": ["West Chester", "Exton", "Malvern", "Paoli", "Downingtown", "Chester County", "Main Line"],
   "makesOffer": [
+    {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Vinyl wraps"}},
+    {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Brake caliper color change"}},
     {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Paint protection film (PPF)"}},
     {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Ceramic coating"}},
-    {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Window tinting"}},
-    {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Brake caliper color change"}}
+    {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Window tinting"}}
   ],
   "sameAs": ["https://www.instagram.com/mainlineautoworks/"]
 }
@@ -57,21 +56,20 @@
       <img src="assets/img/logo-light.png" alt="Main Line Auto Works" width="180" height="55">
     </a>
     <nav class="nav" aria-label="Main">
-      <a href="#ppf">PPF</a>
-      <a href="#ceramic">Ceramic coating</a>
-      <a href="#tint">Window tint</a>
+      <a href="#wraps">Wraps</a>
       <a href="#calipers">Calipers</a>
+      <a href="#protection">PPF &amp; ceramic</a>
+      <a href="#tint">Tint</a>
       <a href="#visit">Visit</a>
     </nav>
     <a class="btn btn-red btn-sm" href="#estimate">Free estimate</a>
     <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-nav">Menu</button>
   </div>
   <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile" hidden>
-    <a href="#ppf">Paint protection film</a>
-    <a href="#ceramic">Ceramic coating</a>
-    <a href="#tint">Window tint</a>
+    <a href="#wraps">Vinyl wraps</a>
     <a href="#calipers">Caliper color change</a>
-    <a href="#compare">PPF or ceramic?</a>
+    <a href="#protection">PPF and ceramic coating</a>
+    <a href="#tint">Window tint</a>
     <a href="#visit">Visit</a>
   </nav>
 </header>
@@ -82,56 +80,119 @@
     <img class="hero-img" src="assets/img/hero-audi.webp" alt="Grey Audi RS Q8 with red brake calipers, finished by Main Line Auto Works" width="1320" height="742" fetchpriority="high">
     <div class="hero-shade" aria-hidden="true"></div>
     <div class="wrap hero-copy">
-      <h1>Protected,<br>coated,<br>tinted.</h1>
-      <p class="hero-sub">Paint protection film, ceramic coating, window tint and caliper color change, installed at our West Chester shop for cars across the Main Line and Chester County.</p>
+      <h1>Color,<br>changed.</h1>
+      <p class="hero-sub">Vinyl wraps and brake caliper color change in West Chester, plus paint protection film, ceramic coating and window tint for cars across the Main Line.</p>
       <div class="hero-actions">
         <a class="btn btn-red" href="#estimate">Get a free estimate</a>
-        <a class="btn btn-ghost" href="#compare">PPF or ceramic? Compare</a>
+        <a class="btn btn-ghost" href="#calipers">Try a caliper color</a>
       </div>
     </div>
   </section>
 
-  <!-- Core services: each gets a full feature -->
-  <section class="feature" id="ppf" aria-labelledby="ppf-h">
-    <div class="wrap feature-grid">
-      <figure class="feature-photo">
-        <img src="assets/img/ppf.webp" alt="Technician installing clear paint protection film on a grey car hood" width="1800" height="1202" loading="lazy">
-      </figure>
-      <div class="feature-copy">
-        <h2 id="ppf-h">Paint protection film</h2>
-        <p>A clear, virtually invisible urethane film that takes the hits your paint would: rock chips, road salt, scratches and swirl marks. Your factory paint stays factory, and that shows up at resale.</p>
+  <section class="wraps" id="wraps" aria-labelledby="wraps-h">
+    <div class="wrap wraps-grid">
+      <div class="wraps-copy">
+        <h2 id="wraps-h">Vinyl wraps</h2>
+        <p>A new color without a respray. A wrap changes the whole look of your car, protects the factory paint underneath, and comes off when you're ready for something else.</p>
         <ul class="ticks">
-          <li>Full front, partial front or full-body coverage</li>
-          <li>Precision-fit around bumpers, hoods, mirrors and rockers</li>
-          <li>Pairs with ceramic coating for gloss and easy washing</li>
+          <li>Full color change</li>
+          <li>Roof, hood and mirror wraps</li>
+          <li>Chrome delete and blacked-out trim</li>
+          <li>Stripes and accents</li>
         </ul>
-        <a class="btn btn-dark" href="#estimate">Get a PPF estimate</a>
+        <a class="btn btn-dark" href="#estimate">Get a wrap estimate</a>
+      </div>
+      <div class="finishes">
+        <p class="finishes-intro">Every finish, in hundreds of colors</p>
+        <ul class="swatches">
+          <li><span class="sw sw-gloss" aria-hidden="true"></span>Gloss</li>
+          <li><span class="sw sw-satin" aria-hidden="true"></span>Satin</li>
+          <li><span class="sw sw-matte" aria-hidden="true"></span>Matte</li>
+          <li><span class="sw sw-metallic" aria-hidden="true"></span>Metallic</li>
+          <li><span class="sw sw-shift" aria-hidden="true"></span>Color-shift</li>
+          <li><span class="sw sw-carbon" aria-hidden="true"></span>Carbon fiber</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <section class="feature feature-flip" id="ceramic" aria-labelledby="ceramic-h">
-    <div class="wrap feature-grid">
-      <figure class="feature-photo">
-        <img src="assets/img/ceramic.webp" alt="Gloved hand applying ceramic coating to a black car's paint" width="1800" height="1191" loading="lazy">
-      </figure>
-      <div class="feature-copy">
-        <h2 id="ceramic-h">Ceramic coating</h2>
-        <p>A professional-grade coating that bonds to your clear coat and forms a slick, hydrophobic layer. Water, dirt and road grime slide off, UV is held back, and the paint keeps a deep, wet-looking gloss.</p>
-        <ul class="ticks">
-          <li>Paint correction before coating, so the gloss is locked in clean</li>
-          <li>Paint, wheels and glass</li>
-          <li>Washing takes a fraction of the time</li>
-        </ul>
-        <a class="btn btn-dark" href="#estimate">Get a coating estimate</a>
+  <section class="calipers" id="calipers" aria-labelledby="calipers-h">
+    <div class="wrap calipers-grid">
+      <div class="caliper-view">
+        <img id="caliper-img" src="assets/img/caliper-red.webp" alt="Brake caliper shown in red behind a black wheel" width="720" height="540" loading="lazy">
       </div>
+      <div class="calipers-copy">
+        <h2 id="calipers-h">Caliper color change</h2>
+        <p>The detail people notice at a stoplight. We refinish your brake calipers in high-heat, professional-grade paint, in the color you choose.</p>
+        <div class="color-picker" role="radiogroup" aria-label="Caliper color">
+          <button role="radio" aria-checked="true" data-color="red" style="--c:#CD1620"><span class="sr-only">Red</span></button>
+          <button role="radio" aria-checked="false" data-color="yellow" style="--c:#F0BE14"><span class="sr-only">Yellow</span></button>
+          <button role="radio" aria-checked="false" data-color="orange" style="--c:#F06E14"><span class="sr-only">Orange</span></button>
+          <button role="radio" aria-checked="false" data-color="blue" style="--c:#195AD2"><span class="sr-only">Blue</span></button>
+          <button role="radio" aria-checked="false" data-color="silver" style="--c:#B9BEC4"><span class="sr-only">Silver</span></button>
+          <button role="radio" aria-checked="false" data-color="black" style="--c:#1C1C1E"><span class="sr-only">Gloss black</span></button>
+        </div>
+        <p class="color-name" id="color-name" aria-live="polite">Red</p>
+        <ul class="ticks ticks-dark">
+          <li>Any color, matched to your wrap or factory trim</li>
+          <li>High-heat finish built for brake temperatures</li>
+          <li>Wheel painting, powder coating and curb rash repair</li>
+        </ul>
+        <a class="btn btn-red" href="#estimate">Get a caliper estimate</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="protection" id="protection" aria-labelledby="protection-h">
+    <div class="wrap">
+      <h2 id="protection-h">Protect the finish</h2>
+      <p class="section-intro">Once it looks right, keep it that way. Film is physical armor; coating is a chemical shield. Most clients who plan to keep the car get both.</p>
+      <div class="protect-grid">
+        <article>
+          <figure><img src="assets/img/ppf.webp" alt="Technician installing clear paint protection film on a grey car hood" width="1800" height="1202" loading="lazy"></figure>
+          <h3>Paint protection film</h3>
+          <p>Clear, virtually invisible film over bumpers, hoods, mirrors and rockers. Takes rock chips, salt and scratches so your paint doesn't. Full front, partial front or full body.</p>
+        </article>
+        <article>
+          <figure><img src="assets/img/ceramic.webp" alt="Gloved hand applying ceramic coating to a black car's paint" width="1800" height="1191" loading="lazy"></figure>
+          <h3>Ceramic coating</h3>
+          <p>A hard, hydrophobic layer bonded to your paint, wrap or film. Deep gloss, UV protection, and washing that takes a fraction of the time.</p>
+        </article>
+      </div>
+      <div class="compare-table" role="table" aria-label="PPF versus ceramic coating">
+        <div class="ct-row ct-head" role="row">
+          <span role="columnheader"><span class="sr-only">What you want</span></span>
+          <span role="columnheader">PPF</span>
+          <span role="columnheader">Ceramic</span>
+          <span role="columnheader" class="ct-both">Both</span>
+        </div>
+        <div class="ct-row" role="row">
+          <span role="rowheader">Stops rock chips</span>
+          <span role="cell" class="yes">Yes</span>
+          <span role="cell" class="no">No</span>
+          <span role="cell" class="yes">Yes</span>
+        </div>
+        <div class="ct-row" role="row">
+          <span role="rowheader">Deep gloss, water beads off</span>
+          <span role="cell">Some</span>
+          <span role="cell" class="yes">Yes</span>
+          <span role="cell" class="yes">Yes</span>
+        </div>
+        <div class="ct-row" role="row">
+          <span role="rowheader">Faster, easier washing</span>
+          <span role="cell">Some</span>
+          <span role="cell" class="yes">Yes</span>
+          <span role="cell" class="yes">Yes</span>
+        </div>
+      </div>
+      <a class="btn btn-dark" href="#estimate">Get a protection estimate</a>
     </div>
   </section>
 
   <section class="tint" id="tint" aria-labelledby="tint-h">
     <div class="wrap tint-grid">
       <div class="tint-copy">
-        <h2 id="tint-h">Window tint. Pick your shade.</h2>
+        <h2 id="tint-h">Window tint</h2>
         <p>Tint is measured in VLT: how much visible light the film lets through. Lower number, darker glass. Try a few to see how each one reads.</p>
         <div class="shade-picker" role="radiogroup" aria-label="Tint darkness">
           <button role="radio" aria-checked="false" data-vlt="70">70%</button>
@@ -149,71 +210,6 @@
         <div class="film" id="film"></div>
         <span class="vlt-readout" id="vlt-readout">35</span>
       </div>
-    </div>
-  </section>
-
-  <section class="feature" id="calipers" aria-labelledby="calipers-h">
-    <div class="wrap feature-grid">
-      <figure class="feature-photo feature-photo-crop">
-        <img src="assets/img/hero-audi.webp" alt="Red painted brake caliper behind a black wheel on a grey Audi" width="1320" height="742" loading="lazy">
-      </figure>
-      <div class="feature-copy">
-        <h2 id="calipers-h">Caliper color change</h2>
-        <p>The detail people notice at a stoplight. We refinish your brake calipers in high-heat, professional-grade paint, in the color you choose. Pair it with wheel refinishing for the full look.</p>
-        <ul class="ticks">
-          <li>Any color, including factory performance reds and yellows</li>
-          <li>High-heat finish built for brake temperatures</li>
-          <li>Wheel painting, powder coating and curb rash repair</li>
-        </ul>
-        <a class="btn btn-dark" href="#estimate">Get a caliper estimate</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Decision helper: PPF vs ceramic vs both -->
-  <section class="compare" id="compare" aria-labelledby="compare-h">
-    <div class="wrap">
-      <h2 id="compare-h">PPF or ceramic coating?</h2>
-      <p class="compare-intro">They solve different problems. Film is physical armor; coating is a chemical shield. Most of our protection clients end up with both.</p>
-      <div class="compare-table" role="table" aria-label="PPF versus ceramic coating">
-        <div class="ct-row ct-head" role="row">
-          <span role="columnheader"><span class="sr-only">What you want</span></span>
-          <span role="columnheader">PPF</span>
-          <span role="columnheader">Ceramic</span>
-          <span role="columnheader" class="ct-both">Both</span>
-        </div>
-        <div class="ct-row" role="row">
-          <span role="rowheader">Stops rock chips</span>
-          <span role="cell" class="yes">Yes</span>
-          <span role="cell" class="no">No</span>
-          <span role="cell" class="yes ct-both">Yes</span>
-        </div>
-        <div class="ct-row" role="row">
-          <span role="rowheader">Guards against scratches and salt</span>
-          <span role="cell" class="yes">Yes</span>
-          <span role="cell">Light protection</span>
-          <span role="cell" class="yes ct-both">Yes</span>
-        </div>
-        <div class="ct-row" role="row">
-          <span role="rowheader">Deep gloss, water beads off</span>
-          <span role="cell">Some</span>
-          <span role="cell" class="yes">Yes</span>
-          <span role="cell" class="yes ct-both">Yes</span>
-        </div>
-        <div class="ct-row" role="row">
-          <span role="rowheader">Faster, easier washing</span>
-          <span role="cell">Some</span>
-          <span role="cell" class="yes">Yes</span>
-          <span role="cell" class="yes ct-both">Yes</span>
-        </div>
-        <div class="ct-row" role="row">
-          <span role="rowheader">Best for</span>
-          <span role="cell">Highway miles, new paint</span>
-          <span role="cell">Gloss and easy care</span>
-          <span role="cell" class="ct-both">A car you plan to keep</span>
-        </div>
-      </div>
-      <p class="small-dark">The common setup: film on the high-impact areas (front bumper, hood, mirrors), ceramic coating over the whole car, film included.</p>
     </div>
   </section>
 
@@ -241,8 +237,8 @@
       </figure>
       <div>
         <h2 id="pickup-h">We'll pick it up</h2>
-        <p>Film and coating work takes the shop. Getting your car here doesn't have to be your problem: we'll pick it up from your home or office and bring it back finished.</p>
-        <p>After the install, we keep it looking right. Our mobile van carries its own water and power for maintenance washes and details in your driveway.</p>
+        <p>Wraps, film and coatings happen in the shop. Getting your car here doesn't have to be your problem: we'll pick it up from your home or office and bring it back finished.</p>
+        <p>Afterward, our mobile van keeps it looking right with maintenance washes and details in your driveway, using its own water and power.</p>
       </div>
     </div>
   </section>
@@ -264,20 +260,20 @@
       <h2 id="faq-h">Questions</h2>
       <div class="faq-list">
         <details>
-          <summary>Should I get PPF or ceramic coating?</summary>
-          <p>If rock chips and scratches are the worry, PPF. If you want gloss and easy washing, ceramic. Most clients who plan to keep the car do film on the front and coating over everything. We'll recommend a setup when we see the car.</p>
+          <summary>Does a wrap damage my paint?</summary>
+          <p>No. Quality vinyl on factory paint protects it, and it can be removed when you want to change the color or sell the car. We'll look at the paint first and tell you if anything needs attention before wrapping.</p>
         </details>
         <details>
-          <summary>Can ceramic coating go over PPF?</summary>
-          <p>Yes. Coating the film makes it easier to clean and keeps it looking glossy. It's the most common way we finish a PPF install.</p>
+          <summary>Can I match my calipers to a wrap?</summary>
+          <p>Yes. A lot of clients do both together so the calipers, trim and wrap color work as one look. Bring an idea and we'll help you land on the combination.</p>
+        </details>
+        <details>
+          <summary>Should I get PPF or ceramic coating?</summary>
+          <p>If rock chips and scratches are the worry, PPF. If you want gloss and easy washing, ceramic. Most clients who plan to keep the car do film on the front and coating over everything.</p>
         </details>
         <details>
           <summary>How long will my car be at the shop?</summary>
-          <p>It depends on how much film coverage you choose and whether the paint needs correction first. We'll give you a timeline with your estimate, and we can pick up and drop off the car.</p>
-        </details>
-        <details>
-          <summary>What's the difference between regular and ceramic tint?</summary>
-          <p>Ceramic tint rejects far more heat than standard dyed film without needing to be darker. If you want a cooler cabin but a lighter look, it's the one to get.</p>
+          <p>It depends on the job: a caliper refinish is much quicker than a full wrap or full-body film. We'll give you a timeline with your estimate, and we can pick up and drop off the car.</p>
         </details>
         <details>
           <summary>Is the estimate really free?</summary>
@@ -314,7 +310,7 @@
       </div>
       <div class="hero-actions">
         <a class="btn btn-dark" href="tel:+14845741628">Call (484) 574-1628</a>
-        <a class="btn btn-ghost" href="mailto:info@mainlineautoworks.com?subject=Estimate%20request&amp;body=Year%2C%20make%20and%20model%3A%0AServices%20I'm%20interested%20in%20(PPF%2C%20ceramic%2C%20tint%2C%20calipers)%3A%0ABest%20way%20to%20reach%20me%3A%0A">Email for an estimate</a>
+        <a class="btn btn-ghost" href="mailto:info@mainlineautoworks.com?subject=Estimate%20request&amp;body=Year%2C%20make%20and%20model%3A%0AServices%20I'm%20interested%20in%20(wrap%2C%20calipers%2C%20PPF%2C%20ceramic%2C%20tint)%3A%0ABest%20way%20to%20reach%20me%3A%0A">Email for an estimate</a>
       </div>
     </div>
   </section>
