@@ -202,8 +202,8 @@ p { margin: 0 0 1em; }
 .caliper-view.gl-ready[data-mode="3d"] .cv-angles { display: flex; }
 .caliper-view.gl-ready[data-mode="3d"] .cv-hint { display: flex; }
 .caliper-view.gl-ready[data-mode="photo"] .cv-photo-note { display: block; }
-/* Live repaint layer over the caliper in the real photo (crop 304,168 104x320 of 720x540) */
-#caliper-paint { display: block; position: absolute; left: 42.222%; top: 31.111%; width: 14.444%; height: 59.259%; pointer-events: none; cursor: default; touch-action: auto; }
+/* Live repaint layer over the calipers in the real photo (crop 327,303 193x347 of 1200x900) */
+#caliper-paint { display: block; position: absolute; left: 27.25%; top: 33.667%; width: 16.083%; height: 38.556%; pointer-events: none; cursor: default; touch-action: auto; }
 .caliper-view.gl-ready[data-mode="3d"] #caliper-paint, .caliper-view:not(.paint-ready) #caliper-paint { display: none; }
 .caliper-view:not(.gl-ready) .cv-photo-note { display: block; }
 
