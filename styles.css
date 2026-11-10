@@ -771,3 +771,6 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 /* PPF packages: same look as ceramic, spaced below it */
 .ppf-packages { margin-top: 56px; }
 .ppf-desc { margin: 0 0 4px; font-size: .92rem; line-height: 1.5; color: var(--text-mid); }
+
+/* Package links land with the red title comfortably below the sticky header */
+#ppf, #ceramic { scroll-margin-top: 28px; }
