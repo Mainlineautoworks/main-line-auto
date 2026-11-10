@@ -52,6 +52,15 @@
   sessionStorage.setItem('mlaw-opener','1');
 }catch(e){}})();
 </script>
+<script>
+/* Always open at the top of the homepage. Browsers normally restore the last scroll position on reload/back;
+   turn that off. Links that point at a section (e.g. #estimate from another page) still jump to it. */
+(function(){try{
+  if('scrollRestoration' in history) history.scrollRestoration='manual';
+  var toTop=function(){ var h=location.hash; if(!h||h==='#opener'||h==='#top') window.scrollTo(0,0); };
+  toTop(); addEventListener('load',toTop); addEventListener('pageshow',function(e){ if(e.persisted) toTop(); });
+}catch(e){}})();
+</script>
 </head>
 <body>
 <div class="opener" id="opener" aria-hidden="true">
