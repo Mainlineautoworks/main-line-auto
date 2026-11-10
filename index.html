@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=202611100300">
+<link rel="stylesheet" href="styles.css?v=202611100310">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -268,8 +268,9 @@
           <h3 id="coating-h">Ceramic coating packages</h3>
           <p>Every package starts with a decontaminated surface, because a coating only bonds as well as the paint underneath it. Coverage and process for each are listed below.</p>
         </div>
-        <div class="coating-top">
-          <div class="coat-tiers">
+        <div class="coat-carousel" role="region" aria-roledescription="carousel" aria-label="Ceramic coating packages">
+          <button type="button" class="cc-arrow cc-prev" aria-label="Previous package"><span aria-hidden="true">&#8249;</span></button>
+          <div class="coat-track" id="coat-track" tabindex="0">
           <article class="coat-card " data-cover="paint glass" data-pkg="l1">
             <p class="coat-level">Level I</p>
             <h4>Ceramic Sealant</h4>
@@ -297,9 +298,6 @@
             <ul><li>All painted surfaces</li><li>All exterior glass</li><li>All exterior trim</li></ul>
             <p class="coat-sub">Process</p><ul><li>Wash, clay bar, iron decontamination and polish</li><li>Multi-layer professional coating</li><li>Complimentary express interior detail</li></ul>
           </article>
-          </div>
-        </div>
-        <div class="coat-addons">
           <article class="coat-card coat-addon" data-cover="glass" data-pkg="glass">
             <p class="coat-level">Add-on or standalone</p>
             <h4>Exterior Glass Coating</h4>
@@ -318,6 +316,9 @@
             <ul><li>Full wheel face, every wheel</li></ul>
             <p class="coat-sub">Process</p><ul><li>In-depth wheel cleaning and decontamination</li><li>Multi-layer application</li><li>High-heat resistant to brake dust</li></ul>
           </article>
+          </div>
+          <button type="button" class="cc-arrow cc-next" aria-label="Next package"><span aria-hidden="true">&#8250;</span></button>
+          <div class="cc-dots" role="tablist" aria-label="Choose a package"></div>
         </div>
       </div>
       <div class="protect-cta">
@@ -484,6 +485,6 @@
     <p>© <span id="year">2026</span> Main Line Auto Works</p>
   </div>
 </footer>
-<script src="main.js?v=202611100200" defer></script>
+<script src="main.js?v=202611100310" defer></script>
 </body>
 </html>

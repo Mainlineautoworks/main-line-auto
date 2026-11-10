@@ -242,4 +242,38 @@ arrowNav(shadeButtons, setShade);
 const initial = document.querySelector('.shade-picker [aria-checked="true"]');
 if (initial) setShade(initial);
 
+// Ceramic packages carousel: arrows, dots, opens on the featured package
+(() => {
+  const track = document.getElementById('coat-track'); if (!track) return;
+  const wrap = track.closest('.coat-carousel'), cards = Array.from(track.children);
+  const prev = wrap.querySelector('.cc-prev'), next = wrap.querySelector('.cc-next'), dotsEl = wrap.querySelector('.cc-dots');
+  const dots = cards.map((c, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'tab');
+    b.setAttribute('aria-label', c.querySelector('h4').textContent);
+    b.addEventListener('click', () => go(i)); dotsEl.appendChild(b); return b;
+  });
+  const step = () => cards[1].offsetLeft - cards[0].offsetLeft;
+  const current = () => Math.round(track.scrollLeft / step());
+  function go(i) {
+    i = Math.max(0, Math.min(cards.length - 1, i));
+    const center = getComputedStyle(cards[i]).scrollSnapAlign.includes('center');
+    track.scrollTo({ left: center ? cards[i].offsetLeft - (track.clientWidth - cards[i].offsetWidth) / 2 : cards[i].offsetLeft - cards[0].offsetLeft });
+  }
+  function update() {
+    const max = track.scrollWidth - track.clientWidth - 2, x = track.scrollLeft;
+    let idx = cards.findIndex(c => c.offsetLeft + c.offsetWidth / 2 >= x + (track.clientWidth < 700 ? track.clientWidth / 2 : 1));
+    if (x >= max) idx = cards.length - 1; if (idx < 0) idx = 0;
+    dots.forEach((d, i) => d.setAttribute('aria-selected', String(i === idx)));
+    prev.disabled = x <= 8; next.disabled = x >= max - 6;
+  }
+  prev.addEventListener('click', () => track.scrollBy({ left: -step() }));
+  next.addEventListener('click', () => track.scrollBy({ left: step() }));
+  track.addEventListener('keydown', e => { if (e.key === 'ArrowRight') { e.preventDefault(); next.click(); } if (e.key === 'ArrowLeft') { e.preventDefault(); prev.click(); } });
+  track.addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
+  addEventListener('resize', update);
+  // phones open on the featured package; wider screens start at Level I with Level II already in view
+  if (innerWidth < 760) { track.style.scrollBehavior = 'auto'; go(cards.findIndex(c => c.classList.contains('is-featured'))); track.style.scrollBehavior = ''; }
+  update();
+})();
+
 document.getElementById('year').textContent = new Date().getFullYear();

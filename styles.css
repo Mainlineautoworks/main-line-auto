@@ -731,3 +731,28 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 
 /* Wraps: center the estimate button on tablets and phones (matches calipers) */
 @media (max-width: 960px) { .wraps-copy .btn { display: table; margin-left: auto; margin-right: auto; } }
+
+/* Ceramic packages carousel */
+.coat-carousel { position: relative; margin-top: 8px; }
+.coat-track { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  padding: 18px 4px 22px; scrollbar-width: none; outline: none; }
+.coat-track::-webkit-scrollbar { display: none; }
+.coat-track .coat-card { flex: 0 0 calc((100% - 32px) / 3); scroll-snap-align: start; min-width: 0; }
+.coat-track:focus-visible { box-shadow: inset 0 0 0 2px var(--red); border-radius: 10px; }
+.cc-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid rgba(29,33,37,.18); background: var(--white); color: var(--graphite); font-size: 1.7rem; line-height: 1;
+  display: grid; place-items: center; cursor: pointer; box-shadow: 0 6px 18px -8px rgba(0,0,0,.35); transition: opacity .2s, background .2s; }
+.cc-arrow:hover { background: var(--graphite); color: var(--white); }
+.cc-arrow:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.cc-arrow[disabled] { opacity: 0; pointer-events: none; }
+.cc-prev { left: -22px; } .cc-next { right: -22px; }
+.cc-dots { display: flex; justify-content: center; gap: 8px; margin-top: 2px; }
+.cc-dots button { width: 9px; height: 9px; padding: 0; border-radius: 999px; border: 0; background: rgba(29,33,37,.22); cursor: pointer; transition: width .25s, background .25s; }
+.cc-dots button[aria-selected="true"] { width: 26px; background: var(--red); }
+.cc-dots button:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+@media (max-width: 1000px) { .coat-track .coat-card { flex-basis: calc((100% - 16px) / 2); } }
+@media (max-width: 760px) {
+  .coat-track { margin: 0 calc(-1 * var(--gutter)); padding-left: var(--gutter); padding-right: var(--gutter); scroll-padding: 0 var(--gutter); }
+  .coat-track .coat-card { flex-basis: 84%; scroll-snap-align: center; }
+  .cc-arrow { display: none; }
+}
