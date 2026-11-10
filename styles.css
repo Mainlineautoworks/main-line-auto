@@ -715,3 +715,8 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 
 /* Wrap viewer: letterbox space matches the section background */
 .wrap-view { background: transparent; }
+
+/* Softer, rounded photo corners in both viewers */
+.wrap-view .cv-stage { border-radius: 16px; overflow: hidden; }
+.calipers .caliper-view { border-radius: 16px; }
+@media (max-width: 760px) { .wrap-view .cv-stage, .calipers .caliper-view { border-radius: 12px; } }
