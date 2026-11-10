@@ -191,7 +191,7 @@ function setMode(mode) {
 modeButtons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
 const caliperPaint = createPainter({
   view: caliperView, img: document.getElementById('caliper-img'), canvas: document.getElementById('caliper-paint'),
-  stage: document.getElementById('cv-stage'), initial: 'sports', color: '#CD1620',
+  stage: document.getElementById('cv-stage'), initial: 'sports', color: '#F0BE14',
   vehicles: {
     sports:  { img: asset('caliper-sports.webp'),  shade: asset('caliper-sports-shade.png'),  box: [659, 274, 170, 358], alt: 'Black wheel on a red sports car' },
     sedan:   { img: asset('caliper-sedan.webp'),   shade: asset('caliper-sedan-shade.png'),   box: [361, 484, 212, 379], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
