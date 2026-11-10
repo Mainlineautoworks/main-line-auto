@@ -723,3 +723,8 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 
 /* Announcement bar: keep "Call (484) 574-1628" on one line */
 .topbar a { white-space: nowrap; }
+
+/* Wraps and calipers: a little less vertical padding */
+.wraps, .calipers { padding-top: clamp(56px, 7.5vw, 96px); padding-bottom: clamp(56px, 7.5vw, 96px); }
+@media (max-width: 960px) { .calipers { padding-top: 32px; } }
+@media (max-width: 760px) { .wraps, .calipers { padding-bottom: 48px; } .wraps { padding-top: 48px; } .calipers { padding-top: 28px; } }
