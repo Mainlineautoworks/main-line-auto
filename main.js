@@ -36,7 +36,7 @@ function arrowNav(buttons, select) {
 // box = where the shade layer sits in the photo: [x, y, width, height]; size defaults to 1200x900.
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261109n';
+const ASSET_V = '20261109o';
 const toLin = v => Math.pow(v / 255, 2.2);
 const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
 const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
@@ -210,7 +210,7 @@ const wrapPaint = createPainter({
   view: document.getElementById('wrap-view'), img: document.getElementById('wrap-img'), canvas: document.getElementById('wrap-paint'),
   stage: document.getElementById('wrap-stage'), initial: 'sports', color: '#C8102E',
   vehicles: {
-    sports: { img: asset('wrap-sports.webp'), shade: asset('wrap-sports-shade.png'), box: [30, 232, 1263, 537], size: [1320, 833], alt: 'Porsche sports car with its body wrapped in the selected color' },
+    sports: { img: asset('wrap-sports.webp'), shade: asset('wrap-sports-shade.png'), box: [23, 230, 1297, 688], size: [1320, 966], alt: 'Lamborghini Huracan with its body wrapped in the selected color' },
     sedan: { img: asset('wrap-sedan.webp'), shade: asset('wrap-sedan-shade.png'), box: [21, 544, 1263, 380], size: [1320, 1158], alt: 'Porsche sport sedan with its body wrapped in the selected color' },
     suv: { img: asset('wrap-suv.webp'), shade: asset('wrap-suv-shade.png'), box: [53, 327, 1219, 404], size: [1320, 929], alt: 'Porsche SUV with its body wrapped in the selected color' },
     truck: { img: asset('wrap-truck.webp'), shade: asset('wrap-truck-shade.png'), box: [35, 117, 1243, 496], size: [1320, 812], alt: 'Ford F-250 pickup with its body wrapped in the selected color' }
