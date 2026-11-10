@@ -792,3 +792,14 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 }
 .coat-card .coat-quote:hover, .cc-cta .btn:hover { background: var(--red); color: var(--white); }
 .coat-card .coat-quote:focus-visible, .cc-cta .btn:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+
+/* Protection CTA: faint red hex pattern behind the buttons, fading out toward the text */
+.protect-cta::after {
+  content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: min(46%, 560px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 L56 16.2 L56 48.5 L28 64.7 L0 48.5 L0 16.2 Z M28 64.7 L28 97 M0 48.5 L0 80.8 M56 48.5 L56 80.8' fill='none' stroke='%23d81e2c' stroke-width='1.4'/%3E%3C/svg%3E");
+  background-size: 34px 59px; opacity: .28; pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 120% 150% at 100% 0%, #000 30%, transparent 85%);
+          mask-image: radial-gradient(ellipse 120% 150% at 100% 0%, #000 30%, transparent 85%);
+}
+.protect-cta-copy, .protect-cta-actions { position: relative; z-index: 1; }
+@media (max-width: 760px) { .protect-cta::after { width: 100%; opacity: .22; -webkit-mask-image: radial-gradient(ellipse 120% 45% at 100% 100%, #000 20%, transparent 85%); mask-image: radial-gradient(ellipse 120% 45% at 100% 100%, #000 20%, transparent 85%); } }
