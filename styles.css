@@ -720,3 +720,6 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .wrap-view .cv-stage { border-radius: 16px; overflow: hidden; }
 .calipers .caliper-view { border-radius: 16px; }
 @media (max-width: 760px) { .wrap-view .cv-stage, .calipers .caliper-view { border-radius: 12px; } }
+
+/* Announcement bar: keep "Call (484) 574-1628" on one line */
+.topbar a { white-space: nowrap; }
