@@ -679,3 +679,42 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 
 /* Tick dashes: sit on the middle of the first line of text */
 .ticks li::before { top: calc(12px + 0.8em - 1px); }
+
+/* ---------- Page opener ---------- */
+.opener { display: none; }
+.op-on .opener { display: block; position: fixed; inset: 0; z-index: 9999; pointer-events: none; }
+.op-on body { overflow: hidden; }
+.op-panel { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 45%, #2b3137 0%, #1d2125 55%, #15181b 100%); }
+.op-inner { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 16px; width: min(260px, 62vw); }
+.op-inner img { width: 100%; height: auto; opacity: 0; transform: translateY(6px); }
+.op-line { display: block; width: 100%; height: 2px; background: var(--red); transform: scaleX(0); transform-origin: left center; }
+.op-edge { position: absolute; top: -20%; bottom: -20%; left: 0; width: 6px; background: var(--red); box-shadow: 0 0 24px rgba(215,25,42,.8); opacity: 0; transform: translateX(-20px) skewX(-18deg); }
+
+/* Option 1: paint wipe - logo in, red pinstripe draws, panel peels away diagonally behind a red edge */
+[data-opener="wipe"] .op-inner img { animation: op-in .45s ease-out .05s forwards; }
+[data-opener="wipe"] .op-line { animation: op-draw .4s cubic-bezier(.6,0,.2,1) .3s forwards; }
+[data-opener="wipe"] .op-panel { clip-path: polygon(0 0, 140% 0, 100% 100%, -40% 100%); animation: op-peel .6s cubic-bezier(.7,0,.2,1) .75s forwards; }
+[data-opener="wipe"] .op-inner { animation: op-out .3s ease-in .72s forwards; }
+[data-opener="wipe"] .op-edge { animation: op-edge .6s cubic-bezier(.7,0,.2,1) .75s forwards; }
+@keyframes op-in { to { opacity: 1; transform: none; } }
+@keyframes op-draw { to { transform: scaleX(1); } }
+@keyframes op-out { to { opacity: 0; transform: translate(-50%, -50%) translateX(40px); } }
+@keyframes op-peel { to { clip-path: polygon(140% 0, 140% 0, 100% 100%, 100% 100%); } }
+@keyframes op-edge { 0% { opacity: 1; transform: translateX(-10vw) skewX(-18deg); } 90% { opacity: 1; } 100% { opacity: 0; transform: translateX(115vw) skewX(-18deg); } }
+
+/* Option 3: logo only - logo fades in, holds, whole screen fades out */
+[data-opener="logo"] .op-line { display: none; }
+[data-opener="logo"] .op-inner img { animation: op-in .5s ease-out .05s forwards; }
+[data-opener="logo"] .opener { animation: op-fade .45s ease-in .85s forwards; }
+@keyframes op-fade { to { opacity: 0; } }
+
+/* hero lands as the opener clears */
+.op-on .hero-copy > * { opacity: 0; transform: translateY(14px); }
+.op-done .hero-copy > * { opacity: 1; transform: none; transition: opacity .5s ease-out, transform .5s ease-out; }
+.op-done .hero-copy > :nth-child(2) { transition-delay: .06s; } .op-done .hero-copy > :nth-child(3) { transition-delay: .12s; } .op-done .hero-copy > :nth-child(4) { transition-delay: .18s; }
+
+/* skipped or reduced motion: just a quick fade */
+.op-skip .opener, .op-reduce .opener { animation: op-fade .3s ease-out forwards !important; }
+.op-reduce .op-inner img { opacity: 1; transform: none; animation: none; }
+.op-reduce .op-line, .op-reduce .op-edge { display: none; }
+.op-reduce .op-panel, .op-skip .op-panel { animation: none !important; }
