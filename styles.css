@@ -723,13 +723,3 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 
 /* Announcement bar: keep "Call (484) 574-1628" on one line */
 .topbar a { white-space: nowrap; }
-
-/* Wraps: very subtle red honeycomb, kept inside the photo frame (never under text) */
-.wrap-view { isolation: isolate; }
-.wrap-view::before {
-  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2256%22%20height%3D%2297%22%20viewBox%3D%220%200%2056%2097%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23D7192A%22%20stroke-width%3D%221.6%22%3E%3Cpath%20d%3D%22M28%201%20L55%2016.5%20V47.5%20L28%2063%20L1%2047.5%20V16.5%20Z%22/%3E%3Cpath%20d%3D%22M28%2063%20V96%22/%3E%3Cpath%20d%3D%22M0%2080%20L1%2079.5%20M55%2079.5%20L56%2080%22/%3E%3C/g%3E%3C/svg%3E"); background-size: 34px 59px; background-position: center;
-  opacity: .16;
-  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
-          mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
-}
