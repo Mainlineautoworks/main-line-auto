@@ -636,3 +636,25 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .protect-cta-actions { min-width: 0; }
   .protect-cta-actions .btn { width: 100%; }
 }
+
+/* Protection: two compact service panels (replaces stock-photo cards) */
+.protect-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0 40px; }
+.pp { position: relative; border-radius: 10px; padding: clamp(24px, 3vw, 36px); display: flex; flex-direction: column; overflow: hidden; }
+.pp-film { background: var(--graphite); color: var(--pearl); }
+.pp-coat { background: var(--white); border: 1px solid rgba(29,33,37,.14); }
+.pp::after { content: ""; position: absolute; right: -60px; top: -60px; width: 200px; height: 200px; border-radius: 50%; pointer-events: none; }
+.pp-film::after { background: radial-gradient(circle, rgba(215,25,42,.35), transparent 70%); }
+.pp-coat::after { background: radial-gradient(circle, rgba(29,33,37,.08), transparent 70%); }
+.pp-tag { margin: 0 0 8px; font-size: .74rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--red); }
+.pp h3 { margin: 0 0 12px; font-size: clamp(1.2rem, 2vw, 1.5rem); }
+.pp > p:not(.pp-tag) { margin: 0 0 18px; max-width: 34em; }
+.pp-film > p:not(.pp-tag) { color: var(--alloy); }
+.pp-coat > p:not(.pp-tag) { color: var(--text-mid); }
+.pp ul { list-style: none; padding: 0; margin: 0 0 24px; border-top: 1px solid currentColor; border-color: rgba(128,128,128,.3); }
+.pp li { position: relative; padding: 10px 0 10px 22px; border-bottom: 1px solid rgba(128,128,128,.25); font-size: .95rem; }
+.pp li::before { content: ""; position: absolute; left: 2px; top: 1.15em; width: 10px; height: 2px; background: var(--red); }
+.pp-link { margin-top: auto; align-self: flex-start; font-weight: 600; text-decoration: none; border-bottom: 2px solid var(--red); padding-bottom: 2px; }
+.pp-link:hover { color: var(--red); }
+.pp-film .pp-link { color: var(--white); }
+.pp-coat .pp-link { color: var(--graphite); }
+@media (max-width: 760px) { .protect-panels { grid-template-columns: 1fr; } }
