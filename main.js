@@ -134,7 +134,9 @@ function createPainter({ view, img, canvas, stage, vehicles, initial, color }) {
     setFinish(name) { goalFin = FIN[name] || FIN.gloss; animate(); }
   };
 }
-const asset = (name) => `assets/img/${name}?v=${ASSET_V}`;
+// Resolve images next to main.js, so subpages (e.g. /vinyl-wraps/) load the same files.
+const ASSET_BASE = new URL('assets/img/', (document.currentScript && document.currentScript.src) || location.href);
+const asset = (name) => `${new URL(name, ASSET_BASE).href}?v=${ASSET_V}`;
 
 // Wire one section's pickers (vehicle, color swatches, custom color, finish) to its painter.
 function wirePickers(section, painter, { onColor, onFinish, onVehicle } = {}) {
@@ -216,7 +218,7 @@ const wrapPaint = createPainter({
     truck: { img: asset('wrap-truck.webp'), shade: asset('wrap-truck-shade.png'), box: [83, 53, 838, 278], size: [990, 481], alt: 'Ram TRX pickup with its body wrapped in the selected color' }
   }
 });
-wirePickers(document.getElementById('wraps'), wrapPaint);
+wirePickers(document.getElementById('wrap-view') && document.getElementById('wrap-view').closest('section'), wrapPaint);
 
 // Tint picker: film opacity = light the film blocks (1 - VLT)
 const notes = {
@@ -276,4 +278,4 @@ document.querySelectorAll('.coat-carousel').forEach(wrapEl => {
   update();
 });
 
-document.getElementById('year').textContent = new Date().getFullYear();
+const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent = new Date().getFullYear();
