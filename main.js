@@ -208,7 +208,7 @@ wirePickers(document.getElementById('calipers'), caliperPaint, {
 // Wraps: full-body color change on real cars
 const wrapPaint = createPainter({
   view: document.getElementById('wrap-view'), img: document.getElementById('wrap-img'), canvas: document.getElementById('wrap-paint'),
-  stage: document.getElementById('wrap-stage'), initial: 'sports', color: '#C8102E',
+  stage: document.getElementById('wrap-stage'), initial: 'sedan', color: '#C8102E',
   vehicles: {
     sports: { img: asset('wrap-sports.webp'), shade: asset('wrap-sports-shade.png'), box: [74, 219, 979, 435], size: [1117, 787], alt: 'Lamborghini Huracan with its body wrapped in the selected color' },
     sedan: { img: asset('wrap-sedan.webp'), shade: asset('wrap-sedan-shade.png'), box: [42, 86, 921, 314], size: [1005, 526], alt: 'BMW M3 sedan with its body wrapped in the selected color' },
