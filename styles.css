@@ -690,7 +690,7 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .op-line { display: block; width: 100%; height: 2px; background: var(--red); transform: scaleX(0); transform-origin: left center; }
 .op-edge { position: absolute; top: -20%; bottom: -20%; left: 0; width: 6px; background: var(--red); box-shadow: 0 0 24px rgba(215,25,42,.8); opacity: 0; transform: translateX(-20px) skewX(-18deg); }
 
-/* Option 1: paint wipe - logo in, red pinstripe draws, panel peels away diagonally behind a red edge */
+/* Paint wipe - logo in, red pinstripe draws, panel peels away diagonally behind a red edge */
 [data-opener="wipe"] .op-inner img { animation: op-in .45s ease-out .05s forwards; }
 [data-opener="wipe"] .op-line { animation: op-draw .4s cubic-bezier(.6,0,.2,1) .3s forwards; }
 [data-opener="wipe"] .op-panel { clip-path: polygon(0 0, 140% 0, 100% 100%, -40% 100%); animation: op-peel .6s cubic-bezier(.7,0,.2,1) .75s forwards; }
@@ -701,12 +701,6 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 @keyframes op-out { to { opacity: 0; transform: translate(-50%, -50%) translateX(40px); } }
 @keyframes op-peel { to { clip-path: polygon(140% 0, 140% 0, 100% 100%, 100% 100%); } }
 @keyframes op-edge { 0% { opacity: 1; transform: translateX(-10vw) skewX(-18deg); } 90% { opacity: 1; } 100% { opacity: 0; transform: translateX(115vw) skewX(-18deg); } }
-
-/* Option 3: logo only - logo fades in, holds, whole screen fades out */
-[data-opener="logo"] .op-line { display: none; }
-[data-opener="logo"] .op-inner img { animation: op-in .5s ease-out .05s forwards; }
-[data-opener="logo"] .opener { animation: op-fade .45s ease-in .85s forwards; }
-@keyframes op-fade { to { opacity: 0; } }
 
 /* hero lands as the opener clears */
 .op-on .hero-copy > * { opacity: 0; transform: translateY(14px); }

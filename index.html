@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=202611100100">
+<link rel="stylesheet" href="styles.css?v=202611100110">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -42,12 +42,12 @@
 }
 </script>
 <script>
-/* Page opener: runs before first paint. Variant from #opener-wipe / #opener-logo (forces a replay), else "wipe".
+/* Page opener (paint wipe): runs before first paint. #opener in the URL forces a replay.
    Shown once per browser session; skipped entirely without JS. */
 (function(){try{
-  var h=location.hash, v=h==='#opener-logo'?'logo':(h==='#opener-wipe'?'wipe':null), forced=!!v;
+  var forced=location.hash==='#opener';
   if(!forced && sessionStorage.getItem('mlaw-opener')) return;
-  var d=document.documentElement; d.classList.add('op-on'); d.setAttribute('data-opener', v||'wipe');
+  var d=document.documentElement; d.classList.add('op-on'); d.setAttribute('data-opener','wipe');
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('op-reduce');
   sessionStorage.setItem('mlaw-opener','1');
 }catch(e){}})();
@@ -66,14 +66,12 @@
 (function(){
   var d=document.documentElement, o=document.getElementById('opener');
   if(!d.classList.contains('op-on')){ o.remove(); return; }
-  var v=d.getAttribute('data-opener'), reduce=d.classList.contains('op-reduce');
-  var total=reduce?450:(v==='logo'?1300:1350), done=false;
+  var reduce=d.classList.contains('op-reduce');
+  var total=reduce?450:1350, done=false;
   function finish(){ if(done) return; done=true; d.classList.add('op-done'); setTimeout(function(){ o.remove(); d.classList.remove('op-on'); },420); }
   function skip(){ if(!done){ d.classList.add('op-skip'); finish(); } }
   setTimeout(finish,total);
   ['pointerdown','keydown','wheel','touchstart'].forEach(function(e){ addEventListener(e,skip,{once:true,passive:true}); });
-  /* replay from the preview: change the hash to #opener-wipe or #opener-logo */
-  addEventListener('hashchange',function(){ if(location.hash==='#opener-wipe'||location.hash==='#opener-logo') location.reload(); });
 })();
 </script>
 
