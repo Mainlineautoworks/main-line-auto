@@ -777,3 +777,10 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 
 /* Package titles: bolder (display font has one weight, so thicken the strokes) */
 .coating-head h3 { -webkit-text-stroke: 0.04em currentColor; paint-order: stroke fill; letter-spacing: .02em; }
+
+/* Package cards: quote button pinned to the bottom of each card */
+.coat-track .coat-card { display: flex; flex-direction: column; }
+.coat-card .coat-quote { position: relative; z-index: 1; margin-top: auto; align-self: stretch; justify-content: center; text-align: center; }
+.coat-card ul:last-of-type { margin-bottom: 22px; }
+/* Standard quote button under each carousel */
+.cc-cta { display: flex; justify-content: center; margin-top: 22px; }
