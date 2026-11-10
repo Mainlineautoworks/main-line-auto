@@ -712,3 +712,6 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .op-reduce .op-inner img { opacity: 1; transform: none; animation: none; }
 .op-reduce .op-line, .op-reduce .op-edge { display: none; }
 .op-reduce .op-panel, .op-skip .op-panel { animation: none !important; }
+
+/* Wrap viewer: letterbox space matches the section background */
+.wrap-view { background: transparent; }
