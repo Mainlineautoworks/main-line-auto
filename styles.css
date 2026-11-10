@@ -661,3 +661,7 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 
 /* comparison table removed: tighten the gap above the packages */
 .coating { margin-top: 0; padding-top: 0; border-top: 0; }
+
+/* Calipers: less space above the title on tablets and phones */
+@media (max-width: 960px) { .calipers { padding-top: 40px; } }
+@media (max-width: 760px) { .calipers { padding-top: 32px; } }
