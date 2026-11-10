@@ -242,10 +242,10 @@ arrowNav(shadeButtons, setShade);
 const initial = document.querySelector('.shade-picker [aria-checked="true"]');
 if (initial) setShade(initial);
 
-// Ceramic packages carousel: arrows, dots, opens on the featured package
-(() => {
-  const track = document.getElementById('coat-track'); if (!track) return;
-  const wrap = track.closest('.coat-carousel'), cards = Array.from(track.children);
+// Package carousels (ceramic, PPF): arrows, dots, phones open on the featured package
+document.querySelectorAll('.coat-carousel').forEach(wrapEl => {
+  const track = wrapEl.querySelector('.coat-track'); if (!track) return;
+  const wrap = wrapEl, cards = Array.from(track.children);
   const prev = wrap.querySelector('.cc-prev'), next = wrap.querySelector('.cc-next'), dotsEl = wrap.querySelector('.cc-dots');
   const dots = cards.map((c, i) => {
     const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'tab');
@@ -274,6 +274,6 @@ if (initial) setShade(initial);
   // phones open on the featured package; wider screens start at Level I with Level II already in view
   if (innerWidth < 760) { track.style.scrollBehavior = 'auto'; go(cards.findIndex(c => c.classList.contains('is-featured'))); track.style.scrollBehavior = ''; }
   update();
-})();
+});
 
 document.getElementById('year').textContent = new Date().getFullYear();

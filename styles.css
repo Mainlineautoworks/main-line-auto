@@ -767,3 +767,7 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .coating-head { max-width: none; }
 .coating-head h3 { font-size: clamp(1.25rem, 2.6vw, 1.9rem); }
 @media (min-width: 961px) { .coating-head p { max-width: none; text-wrap: nowrap; } }
+
+/* PPF packages: same look as ceramic, spaced below it */
+.ppf-packages { margin-top: 56px; }
+.ppf-desc { margin: 0 0 4px; font-size: .92rem; line-height: 1.5; color: var(--text-mid); }
