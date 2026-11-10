@@ -658,3 +658,6 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .pp-film .pp-link { color: var(--white); }
 .pp-coat .pp-link { color: var(--graphite); }
 @media (max-width: 760px) { .protect-panels { grid-template-columns: 1fr; } }
+
+/* comparison table removed: tighten the gap above the packages */
+.coating { margin-top: 0; padding-top: 0; border-top: 0; }
