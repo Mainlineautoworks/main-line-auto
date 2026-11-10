@@ -190,21 +190,9 @@
         <p>Painted calipers turn heads at every stoplight. We hand-prep each one and finish it in a pro-grade, high-temperature coating that won't fade from brake heat, salt or dust. Try a color below.</p>
       </div>
       <div class="caliper-view" id="caliper-view" data-mode="photo">
-        <canvas id="caliper-canvas" tabindex="0" role="img" aria-label="3D model of a wheel and brake caliper in the selected color. Drag, or use the arrow keys, to change the angle."></canvas>
         <div class="cv-stage" id="cv-stage">
           <img id="caliper-img" src="assets/img/caliper-sports.webp?v=20261110c" alt="Black wheel on a red sports car" width="1200" height="900" loading="lazy">
           <canvas id="caliper-paint" width="193" height="347" aria-hidden="true"></canvas>
-        </div>
-        <p class="cv-hint" aria-hidden="true"><span class="cv-hint-icon"></span>Drag to rotate</p>
-        <div class="cv-mode" role="group" aria-label="View">
-          <button type="button" data-mode="photo" aria-pressed="true">Real car</button>
-          <button type="button" data-mode="3d" aria-pressed="false">3D angles</button>
-        </div>
-        <div class="cv-angles" role="group" aria-label="Viewing angle">
-          <button type="button" data-view="front" aria-pressed="false">Front</button>
-          <button type="button" data-view="three" aria-pressed="true">3/4</button>
-          <button type="button" data-view="low" aria-pressed="false">Low</button>
-          <button type="button" data-view="close" aria-pressed="false">Close-up</button>
         </div>
         <p class="cv-photo-note">Real car, repainted live</p>
       </div>
@@ -498,8 +486,6 @@
     <p>© <span id="year">2026</span> Main Line Auto Works</p>
   </div>
 </footer>
-
-<script src="caliper-3d.js?v=202611091725" defer></script>
-<script src="main.js?v=202611100030" defer></script>
+<script src="main.js?v=202611100140" defer></script>
 </body>
 </html>
