@@ -619,3 +619,20 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .coating-top { grid-template-columns: 1fr; }
 .coat-card.is-featured { border-color: var(--red); box-shadow: 0 0 0 2px var(--red), 0 14px 30px -18px rgba(215,25,42,.6); }
 .coat-card:hover { transform: none; }
+
+/* Protection section closing call-to-action */
+.protect-cta { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 28px 48px; margin-top: 40px; padding: clamp(24px, 4vw, 44px); border-radius: 10px; background: var(--graphite); color: var(--pearl); position: relative; overflow: hidden; }
+.protect-cta::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--red); }
+.protect-cta h3 { margin: 0 0 10px; font-size: clamp(1.15rem, 2vw, 1.5rem); }
+.protect-cta p { margin: 0; max-width: 40em; color: var(--alloy); }
+.protect-cta-points { list-style: none; padding: 0; margin: 18px 0 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: .92rem; color: var(--pearl); }
+.protect-cta-points li { position: relative; padding-left: 18px; }
+.protect-cta-points li::before { content: ""; position: absolute; left: 0; top: .72em; width: 9px; height: 2px; background: var(--red); }
+.protect-cta-actions { display: flex; flex-direction: column; gap: 10px; min-width: 240px; }
+.protect-cta-actions .btn { justify-content: center; text-align: center; }
+@media (max-width: 760px) {
+  .protect-cta { grid-template-columns: 1fr; }
+  .protect-cta-points { flex-direction: column; }
+  .protect-cta-actions { min-width: 0; }
+  .protect-cta-actions .btn { width: 100%; }
+}
