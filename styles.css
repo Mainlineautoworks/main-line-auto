@@ -756,3 +756,6 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .coat-track .coat-card { flex-basis: 84%; scroll-snap-align: center; }
   .cc-arrow { display: none; }
 }
+
+/* Ceramic packages heading and intro: centered */
+.coating-head { text-align: center; margin-left: auto; margin-right: auto; }
