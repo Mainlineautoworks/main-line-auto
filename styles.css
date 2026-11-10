@@ -665,3 +665,10 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 /* Calipers: less space above the title on tablets and phones */
 @media (max-width: 960px) { .calipers { padding-top: 40px; } }
 @media (max-width: 760px) { .calipers { padding-top: 32px; } }
+
+/* Calipers: center the estimate button on tablets and phones */
+@media (max-width: 960px) {
+  .cal-details { text-align: center; }
+  .cal-details .ticks { text-align: left; }
+  .cal-details .btn { display: inline-flex; }
+}
