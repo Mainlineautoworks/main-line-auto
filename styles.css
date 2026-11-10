@@ -676,3 +676,6 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 /* Calipers: keep the title on one line, scaled to its column */
 .cal-head { container-type: inline-size; }
 .cal-head h2 { white-space: nowrap; font-size: min(5.4cqi, 2.4rem); }
+
+/* Tick dashes: sit on the middle of the first line of text */
+.ticks li::before { top: calc(12px + 0.8em - 1px); }
