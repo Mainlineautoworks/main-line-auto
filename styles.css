@@ -628,7 +628,7 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .protect-cta-points { list-style: none; padding: 0; margin: 18px 0 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: .92rem; color: var(--pearl); }
 .protect-cta-points li { position: relative; padding-left: 18px; }
 .protect-cta-points li::before { content: ""; position: absolute; left: 0; top: .72em; width: 9px; height: 2px; background: var(--red); }
-.protect-cta-actions { display: flex; flex-direction: column; gap: 18px; min-width: 240px; }
+.protect-cta-actions { display: flex; flex-direction: column; gap: 28px; min-width: 240px; }
 .protect-cta-actions .btn { justify-content: center; text-align: center; }
 @media (max-width: 760px) {
   .protect-cta { grid-template-columns: 1fr; }
