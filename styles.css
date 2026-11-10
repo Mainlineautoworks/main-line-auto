@@ -796,8 +796,8 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 /* Protection CTA: faint red hex pattern behind the buttons, fading out toward the text */
 .protect-cta::after {
   content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: min(46%, 560px);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 L56 16.2 L56 48.5 L28 64.7 L0 48.5 L0 16.2 Z M28 64.7 L28 97 M0 48.5 L0 80.8 M56 48.5 L56 80.8' fill='none' stroke='%23d81e2c' stroke-width='1.4'/%3E%3C/svg%3E");
-  background-size: 34px 59px; opacity: .28; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.641' height='60' viewBox='0 0 34.641 60'%3E%3Cpath d='M17.32 -20.00 L34.64 -10.00 L34.64 10.00 L17.32 20.00 L0.00 10.00 L0.00 -10.00 Z M17.32 40.00 L34.64 50.00 L34.64 70.00 L17.32 80.00 L0.00 70.00 L0.00 50.00 Z M0.00 10.00 L17.32 20.00 L17.32 40.00 L0.00 50.00 L-17.32 40.00 L-17.32 20.00 Z M34.64 10.00 L51.96 20.00 L51.96 40.00 L34.64 50.00 L17.32 40.00 L17.32 20.00 Z' fill='none' stroke='%23d81e2c' stroke-width='1.2'/%3E%3C/svg%3E");
+  background-size: 31.18px 54px; opacity: .28; pointer-events: none;
   -webkit-mask-image: radial-gradient(ellipse 120% 150% at 100% 0%, #000 30%, transparent 85%);
           mask-image: radial-gradient(ellipse 120% 150% at 100% 0%, #000 30%, transparent 85%);
 }
