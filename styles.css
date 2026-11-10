@@ -672,3 +672,7 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .cal-details .ticks { text-align: left; }
   .cal-details .btn { display: inline-flex; }
 }
+
+/* Calipers: keep the title on one line, scaled to its column */
+.cal-head { container-type: inline-size; }
+.cal-head h2 { white-space: nowrap; font-size: min(5.4cqi, 2.4rem); }
