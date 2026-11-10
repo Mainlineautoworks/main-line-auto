@@ -784,3 +784,11 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .coat-card ul:last-of-type { margin-bottom: 22px; }
 /* Standard quote button under each carousel */
 .cc-cta { display: flex; justify-content: center; margin-top: 22px; }
+
+/* Quote buttons: hollow red outline, pill shape; fill on hover */
+.coat-card .coat-quote, .cc-cta .btn {
+  background: transparent; color: var(--red); border: 2px solid var(--red); border-radius: 999px;
+  transition: background .2s, color .2s;
+}
+.coat-card .coat-quote:hover, .cc-cta .btn:hover { background: var(--red); color: var(--white); }
+.coat-card .coat-quote:focus-visible, .cc-cta .btn:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
