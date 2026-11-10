@@ -765,3 +765,4 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .coating-head h3 { color: var(--red); font-size: clamp(1.4rem, 3.2vw, 2.3rem); margin-bottom: 12px; }
 .coating-head p { font-size: .95rem; }
 .coating-head { max-width: none; }
+.coating-head h3 { font-size: clamp(1.25rem, 2.6vw, 1.9rem); }
