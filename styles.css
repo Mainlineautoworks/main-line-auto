@@ -774,3 +774,6 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 
 /* Package links land with the red title comfortably below the sticky header */
 #ppf, #ceramic { scroll-margin-top: 28px; }
+
+/* Package titles: bolder (display font has one weight, so thicken the strokes) */
+.coating-head h3 { -webkit-text-stroke: 0.04em currentColor; paint-order: stroke fill; letter-spacing: .02em; }
