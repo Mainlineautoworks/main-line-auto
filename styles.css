@@ -574,3 +574,43 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 @media (max-width: 760px) {
   .coat-tiers, .coat-addons { grid-template-columns: 1fr; }
 }
+
+/* Caliper section layout: intro, photo, controls, details.
+   Desktop: photo left spanning all rows. Mobile: controls sit right under the photo. */
+.calipers-grid { grid-template-columns: 7fr 5fr; grid-template-areas: "view head" "view controls" "view details"; grid-template-rows: auto auto 1fr; column-gap: clamp(32px, 5vw, 72px); row-gap: 0; align-items: start; }
+.cal-head { grid-area: head; }
+.calipers-grid > .caliper-view { grid-area: view; align-self: center; }
+.cal-controls { grid-area: controls; }
+.cal-details { grid-area: details; }
+.cal-head h2 { margin-bottom: 18px; }
+.cal-head p { color: var(--alloy); max-width: 30em; margin: 0; }
+.cal-controls .picker-label:first-child { margin-top: 26px; }
+.cal-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-top: 10px; }
+.cal-row .color-name { margin: 0; }
+.cal-row .finish-picker { margin: 0; }
+.cal-details .ticks { margin-top: 24px; }
+@media (max-width: 960px) {
+  .calipers-grid { grid-template-columns: 1fr; grid-template-areas: "head" "view" "controls" "details"; grid-template-rows: none; }
+  .cal-head { margin-bottom: 18px; }
+  .cal-controls { margin-top: 14px; }
+  .cal-controls .picker-label:first-child { margin-top: 0; }
+}
+@media (max-width: 760px) {
+  .cal-head h2 { margin-bottom: 10px; }
+  .cal-head p { font-size: .98rem; }
+  .cal-controls { margin-top: 12px; }
+  .cal-controls .picker-label { margin: 12px 0 7px; font-size: .72rem; }
+  .cal-controls .picker-label:first-child { margin-top: 0; }
+  /* one swipeable row of vehicles instead of wrapping */
+  .cal-controls .vehicle-picker { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter) 2px; }
+  .cal-controls .vehicle-picker::-webkit-scrollbar { display: none; }
+  .cal-controls .vehicle-picker button { flex: none; padding: 9px 14px; font-size: .88rem; }
+  .cal-controls .color-picker { gap: 8px; flex-wrap: nowrap; justify-content: space-between; }
+  .cal-controls .color-picker button, .cal-controls .custom-swatch { width: 38px; height: 38px; flex: none; }
+  .cal-row { margin-top: 10px; }
+  .cal-row .finish-picker button { padding: 8px 12px; font-size: .84rem; }
+  .cal-details .ticks { margin: 22px 0 24px; }
+}
+@media (max-width: 360px) {
+  .cal-controls .color-picker button, .cal-controls .custom-swatch { width: 34px; height: 34px; }
+}

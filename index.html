@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=202611092000">
+<link rel="stylesheet" href="styles.css?v=202611092030">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -154,6 +154,10 @@
 
   <section class="calipers" id="calipers" aria-labelledby="calipers-h">
     <div class="wrap calipers-grid">
+      <div class="cal-head">
+        <h2 id="calipers-h">Caliper color change</h2>
+        <p>Painted brake calipers are the detail that turns heads at every stoplight. We prep each caliper by hand and finish it in a high-temperature, professional-grade coating that holds its color through brake heat, road salt and brake dust. Pick a color below and see it on a real car.</p>
+      </div>
       <div class="caliper-view" id="caliper-view" data-mode="photo">
         <canvas id="caliper-canvas" tabindex="0" role="img" aria-label="3D model of a wheel and brake caliper in the selected color. Drag, or use the arrow keys, to change the angle."></canvas>
         <div class="cv-stage" id="cv-stage">
@@ -173,9 +177,7 @@
         </div>
         <p class="cv-photo-note">Real car, repainted live</p>
       </div>
-      <div class="calipers-copy">
-        <h2 id="calipers-h">Caliper color change</h2>
-        <p>Painted brake calipers are the detail that turns heads at every stoplight. We prep each caliper by hand and finish it in a high-temperature, professional-grade coating that holds its color through brake heat, road salt and brake dust. Pick a color below and see it on a real car.</p>
+      <div class="cal-controls">
         <p class="picker-label" id="vehicle-label">Vehicle</p>
         <div class="vehicle-picker" role="radiogroup" aria-labelledby="vehicle-label">
           <button role="radio" aria-checked="true" data-vehicle="sports">Sports car</button>
@@ -196,12 +198,16 @@
             <span class="sr-only">Custom color</span>
           </label>
         </div>
-        <p class="color-name" id="color-name" aria-live="polite">Red</p>
-        <div class="finish-picker" role="radiogroup" aria-label="Finish">
-          <button role="radio" aria-checked="true" data-finish="gloss">Gloss</button>
-          <button role="radio" aria-checked="false" data-finish="satin">Satin</button>
-          <button role="radio" aria-checked="false" data-finish="matte">Matte</button>
+        <div class="cal-row">
+          <p class="color-name" id="color-name" aria-live="polite">Red</p>
+          <div class="finish-picker" role="radiogroup" aria-label="Finish">
+            <button role="radio" aria-checked="true" data-finish="gloss">Gloss</button>
+            <button role="radio" aria-checked="false" data-finish="satin">Satin</button>
+            <button role="radio" aria-checked="false" data-finish="matte">Matte</button>
+          </div>
         </div>
+      </div>
+      <div class="cal-details">
         <ul class="ticks ticks-dark">
           <li>Any color, matched to your wrap or factory trim</li>
           <li>High-heat finish built for brake temperatures</li>
