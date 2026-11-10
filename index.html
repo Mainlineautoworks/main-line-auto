@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=202611092030">
+<link rel="stylesheet" href="styles.css?v=202611092040">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -108,7 +108,7 @@
       <div class="wrap-tool">
         <div class="caliper-view wrap-view" id="wrap-view">
           <div class="cv-stage" id="wrap-stage">
-            <img id="wrap-img" src="assets/img/wrap-sports.webp?v=20261109m" alt="Porsche sports car with its body wrapped in the selected color" width="1320" height="833" loading="lazy">
+            <img id="wrap-img" src="assets/img/wrap-sports.webp?v=20261109n" alt="Porsche sports car with its body wrapped in the selected color" width="1320" height="833" loading="lazy">
             <canvas id="wrap-paint" width="1149" height="342" aria-hidden="true"></canvas>
           </div>
           <p class="cv-photo-note">Real car, rewrapped live</p>
@@ -161,7 +161,7 @@
       <div class="caliper-view" id="caliper-view" data-mode="photo">
         <canvas id="caliper-canvas" tabindex="0" role="img" aria-label="3D model of a wheel and brake caliper in the selected color. Drag, or use the arrow keys, to change the angle."></canvas>
         <div class="cv-stage" id="cv-stage">
-          <img id="caliper-img" src="assets/img/caliper-sports.webp?v=20261109m" alt="Black wheel on a red sports car" width="1200" height="900" loading="lazy">
+          <img id="caliper-img" src="assets/img/caliper-sports.webp?v=20261109n" alt="Black wheel on a red sports car" width="1200" height="900" loading="lazy">
           <canvas id="caliper-paint" width="193" height="347" aria-hidden="true"></canvas>
         </div>
         <p class="cv-hint" aria-hidden="true"><span class="cv-hint-icon"></span>Drag to rotate</p>
@@ -263,40 +263,9 @@
       <div class="coating" id="ceramic" aria-labelledby="coating-h">
         <div class="coating-head">
           <h3 id="coating-h">Ceramic coating packages</h3>
-          <p>Every package starts with a decontaminated surface, because a coating only bonds as well as the paint underneath it. Choose a package to see exactly what it covers.</p>
+          <p>Every package starts with a decontaminated surface, because a coating only bonds as well as the paint underneath it. Coverage and process for each are listed below.</p>
         </div>
         <div class="coating-top">
-          <figure class="coat-diagram">
-            <svg class="coat-svg" id="coat-svg" viewBox="0 0 600 230" data-on="paint glass trim" role="img" aria-labelledby="coat-svg-t">
-              <title id="coat-svg-t">Diagram of a car showing which surfaces the selected package coats</title>
-              <defs>
-                <linearGradient id="coat-sheen" x1="0" x2="1" y1="0" y2="0">
-                  <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
-                </linearGradient>
-                <clipPath id="coat-clip"><path d="M40,168 C40,148 54,137 82,132 L172,122 C204,96 244,74 300,70 L382,70 C424,72 454,92 482,118 L542,126 C562,130 570,145 570,164 L570,178 C570,184 566,188 560,188 L500,188 A44,44 0 0 0 412,188 L196,188 A44,44 0 0 0 108,188 L52,188 C44,188 40,182 40,175 Z"/></clipPath>
-              </defs>
-              <ellipse cx="305" cy="214" rx="270" ry="9" class="z-shadow"/>
-              <path class="z z-paint" d="M40,168 C40,148 54,137 82,132 L172,122 C204,96 244,74 300,70 L382,70 C424,72 454,92 482,118 L542,126 C562,130 570,145 570,164 L570,178 C570,184 566,188 560,188 L500,188 A44,44 0 0 0 412,188 L196,188 A44,44 0 0 0 108,188 L52,188 C44,188 40,182 40,175 Z"/>
-              <path class="z-line" d="M300,122 L300,186 M410,122 C412,150 410,170 404,186 M82,150 C200,146 420,146 560,150"/>
-              <path class="z z-glass" d="M196,120 C220,98 254,84 296,81 L298,120 Z"/>
-              <path class="z z-glass" d="M308,81 L378,81 C406,83 428,99 446,118 L308,120 Z"/>
-              <path class="z z-trim" d="M190,122 C216,96 252,78 298,76 L380,76 C414,78 442,96 462,120 L452,121 C432,101 408,86 378,85 L308,85 L308,120 L298,120 L298,86 C256,88 226,102 204,122 Z"/>
-              <path class="z z-trim" d="M196,180 L412,180 L410,188 L198,188 Z"/>
-              <path class="z z-trim" d="M44,176 L100,176 L104,186 L52,188 C46,186 44,182 44,176 Z"/>
-              <path class="z-light" d="M46,142 C54,138 66,136 78,136 L74,146 C64,147 54,148 46,150 Z"/>
-              <path class="z-light z-tail" d="M556,132 L566,140 L566,152 L556,150 Z"/>
-              <g class="z z-wheels">
-                <circle cx="152" cy="188" r="36" class="z-tire"/><circle cx="152" cy="188" r="25" class="z-rim"/>
-                <circle cx="456" cy="188" r="36" class="z-tire"/><circle cx="456" cy="188" r="25" class="z-rim"/>
-                <path class="z-spoke" d="M152,165 L152,211 M129,188 L175,188 M136,172 L168,204 M168,172 L136,204 M456,165 L456,211 M433,188 L479,188 M440,172 L472,204 M472,172 L440,204"/>
-              </g>
-              <rect class="z-sheen" x="-160" y="60" width="140" height="140" clip-path="url(#coat-clip)"/>
-            </svg>
-            <figcaption class="coat-legend">
-              <span class="lg lg-paint">Paint</span><span class="lg lg-glass">Glass</span><span class="lg lg-trim">Trim</span><span class="lg lg-wheels">Wheels</span>
-            </figcaption>
-            <p class="coat-now" id="coat-now" aria-live="polite">Level II: 5-Year Ceramic Coating</p>
-          </figure>
           <div class="coat-tiers">
           <article class="coat-card " data-cover="paint glass" data-pkg="l1">
             <p class="coat-level">Level I</p>
@@ -306,7 +275,6 @@
             <p class="coat-sub">Coverage</p>
             <ul><li>All painted surfaces</li><li>All exterior glass</li></ul>
             <p class="coat-sub">Process</p><ul><li>Hand wash and ceramic spray application</li><li>No cure time</li><li>Same-day turnaround</li></ul>
-            <button type="button" class="coat-select" aria-pressed="false"><span class="sr-only">Show coverage for </span>Ceramic Sealant</button>
           </article>
           <article class="coat-card is-featured" data-cover="paint glass trim" data-pkg="l2">
             <span class="coat-badge">Most popular</span><p class="coat-level">Level II</p>
@@ -316,7 +284,6 @@
             <p class="coat-sub">Coverage</p>
             <ul><li>All painted surfaces</li><li>All exterior glass</li><li>All exterior trim</li></ul>
             <p class="coat-sub">Process</p><ul><li>Wash, clay bar, iron decontamination and polish</li><li>Single-layer professional coating</li><li>Complimentary interior detail</li></ul>
-            <button type="button" class="coat-select" aria-pressed="false"><span class="sr-only">Show coverage for </span>5-Year Ceramic Coating</button>
           </article>
           <article class="coat-card " data-cover="paint glass trim" data-pkg="l3">
             <p class="coat-level">Level III</p>
@@ -326,7 +293,6 @@
             <p class="coat-sub">Coverage</p>
             <ul><li>All painted surfaces</li><li>All exterior glass</li><li>All exterior trim</li></ul>
             <p class="coat-sub">Process</p><ul><li>Wash, clay bar, iron decontamination and polish</li><li>Multi-layer professional coating</li><li>Complimentary interior detail</li></ul>
-            <button type="button" class="coat-select" aria-pressed="false"><span class="sr-only">Show coverage for </span>10-Year Ceramic Coating</button>
           </article>
           </div>
         </div>
@@ -339,7 +305,6 @@
             <p class="coat-sub">Coverage</p>
             <ul><li>Front windshield and rear glass</li><li>Door and quarter windows</li><li>Sunroof or panoramic roof</li></ul>
             <p class="coat-sub">Benefits</p><ul><li>Rain beads and sheets off at speed</li><li>Easier ice and bug removal</li></ul>
-            <button type="button" class="coat-select" aria-pressed="false"><span class="sr-only">Show coverage for </span>Exterior Glass Coating</button>
           </article>
           <article class="coat-card coat-addon" data-cover="wheels" data-pkg="wheels">
             <p class="coat-level">Add-on or standalone</p>
@@ -349,7 +314,6 @@
             <p class="coat-sub">Coverage</p>
             <ul><li>Full wheel face, every wheel</li></ul>
             <p class="coat-sub">Process</p><ul><li>In-depth wheel cleaning and decontamination</li><li>Multi-layer application</li><li>High-heat resistant to brake dust</li></ul>
-            <button type="button" class="coat-select" aria-pressed="false"><span class="sr-only">Show coverage for </span>Wheel Coating</button>
           </article>
         </div>
       </div>
@@ -505,6 +469,6 @@
 </footer>
 
 <script src="caliper-3d.js?v=202611091725" defer></script>
-<script src="main.js?v=202611092020" defer></script>
+<script src="main.js?v=202611092050" defer></script>
 </body>
 </html>

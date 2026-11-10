@@ -614,3 +614,8 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 @media (max-width: 360px) {
   .cal-controls .color-picker button, .cal-controls .custom-swatch { width: 34px; height: 34px; }
 }
+
+/* Ceramic packages without the diagram: tiers span the full width */
+.coating-top { grid-template-columns: 1fr; }
+.coat-card.is-featured { border-color: var(--red); box-shadow: 0 0 0 2px var(--red), 0 14px 30px -18px rgba(215,25,42,.6); }
+.coat-card:hover { transform: none; }
