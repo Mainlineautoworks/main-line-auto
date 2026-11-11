@@ -920,3 +920,18 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .link-light { color: var(--white); }
 .cal-details .wraps-actions { margin-top: 4px; }
 @media (max-width: 960px) { .cal-details .wraps-actions .btn { margin: 0; } }
+
+/* PPF & ceramic subpage */
+.coating-solo { border-top: 0; padding-top: 0; margin: 0; }
+.pc-carousel { padding: clamp(48px, 6vw, 80px) 0; }
+.wp-head-left .pp-tag { margin-bottom: 10px; }
+.wp-dark .wp-head-left .pp-tag { color: var(--red); }
+.pc-which .wp-card { border-top-width: 3px; }
+.pc-which .wp-num { text-transform: uppercase; font-size: .75rem; }
+.pc-both { background: var(--red); border-top-color: var(--white) !important; }
+.pc-both .wp-num, .pc-both p { color: var(--white) !important; }
+.pc-cta-section { padding: clamp(48px, 6vw, 80px) 0; }
+.pc-cta-section .protect-cta { margin: 0; }
+.pc-more { text-align: center; margin: 28px 0 0; }
+.pc-compare { padding-bottom: clamp(40px, 5vw, 64px); }
+.pc-compare .protect-panels { margin-bottom: 0; }
