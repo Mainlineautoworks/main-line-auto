@@ -1583,3 +1583,4 @@ body:has(.dp-bar.is-on) .qa { bottom: 92px; }
   .cta-form-intro { position: static; }
 }
 @media (max-width: 520px) { .intake .if-row { grid-template-columns: 1fr; } }
+.dp-book-hint { margin: 8px 0 0; font-size: .85rem; color: var(--alloy); text-align: center; }

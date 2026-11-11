@@ -1068,8 +1068,20 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   const IDS = { quick: '7ZTIGMXDQ4HL6HVRJS6JO6DX', exterior: 'BSPHHWFPNNUTGAX5LX7GCDA5', interior: 'IGODDNWH3K5ATIKPHMQZYW3N',
     full: 'IASMDZ6XEM3SARRHGXZR75L4', supercar: '3DCT6QACKJQJA2OJTKCCOPBN', moto: 'O5BF7TKXDWUPEFAOJORQ262T', 'moto-chain': 'O5BF7TKXDWUPEFAOJORQ262T' };
   const radios = Array.from(document.querySelectorAll('input[name="dp-package"]'));
-  const sync = () => { const r = radios.find(x => x.checked); a.href = BASE + (r && IDS[r.value] ? IDS[r.value] : ''); };
-  document.addEventListener('change', e => { if (e.target.name === 'dp-package' || e.target.name === 'dp-size') setTimeout(sync, 0); });
+  const hint = document.getElementById('dp-book-hint');
+  const sync = () => {
+    const r = radios.find(x => x.checked);
+    const href = BASE + (r && IDS[r.value] ? IDS[r.value] : '');
+    a.href = href;
+    document.querySelectorAll('a[data-square]').forEach(b => { b.href = href; });
+    if (hint) {
+      const extras = Array.from(document.querySelectorAll('.dp-addon input:checked')).map(b => b.dataset.name.toLowerCase());
+      hint.textContent = extras.length
+        ? 'Opens Square with your package picked. Add ' + extras.join(', ').replace(/, ([^,]*)$/, ' and $1') + ' there too, then choose a time.'
+        : 'Opens Square with your package picked. Just choose a time.';
+    }
+  };
+  document.addEventListener('change', () => setTimeout(sync, 0));
   sync();
 })();
 
