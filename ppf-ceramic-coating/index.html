@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110610">
+<link rel="stylesheet" href="../styles.css?v=202611110620">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -378,6 +378,42 @@
     </div>
   </section>
 
+  <section class="wp-section rc dt" id="dirt-test" aria-labelledby="dt-h">
+    <div class="wrap">
+      <div class="wp-head">
+        <p class="pp-tag">Try it yourself</p>
+        <h2 id="dt-h">Dirt test</h2>
+        <p>Pick a coating, get the car dirty, then rinse it. Drag across the paint to sling mud, or take it down a muddy back road.</p>
+      </div>
+      <div class="rc-pkgs dt-pkgs" role="radiogroup" aria-label="Coating">
+        <button type="button" role="radio" aria-checked="true" data-level="0">Bare paint</button>
+        <button type="button" role="radio" aria-checked="false" data-level="1">Level I Sealant</button>
+        <button type="button" role="radio" aria-checked="false" data-level="2">Level II 5-Year</button>
+        <button type="button" role="radio" aria-checked="false" data-level="3">Level III 10-Year</button>
+      </div>
+      <div class="rc-stage dt-stage" id="dt-stage">
+        <img src="../assets/img/tint-viz-side.webp?v=1" alt="Side view of a white BMW M3 used for the dirt test" width="1090" height="395">
+        <canvas class="dt-gloss" id="dt-gloss" aria-hidden="true"></canvas>
+        <canvas class="dt-dirt" id="dt-dirt" aria-hidden="true"></canvas>
+        <canvas class="dt-fx" id="dt-fx" aria-label="Drag across the car's paint to sling mud"></canvas>
+      </div>
+      <div class="rc-bar">
+        <div class="rc-score" aria-live="polite">
+          <div><strong id="dt-left">0%</strong><span>Dirt on the paint</span></div>
+          <div class="rc-ok"><strong id="dt-rinses">0</strong><span>Rinses</span></div>
+        </div>
+        <div class="rc-actions dt-actions">
+          <button type="button" class="btn btn-dark" id="dt-mud">Muddy back road</button>
+          <button type="button" class="btn btn-red" id="dt-rinse">Rinse</button>
+          <button type="button" class="btn rc-reset" id="dt-wipe" hidden>Hand scrub</button>
+          <button type="button" class="btn rc-reset" id="dt-reset">Reset</button>
+        </div>
+      </div>
+      <p class="rc-msg" id="dt-msg">Bare paint selected. Get it dirty, then rinse.</p>
+      <p class="dt-note">A coating makes grime release with a rinse. Bugs and bird droppings should still come off soon, so they don't etch in.</p>
+    </div>
+  </section>
+
   <section class="protection pc-carousel" aria-label="Ceramic coating packages">
     <div class="wrap">
       <div class="coating coating-solo" id="ceramic" aria-labelledby="coating-h">
@@ -625,6 +661,6 @@
     <p>© <span id="year">2026</span> Main Line Auto Works</p>
   </div>
 </footer>
-<script src="../main.js?v=202611110590" defer></script>
+<script src="../main.js?v=202611110640" defer></script>
 </body>
 </html>

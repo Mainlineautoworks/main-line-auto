@@ -495,3 +495,146 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     if (zoneAt(x, y)) throwRock(x, y);
   });
 })();
+
+// Ceramic dirt test (PPF & ceramic page): sling dirt, rinse; coating levels release grime more easily
+(() => {
+  const stage = document.getElementById('dt-stage'); if (!stage) return;
+  const W = 1090, H = 395, R = 2;
+  const gloss = document.getElementById('dt-gloss'), dirtC = document.getElementById('dt-dirt'), fx = document.getElementById('dt-fx');
+  [gloss, dirtC, fx].forEach(c => { c.width = W * R; c.height = H * R; });
+  const gctx = gloss.getContext('2d'), dctx = dirtC.getContext('2d'), fctx = fx.getContext('2d');
+  [gctx, dctx, fctx].forEach(c => c.scale(R, R));
+  const btns = Array.from(document.querySelectorAll('.dt-pkgs button'));
+  const leftEl = document.getElementById('dt-left'), rinsesEl = document.getElementById('dt-rinses'), msg = document.getElementById('dt-msg');
+  const mudBtn = document.getElementById('dt-mud'), rinseBtn = document.getElementById('dt-rinse'), wipeBtn = document.getElementById('dt-wipe');
+  const names = ['Bare paint', 'Level I Sealant', 'Level II 5-Year', 'Level III 10-Year'];
+  // how much of each kind of dirt stays after one rinse, by coating level
+  const KEEP = { mud: [0.4, 0.06, 0.02, 0], film: [0.55, 0.04, 0, 0], bug: [0.85, 0.3, 0.18, 0.1], drop: [0.9, 0.35, 0.2, 0.12] };
+  let level = 0, zone = null, maskCanvas = null, items = [], spots = [], beads = [], rinses = 0, total = 0, busy = false, sweep = null, raf = 0;
+  const img = new Image();
+  img.onload = () => {
+    const t = document.createElement('canvas'); t.width = W; t.height = H; const tc = t.getContext('2d'); tc.drawImage(img, 0, 0);
+    const id = tc.getImageData(0, 0, W, H), d = id.data; zone = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) { zone[i] = d[i * 4] > 20 ? 1 : 0; d[i*4] = d[i*4+1] = d[i*4+2] = 0; d[i*4+3] = zone[i] ? 255 : 0; }
+    tc.putImageData(id, 0, 0); maskCanvas = t; drawGloss();
+  };
+  img.src = asset('ppf-zones.png');
+  const onPaint = (x, y) => zone && x >= 0 && y >= 0 && x < W && y < H && zone[(y | 0) * W + (x | 0)] === 1;
+  let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const scaleK = () => Math.min(2.2, Math.max(1, 760 / (stage.clientWidth || 760)));
+  function add(type, x, y) {
+    if (!onPaint(x, y)) return;
+    const k = scaleK(), s = (type === 'mud' ? 3 + Math.random() * 4 : type === 'film' ? 26 + Math.random() * 22 : type === 'bug' ? 1.3 + Math.random() * 1.1 : 4 + Math.random() * 3) * (type === 'film' ? 1 : k);
+    const it = { type, x, y, s, a: 1, seed: (Math.random() * 1e9) | 0 };
+    items.push(it); total += s * s;
+  }
+  function drawItem(c, it) {
+    seed = it.seed; c.globalAlpha = it.a;
+    if (it.type === 'mud') {
+      const cols = ['#7a6448', '#8b7656', '#5e4a34', '#6f5a40'];
+      c.beginPath(); c.ellipse(it.x, it.y, it.s * 0.7, it.s * 0.5, 0, 0, 7); c.fillStyle = 'rgba(105,85,60,.7)'; c.fill();
+      const n = 12 + (rnd() * 8 | 0);
+      for (let i = 0; i < n; i++) {
+        // spray flies rearward (car travels left), so droplets trail to the right
+        const a = (rnd() - 0.5) * 2.2, r = it.s * (0.3 + rnd() * 1.6);
+        const x = it.x + Math.cos(a) * r, y = it.y + Math.sin(a) * r * 0.6, d = 0.4 + rnd() * it.s * 0.22;
+        c.beginPath(); c.ellipse(x, y, d * (1 + rnd()), d, a * 0.4, 0, 7); c.fillStyle = cols[i % 4]; c.globalAlpha = it.a * (0.5 + rnd() * 0.4); c.fill();
+      }
+    } else if (it.type === 'film') {
+      const g = c.createRadialGradient(it.x, it.y, 0, it.x, it.y, it.s);
+      g.addColorStop(0, 'rgba(120,100,72,.30)'); g.addColorStop(1, 'rgba(120,100,72,0)');
+      c.fillStyle = g; c.beginPath(); c.ellipse(it.x, it.y, it.s * 1.6, it.s * 0.6, 0, 0, 7); c.fill();
+    } else if (it.type === 'bug') {
+      c.beginPath(); c.ellipse(it.x + it.s * 0.6, it.y, it.s * 1.8, it.s * 0.8, 0, 0, 7); c.fillStyle = 'rgba(160,150,95,.45)'; c.fill();
+      c.beginPath(); c.ellipse(it.x - it.s * 0.4, it.y, it.s * 0.7, it.s * 0.55, 0, 0, 7); c.fillStyle = '#2a2622'; c.fill();
+      c.fillStyle = 'rgba(120,112,80,.45)'; c.fillRect(it.x, it.y - 0.3, it.s * 3, 0.6);
+    } else {
+      const n = 6;
+      for (let i = 0; i < n; i++) { const a = rnd() * 6.3, r = rnd() * it.s * 0.8; c.beginPath(); c.arc(it.x + Math.cos(a) * r, it.y + Math.sin(a) * r, it.s * (0.4 + rnd() * 0.4), 0, 7); c.fillStyle = '#e9e7df'; c.fill(); }
+      c.beginPath(); c.arc(it.x, it.y, it.s * 0.4, 0, 7); c.fillStyle = '#7d7a72'; c.fill();
+      c.beginPath(); c.arc(it.x + it.s * 0.3, it.y + it.s * 0.2, it.s * 0.2, 0, 7); c.fillStyle = '#3d3a35'; c.fill();
+    }
+    c.globalAlpha = 1;
+  }
+  function drawGloss() {
+    gctx.clearRect(0, 0, W, H); if (!maskCanvas || !level) return;
+    const g = gctx.createLinearGradient(0, 0, W * 0.6, H);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.45, `rgba(255,255,255,${0.12 + level * 0.06})`); g.addColorStop(0.55, `rgba(200,230,255,${0.1 + level * 0.05})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+    gctx.fillStyle = g; gctx.fillRect(0, 0, W, H);
+    gctx.globalCompositeOperation = 'destination-in'; gctx.drawImage(maskCanvas, 0, 0); gctx.globalCompositeOperation = 'source-over';
+  }
+  function render() {
+    dctx.clearRect(0, 0, W, H);
+    for (const s of spots) { dctx.beginPath(); dctx.arc(s.x, s.y, s.r, 0, 7); dctx.strokeStyle = `rgba(150,155,160,${s.a})`; dctx.lineWidth = 0.7; dctx.stroke(); }
+    for (const it of items) if (it.a > 0.01) drawItem(dctx, it);
+    if (maskCanvas) { dctx.globalCompositeOperation = 'destination-in'; dctx.drawImage(maskCanvas, 0, 0); dctx.globalCompositeOperation = 'source-over'; }
+    const left = total ? items.reduce((a, it) => a + it.s * it.s * it.a, 0) / total : 0;
+    leftEl.textContent = Math.round(left * 100) + '%'; rinsesEl.textContent = rinses;
+    return left;
+  }
+  function fxFrame() {
+    fctx.clearRect(0, 0, W, H); let live = false;
+    if (sweep !== null) {
+      live = true; sweep += 18;
+      const x = sweep, g = fctx.createLinearGradient(x - 160, 0, x + 20, 0);
+      g.addColorStop(0, 'rgba(170,215,255,0)'); g.addColorStop(0.75, 'rgba(170,215,255,.45)'); g.addColorStop(1, 'rgba(255,255,255,.75)');
+      fctx.fillStyle = g; fctx.fillRect(x - 160, 0, 180, H);
+      fctx.strokeStyle = 'rgba(255,255,255,.55)'; fctx.lineWidth = 1;
+      for (let i = 0; i < 40; i++) { const sx = x - Math.random() * 150, sy = Math.random() * H; fctx.beginPath(); fctx.moveTo(sx, sy); fctx.lineTo(sx - 6, sy + 18); fctx.stroke(); }
+      for (const it of items) if (!it.rinsed && it.x < x) { it.rinsed = true; it.target = it.a * KEEP[it.type][level]; }
+      if (level) for (let i = 0; i < 10; i++) { const bx = x - Math.random() * 120, by = 60 + Math.random() * 260; if (onPaint(bx, by)) beads.push({ x: bx, y: by, v: 0.5 + Math.random(), r: 1 + Math.random() * 1.6 * (1 + level * 0.15), life: 50 }); }
+      if (x > W + 180) { sweep = null; afterRinse(); }
+    }
+    for (const it of items) if (it.target !== undefined && it.a > it.target) { it.a = Math.max(it.target, it.a - 0.06); live = true; }
+    beads = beads.filter(b => b.life > 0);
+    for (const b of beads) { live = true; b.life--; b.v += 0.12; b.y += b.v; if (!onPaint(b.x, b.y)) b.life = 0;
+      fctx.beginPath(); fctx.arc(b.x, b.y, b.r, 0, 7); fctx.fillStyle = 'rgba(255,255,255,.75)'; fctx.fill();
+      fctx.beginPath(); fctx.arc(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.35, 0, 7); fctx.fillStyle = 'rgba(255,255,255,1)'; fctx.fill(); }
+    if (live) render();
+    raf = live ? requestAnimationFrame(fxFrame) : 0;
+  }
+  const kick = () => { if (!raf) raf = requestAnimationFrame(fxFrame); };
+  function afterRinse() {
+    items.forEach(it => { delete it.rinsed; delete it.target; });
+    items = items.filter(it => it.a > 0.02);
+    rinses++;
+    if (!level) for (let i = 0; i < 60; i++) { const x = 60 + Math.random() * 970, y = 60 + Math.random() * 260; if (onPaint(x, y)) spots.push({ x, y, r: 1.2 + Math.random() * 2.2, a: 0.55 }); }
+    const left = render(); busy = false; setBusy(false);
+    if (!total) { msg.textContent = 'Nothing to rinse yet. Get the car dirty first.'; return; }
+    const specks = items.filter(it => it.type !== 'mud' && it.type !== 'film' && it.a > 0.05).length;
+    if (left < 0.03 && !specks) { msg.textContent = `${names[level]}: clean after ${rinses === 1 ? 'one rinse' : rinses + ' rinses'}. Grime just let go.`; wipeBtn.hidden = true; }
+    else if (level) { msg.textContent = `${names[level]}: the grime rinsed off. Just a few bug and bird spots left, and one quick wipe takes care of them.`; wipeBtn.textContent = 'Quick wipe'; wipeBtn.hidden = false; }
+    else { msg.textContent = `Bare paint: ${Math.round(left * 100)}% of the dirt is still stuck${spots.length ? ', plus water spots as it dries' : ''}. It needs a hand scrub.`; wipeBtn.textContent = 'Hand scrub'; wipeBtn.hidden = false; }
+  }
+  function setBusy(b) { [mudBtn, rinseBtn].forEach(x => x.disabled = b); }
+  function rinse() { if (busy) return; busy = true; setBusy(true); sweep = -40; kick(); }
+  function wipe() {
+    const was = wipeBtn.textContent; items = []; spots = []; total = 0; wipeBtn.hidden = true; render();
+    msg.textContent = was === 'Quick wipe' ? `${names[level]}: one quick wipe and it's spotless.` : 'Bare paint: clean again, after a full hand wash and scrub.';
+  }
+  function reset() { items = []; spots = []; beads = []; total = 0; rinses = 0; wipeBtn.hidden = true; render(); }
+  function mud() {
+    for (let i = 0; i < 40; i++) add('film', 70 + Math.random() * 960, 250 + Math.random() * 60);
+    for (let i = 0; i < 170; i++) { const x = 56 + Math.random() * 980, y = 215 + Math.pow(Math.random(), 0.5) * 100; add('mud', x, y); }
+    for (let i = 0; i < 40; i++) add('mud', 56 + Math.random() * 280, 160 + Math.random() * 160);
+    for (let i = 0; i < 45; i++) add('bug', 56 + Math.random() * 220, 150 + Math.random() * 110);
+    for (let i = 0; i < 5; i++) add('drop', 140 + Math.random() * 760, 60 + Math.random() * 110);
+    render(); msg.textContent = 'Muddy, buggy and the birds found it too. Now rinse it.';
+  }
+  function setLevel(l) {
+    level = l; btns.forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.level) === l)));
+    reset(); drawGloss(); msg.textContent = `${names[l]} selected. Get it dirty, then rinse.`;
+  }
+  btns.forEach(b => b.addEventListener('click', () => setLevel(Number(b.dataset.level))));
+  mudBtn.addEventListener('click', mud); rinseBtn.addEventListener('click', rinse); wipeBtn.addEventListener('click', wipe);
+  document.getElementById('dt-reset').addEventListener('click', () => { reset(); msg.textContent = 'Car reset. Get it dirty, then rinse.'; });
+  let down = false, last = null;
+  const pos = e => { const b = fx.getBoundingClientRect(); return [(e.clientX - b.left) / b.width * W, (e.clientY - b.top) / b.height * H]; };
+  fx.addEventListener('pointerdown', e => { if (busy) return; down = true; last = pos(e); fx.setPointerCapture(e.pointerId); add('mud', ...last); render(); });
+  fx.addEventListener('pointermove', e => {
+    if (!down) return; const p = pos(e), dx = p[0] - last[0], dy = p[1] - last[1], d = Math.hypot(dx, dy);
+    for (let s = 6; s <= d; s += 6) add('mud', last[0] + dx * s / d + (Math.random() - 0.5) * 6, last[1] + dy * s / d + (Math.random() - 0.5) * 6);
+    if (d >= 6) last = p; render();
+  });
+  ['pointerup', 'pointercancel'].forEach(t => fx.addEventListener(t, () => { down = false; }));
+})();
