@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110570">
+<link rel="stylesheet" href="../styles.css?v=202611110590">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -60,7 +60,7 @@
         {
           "@type": "ListItem",
           "position": 2,
-          "name": "PPF & ceramic coating",
+          "name": "PPF & Ceramic Coating",
           "item": "https://mainlineautoworks.com/ppf-ceramic-coating/"
         }
       ]
@@ -153,7 +153,7 @@
     <nav class="nav" aria-label="Main">
       <a href="../vinyl-wraps/">Wraps</a>
       <a href="../caliper-painting/">Calipers</a>
-      <a href="./" aria-current="page">PPF &amp; ceramic</a>
+      <a href="./" aria-current="page">PPF &amp; Ceramic</a>
       <a href="../window-tint/">Tint</a>
       <a href="../auto-detailing/">Detailing</a>
       <a href="../#visit">Visit</a>
@@ -175,7 +175,7 @@
 
   <section class="wp-hero" aria-labelledby="pc-h1">
     <div class="wrap wp-hero-inner">
-      <nav class="crumbs" aria-label="Breadcrumb"><a href="../">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">PPF &amp; ceramic coating</span></nav>
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="../">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">PPF &amp; Ceramic Coating</span></nav>
       <p class="hero-kicker">Protect the finish.</p>
       <h1 id="pc-h1">PPF &amp; Ceramic Coating in West Chester, PA</h1>
       <p class="wp-lead">Keep your paint looking the way it did the day you got it. Paint protection film stops rock chips and scratches. Ceramic coating adds deep gloss and makes every wash easier. We'll help you choose the right one, or the right combination, for how you drive.</p>
@@ -186,7 +186,7 @@
       <ul class="wp-facts">
         <li><strong>4 PPF packages</strong><span>Partial front to full body</span></li>
         <li><strong>3 coating levels</strong><span>6 months to 10+ years</span></li>
-        <li><strong>Full decon</strong><span>Every package starts clean</span></li>
+        <li><strong>Rental cars</strong><span>Coming spring 2027</span></li>
         <li><strong>Free evaluation</strong><span>In person, no pressure</span></li>
       </ul>
     </div>
@@ -251,6 +251,41 @@
           </ul>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="wp-section rc" id="rock-chip-test" aria-labelledby="rc-h">
+    <div class="wrap">
+      <div class="wp-head">
+        <p class="pp-tag">Try it yourself</p>
+        <h2 id="rc-h">Rock chip test</h2>
+        <p>Pick a PPF package, then take the car for a drive, or tap anywhere on the paint to throw a rock. Protected areas shrug it off. Bare paint chips.</p>
+      </div>
+      <div class="rc-pkgs" role="radiogroup" aria-label="PPF coverage">
+        <button type="button" role="radio" aria-checked="true" data-level="0">No film</button>
+        <button type="button" role="radio" aria-checked="false" data-level="1">Partial Front</button>
+        <button type="button" role="radio" aria-checked="false" data-level="2">Full Front</button>
+        <button type="button" role="radio" aria-checked="false" data-level="3">Track Performance</button>
+        <button type="button" role="radio" aria-checked="false" data-level="4">Full Body</button>
+      </div>
+      <div class="rc-stage" id="rc-stage">
+        <img src="../assets/img/tint-viz-side.webp?v=1" alt="Side view of a white BMW M3 used for the rock chip test" width="1090" height="395">
+        <canvas class="rc-cover" id="rc-cover" aria-hidden="true"></canvas>
+        <canvas class="rc-fx" id="rc-fx" aria-label="Tap the car's paint to throw a rock"></canvas>
+        <div class="rc-road" aria-hidden="true"></div>
+        <span class="rc-dir" aria-hidden="true">&larr; Direction of travel</span>
+      </div>
+      <div class="rc-bar">
+        <div class="rc-score" aria-live="polite">
+          <div><strong id="rc-chips">0</strong><span>Chips in your paint</span></div>
+          <div class="rc-ok"><strong id="rc-blocked">0</strong><span>Stopped by film</span></div>
+        </div>
+        <div class="rc-actions">
+          <button type="button" class="btn btn-red" id="rc-drive">Drive a highway mile</button>
+          <button type="button" class="btn rc-reset" id="rc-reset">Reset</button>
+        </div>
+      </div>
+      <p class="rc-msg" id="rc-msg">Choose a package above, then hit drive. Shaded areas are covered by film.</p>
     </div>
   </section>
 
@@ -590,6 +625,6 @@
     <p>© <span id="year">2026</span> Main Line Auto Works</p>
   </div>
 </footer>
-<script src="../main.js?v=202611110530" defer></script>
+<script src="../main.js?v=202611110590" defer></script>
 </body>
 </html>

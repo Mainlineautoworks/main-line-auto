@@ -365,3 +365,133 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     new IntersectionObserver(e => { summaryVisible = e[0].isIntersecting; sync(); }).observe(summary);
   }
 })();
+
+// PPF rock chip test (PPF page): throw rocks at a car; film zones deflect them, bare paint chips
+(() => {
+  const stage = document.getElementById('rc-stage'); if (!stage) return;
+  const cover = document.getElementById('rc-cover'), fx = document.getElementById('rc-fx');
+  const cctx = cover.getContext('2d'), fctx = fx.getContext('2d');
+  const W = 1090, H = 395;
+  const btns = Array.from(document.querySelectorAll('.rc-pkgs button'));
+  const chipsEl = document.getElementById('rc-chips'), blockedEl = document.getElementById('rc-blocked');
+  const msg = document.getElementById('rc-msg'), driveBtn = document.getElementById('rc-drive');
+  const names = ['no film', 'Partial Front', 'Full Front', 'Track Performance', 'Full Body'];
+  let level = 0, zone = null, chips = [], rocks = [], sparks = [], nChip = 0, nBlock = 0, driving = false, raf = 0;
+  [cover, fx].forEach(c => { c.width = W * 2; c.height = H * 2; });
+  cctx.scale(2, 2); fctx.scale(2, 2);
+  const img = new Image();
+  img.onload = () => {
+    const t = document.createElement('canvas'); t.width = W; t.height = H;
+    const tc = t.getContext('2d'); tc.drawImage(img, 0, 0);
+    const d = tc.getImageData(0, 0, W, H).data; zone = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) zone[i] = Math.round(d[i * 4] / 60);
+    drawCover();
+  };
+  img.src = asset('ppf-zones.png');
+  const zoneAt = (x, y) => zone ? zone[(Math.round(y) * W + Math.round(x))] || 0 : 0;
+  const covered = (x, y) => { const z = zoneAt(x, y); return z > 0 && z <= level; };
+  function drawCover() {
+    cctx.clearRect(0, 0, W, H); if (!zone || !level) return;
+    const id = cctx.createImageData(W, H), d = id.data;
+    for (let i = 0; i < W * H; i++) { const z = zone[i]; if (z && z <= level) { d[i*4] = 90; d[i*4+1] = 180; d[i*4+2] = 255; d[i*4+3] = 70; } }
+    const t = document.createElement('canvas'); t.width = W; t.height = H; t.getContext('2d').putImageData(id, 0, 0);
+    cctx.drawImage(t, 0, 0);
+    // glossy film edge sweep
+    cctx.save(); cctx.globalCompositeOperation = 'source-atop';
+    const g = cctx.createLinearGradient(0, 0, W, H); g.addColorStop(0.35, 'rgba(255,255,255,0)'); g.addColorStop(0.5, 'rgba(255,255,255,.35)'); g.addColorStop(0.65, 'rgba(255,255,255,0)');
+    cctx.fillStyle = g; cctx.fillRect(0, 0, W, H); cctx.restore();
+  }
+  function setLevel(l) {
+    level = l; btns.forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.level) === l)));
+    reset(); drawCover();
+    msg.textContent = l ? `${names[l]} selected. Shaded areas are covered by film. Hit drive or tap the car.` : 'No film selected. Every rock hits bare paint. Hit drive or tap the car.';
+  }
+  function reset() { chips = []; rocks = []; sparks = []; nChip = 0; nBlock = 0; score(); kick(); }
+  function score() { chipsEl.textContent = nChip; blockedEl.textContent = nBlock; }
+  function makeChip(x, y) {
+    const k = Math.min(2.4, Math.max(1, 760 / (stage.clientWidth || 760)));
+    const r = (2.6 + Math.random() * 3) * k, n = 8 + (Math.random() * 4 | 0), pts = [];
+    for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, rr = r * (0.55 + Math.random() * 0.6); pts.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.85]); }
+    return { pts, x, y, r };
+  }
+  function throwRock(tx, ty) {
+    const sy = Math.min(H - 40, ty + 30 + Math.random() * 40);
+    const rk = Math.min(2, Math.max(1, 760 / (stage.clientWidth || 760)));
+    rocks.push({ sx: -10, sy, tx, ty, t: 0, dur: 18 + Math.random() * 10, s: (1.6 + Math.random() * 1.4) * rk, done: false, bounce: null });
+    kick();
+  }
+  function impact(r) {
+    const z = zoneAt(r.tx, r.ty);
+    if (!z) { r.bounce = { vx: -2 - Math.random() * 2, vy: -1.5 - Math.random() * 2, x: r.tx, y: r.ty, life: 26 }; return; }
+    if (z <= level) {
+      nBlock++; r.bounce = { vx: -2.5 - Math.random() * 2.5, vy: -2 - Math.random() * 2.5, x: r.tx, y: r.ty, life: 30 };
+      sparks.push({ x: r.tx, y: r.ty, t: 0, film: true });
+    } else {
+      nChip++; chips.push(makeChip(r.tx, r.ty)); sparks.push({ x: r.tx, y: r.ty, t: 0, film: false });
+      r.bounce = { vx: -1.2 - Math.random(), vy: 1 + Math.random(), x: r.tx, y: r.ty, life: 18 };
+    }
+    score();
+  }
+  function frame() {
+    fctx.clearRect(0, 0, W, H);
+    for (const c of chips) {
+      fctx.beginPath(); c.pts.forEach((p, i) => i ? fctx.lineTo(p[0], p[1]) : fctx.moveTo(p[0], p[1])); fctx.closePath();
+      fctx.fillStyle = '#4a4f56'; fctx.fill(); fctx.strokeStyle = 'rgba(255,255,255,.55)'; fctx.lineWidth = 0.6; fctx.stroke();
+      fctx.beginPath(); fctx.arc(c.x + 0.2, c.y + 0.2, c.r * 0.45, 0, 7); fctx.fillStyle = '#b9bcc0'; fctx.fill();
+      fctx.beginPath(); fctx.arc(c.x - c.r * 0.2, c.y - c.r * 0.25, c.r * 0.18, 0, 7); fctx.fillStyle = '#2b2f34'; fctx.fill();
+    }
+    let live = false;
+    for (const s of sparks) {
+      if (s.t > 22) continue; live = true; s.t++;
+      const k = s.t / 22;
+      if (s.film) { fctx.beginPath(); fctx.arc(s.x, s.y, 3 + k * 14, 0, 7); fctx.strokeStyle = `rgba(80,170,255,${1 - k})`; fctx.lineWidth = 2; fctx.stroke(); }
+      else { for (let i = 0; i < 6; i++) { const a = i * 1.05 + s.x; fctx.fillStyle = `rgba(250,250,250,${1 - k})`; fctx.fillRect(s.x + Math.cos(a) * k * 10, s.y + Math.sin(a) * k * 8 + k * k * 6, 1.6, 1.6); } }
+    }
+    for (const r of rocks) {
+      if (r.done) continue; live = true;
+      let x, y;
+      if (!r.bounce) {
+        r.t++; const k = Math.min(r.t / r.dur, 1);
+        x = r.sx + (r.tx - r.sx) * k; y = r.sy + (r.ty - r.sy) * k - Math.sin(k * Math.PI) * 18;
+        if (k >= 1) impact(r);
+      } else {
+        const b = r.bounce; b.x += b.vx; b.y += b.vy; b.vy += 0.25; b.life--; x = b.x; y = b.y; if (b.life <= 0) r.done = true;
+      }
+      fctx.beginPath(); fctx.ellipse(x, y, r.s * 1.2, r.s, 0.6, 0, 7); fctx.fillStyle = '#6b6560'; fctx.fill();
+      fctx.beginPath(); fctx.arc(x - r.s * 0.3, y - r.s * 0.3, r.s * 0.35, 0, 7); fctx.fillStyle = 'rgba(255,255,255,.5)'; fctx.fill();
+    }
+    rocks = rocks.filter(r => !r.done);
+    if (live || driving) raf = requestAnimationFrame(frame); else raf = 0;
+  }
+  function kick() { if (!raf) raf = requestAnimationFrame(frame); }
+  function randomTarget() {
+    for (let i = 0; i < 400; i++) {
+      // highway debris mostly hits the front end and lower body
+      const p = Math.random(); let x, y;
+      if (p < 0.6) { x = 56 + Math.random() * 300; y = 150 + Math.random() * 170; }
+      else if (p < 0.85) { x = 356 + Math.random() * 640; y = 255 + Math.random() * 60; }
+      else { x = 56 + Math.random() * 980; y = 60 + Math.random() * 260; }
+      if (zoneAt(x, y)) return [x, y];
+    }
+    return [150, 250];
+  }
+  function drive() {
+    if (driving) return; reset(); driving = true; driveBtn.disabled = true; kick();
+    let n = 0; const total = 40;
+    const tick = () => { const [x, y] = randomTarget(); throwRock(x, y); if (++n < total) setTimeout(tick, 60 + Math.random() * 90); else setTimeout(finish, 900); };
+    tick();
+  }
+  function finish() {
+    driving = false; driveBtn.disabled = false;
+    msg.textContent = !level ? `One highway mile with no film: ${nChip} chips in your paint.`
+      : nChip ? `${names[level]}: ${nBlock} rocks stopped by the film, ${nChip} chips where the paint was bare.`
+      : `${names[level]}: all ${nBlock} rocks stopped. Not a single chip.`;
+  }
+  btns.forEach(b => b.addEventListener('click', () => setLevel(Number(b.dataset.level))));
+  driveBtn.addEventListener('click', drive);
+  document.getElementById('rc-reset').addEventListener('click', () => { reset(); msg.textContent = 'Car reset. Hit drive or tap the car.'; });
+  fx.addEventListener('pointerdown', e => {
+    const b = fx.getBoundingClientRect(); const x = (e.clientX - b.left) / b.width * W, y = (e.clientY - b.top) / b.height * H;
+    if (zoneAt(x, y)) throwRock(x, y);
+  });
+})();
