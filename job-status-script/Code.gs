@@ -19,12 +19,12 @@
 const STAGES = ['Checked in', 'Prep & inspection', 'Install', 'Curing & finishing', 'Final inspection', 'Ready for pick-up'];
 const JOBS = 'Jobs';
 const UPDATES = 'Updates';
-const SITE = 'https://mainlineautoworks.github.io/main-line-auto/track/';   // switch to https://mainlineautoworks.com/track/ after the domain swap
+const SITE = 'https://mainlineautoworks.com/track/';
 const SHOP = 'Main Line Auto Works';
 const INBOX = 'info@mainlineautoworks.com';           // where website estimate forms are sent
 const REQUESTS = 'Requests';
 const UPLOADS = 'Website form photos';                 // Google Drive folder for uploaded photos
-const WEBSITE = 'https://mainlineautoworks.github.io/main-line-auto/';   // switch to https://mainlineautoworks.com/ after the domain swap
+const WEBSITE = 'https://mainlineautoworks.com/';
 
 /* ---------- one-time setup ---------- */
 

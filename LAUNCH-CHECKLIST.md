@@ -22,10 +22,16 @@ Saved Nov 10, 2026. Done items are checked.
 - [ ] Tint 2 Go
 
 ## Switch-over
-- [ ] Redirects from every old address to its new page (e.g. /ceramic-coatings, /window-tinting-west-chester-pa, /make-an-appointment)
-- [ ] Google Analytics G-927PVGSFBV and Tag Manager GTM-P46Q6HCC
-- [ ] sitemap.xml and robots.txt
-- [ ] CNAME file + DNS records for GitHub Pages; leave email (MX/TXT) records untouched
+- [x] Redirects from every old address to its new page (e.g. /ceramic-coatings, /window-tinting-west-chester-pa, /make-an-appointment)
+- [x] Google Analytics G-927PVGSFBV and Tag Manager GTM-P46Q6HCC
+- [x] sitemap.xml and robots.txt
+- [x] CNAME file (DNS: Namecheap A records -> GitHub, www -> mainlineautoworks.github.io; MX/TXT untouched)
 - [ ] `SITE` in Code.gs → https://mainlineautoworks.com/track/
 - [ ] Google Business Profile website link; Search Console resubmit sitemap
 - [ ] Confirm caliper page claims and photo rights
+
+## After the switch
+- [ ] Enforce HTTPS in GitHub Settings > Pages once the certificate is issued
+- [ ] Search Console: submit https://mainlineautoworks.com/sitemap.xml
+- [ ] Cancel the Squarespace website plan after 1-2 weeks (domain stays at Namecheap)
+- [ ] Old pages currently redirected to the estimate form or homepage: PDR, wheel repair, windshield, air filter, About, portfolios, corporate events
