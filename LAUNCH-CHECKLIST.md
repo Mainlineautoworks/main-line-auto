@@ -1,3 +1,14 @@
+# Main Line Auto Works website checklist
+
+## NEXT TIME (left off Nov 11, 2026, 12:20 AM, right after the DNS switch)
+1. Confirm mainlineautoworks.com shows the new site (private window)
+2. GitHub > main-line-auto > Settings > Pages: confirm "DNS check successful", then tick Enforce HTTPS
+3. Apps Script: paste the latest Code.gs, Deploy > Manage deployments > edit > New version
+4. Send one test estimate form; check info@ email, the customer copy, the Square customer, and the Requests tab
+5. Detailing one-step booking: decide on the cancellation fees (remove them from detailing services, or have the site hand off to Square for the card)
+6. Search Console: submit https://mainlineautoworks.com/sitemap.xml
+7. In 1-2 weeks: cancel the Squarespace website plan (domain stays at Namecheap)
+
 # Before switching mainlineautoworks.com to this site
 
 Saved Nov 10, 2026. Done items are checked.
