@@ -36,7 +36,7 @@ function arrowNav(buttons, select) {
 // box = where the shade layer sits in the photo: [x, y, width, height]; size defaults to 1200x900.
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261110e';
+const ASSET_V = '20261110f';
 const toLin = v => Math.pow(v / 255, 2.2);
 const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
 const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
@@ -496,145 +496,139 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   });
 })();
 
-// Ceramic dirt test (PPF & ceramic page): sling dirt, rinse; coating levels release grime more easily
+// Ceramic dirt test (PPF & ceramic page): realistic grime layers, rinsed off; coating levels release grime more easily
 (() => {
   const stage = document.getElementById('dt-stage'); if (!stage) return;
-  const W = 1090, H = 395, R = 2;
+  const W = 1090, H = 395, WW = W * 2, HH = H * 2;
   const gloss = document.getElementById('dt-gloss'), dirtC = document.getElementById('dt-dirt'), fx = document.getElementById('dt-fx');
-  [gloss, dirtC, fx].forEach(c => { c.width = W * R; c.height = H * R; });
+  [gloss, dirtC, fx].forEach(c => { c.width = WW; c.height = HH; });
   const gctx = gloss.getContext('2d'), dctx = dirtC.getContext('2d'), fctx = fx.getContext('2d');
-  [gctx, dctx, fctx].forEach(c => c.scale(R, R));
   const btns = Array.from(document.querySelectorAll('.dt-pkgs button'));
   const leftEl = document.getElementById('dt-left'), rinsesEl = document.getElementById('dt-rinses'), msg = document.getElementById('dt-msg');
   const mudBtn = document.getElementById('dt-mud'), rinseBtn = document.getElementById('dt-rinse'), wipeBtn = document.getElementById('dt-wipe');
   const names = ['Bare paint', 'Level I Sealant', 'Level II 5-Year', 'Level III 10-Year'];
-  // how much of each kind of dirt stays after one rinse, by coating level
-  const KEEP = { mud: [0.4, 0.06, 0.02, 0], film: [0.55, 0.04, 0, 0], bug: [0.85, 0.3, 0.18, 0.1], drop: [0.9, 0.35, 0.2, 0.12] };
-  let level = 0, zone = null, maskCanvas = null, items = [], spots = [], beads = [], rinses = 0, total = 0, busy = false, sweep = null, raf = 0;
-  const img = new Image();
-  img.onload = () => {
-    const t = document.createElement('canvas'); t.width = W; t.height = H; const tc = t.getContext('2d'); tc.drawImage(img, 0, 0);
-    const id = tc.getImageData(0, 0, W, H), d = id.data; zone = new Uint8Array(W * H);
-    for (let i = 0; i < W * H; i++) { zone[i] = d[i * 4] > 20 ? 1 : 0; d[i*4] = d[i*4+1] = d[i*4+2] = 0; d[i*4+3] = zone[i] ? 255 : 0; }
-    tc.putImageData(id, 0, 0); maskCanvas = t; drawGloss();
-  };
-  img.src = asset('ppf-zones.png');
+  // share of each layer left after one rinse, by coating level
+  const KEEP = { road: [0.4, 0.05, 0.02, 0], smear: [0.45, 0.06, 0.02, 0], bugs: [0.85, 0.3, 0.18, 0.1], drops: [0.9, 0.35, 0.2, 0.12] };
+  const WEIGHT = { road: 94.6, bugs: 6, drops: 4 };          // relative amount of dirt in each layer
+  const L = {}; ['road', 'bugs', 'drops', 'smear', 'spots', 'mask'].forEach(k => { const i = new Image(); i.src = asset(k === 'mask' ? 'grime-mask.png' : `grime-${k}.webp`); L[k] = i; });
+  const A = { road: 0, bugs: 0, drops: 0, smear: 0, spots: 0 }, from = {}, to = {};
+  const smearMask = document.createElement('canvas'); smearMask.width = WW; smearMask.height = HH; const smctx = smearMask.getContext('2d');
+  const smearLayer = document.createElement('canvas'); smearLayer.width = WW; smearLayer.height = HH; const slctx = smearLayer.getContext('2d');
+  let level = 0, smearAmt = 0, peak = 0, rinses = 0, busy = false, sweep = null, raf = 0, beads = [];
+  let zone = null; const zi = new Image();
+  zi.onload = () => { const t = document.createElement('canvas'); t.width = W; t.height = H; const c = t.getContext('2d'); c.drawImage(zi, 0, 0); const d = c.getImageData(0, 0, W, H).data; zone = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) zone[i] = d[i * 4] > 20 ? 1 : 0; };
+  zi.src = asset('ppf-zones.png');
   const onPaint = (x, y) => zone && x >= 0 && y >= 0 && x < W && y < H && zone[(y | 0) * W + (x | 0)] === 1;
-  let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const scaleK = () => Math.min(2.2, Math.max(1, 760 / (stage.clientWidth || 760)));
-  function add(type, x, y) {
-    if (!onPaint(x, y)) return;
-    const k = scaleK(), s = (type === 'mud' ? 3 + Math.random() * 4 : type === 'film' ? 26 + Math.random() * 22 : type === 'bug' ? 1.3 + Math.random() * 1.1 : 4 + Math.random() * 3) * (type === 'film' ? 1 : k);
-    const it = { type, x, y, s, a: 1, seed: (Math.random() * 1e9) | 0 };
-    items.push(it); total += s * s;
-  }
-  function drawItem(c, it) {
-    seed = it.seed; c.globalAlpha = it.a;
-    if (it.type === 'mud') {
-      const cols = ['#7a6448', '#8b7656', '#5e4a34', '#6f5a40'];
-      c.beginPath(); c.ellipse(it.x, it.y, it.s * 0.7, it.s * 0.5, 0, 0, 7); c.fillStyle = 'rgba(105,85,60,.7)'; c.fill();
-      const n = 12 + (rnd() * 8 | 0);
-      for (let i = 0; i < n; i++) {
-        // spray flies rearward (car travels left), so droplets trail to the right
-        const a = (rnd() - 0.5) * 2.2, r = it.s * (0.3 + rnd() * 1.6);
-        const x = it.x + Math.cos(a) * r, y = it.y + Math.sin(a) * r * 0.6, d = 0.4 + rnd() * it.s * 0.22;
-        c.beginPath(); c.ellipse(x, y, d * (1 + rnd()), d, a * 0.4, 0, 7); c.fillStyle = cols[i % 4]; c.globalAlpha = it.a * (0.5 + rnd() * 0.4); c.fill();
-      }
-    } else if (it.type === 'film') {
-      const g = c.createRadialGradient(it.x, it.y, 0, it.x, it.y, it.s);
-      g.addColorStop(0, 'rgba(120,100,72,.30)'); g.addColorStop(1, 'rgba(120,100,72,0)');
-      c.fillStyle = g; c.beginPath(); c.ellipse(it.x, it.y, it.s * 1.6, it.s * 0.6, 0, 0, 7); c.fill();
-    } else if (it.type === 'bug') {
-      c.beginPath(); c.ellipse(it.x + it.s * 0.6, it.y, it.s * 1.8, it.s * 0.8, 0, 0, 7); c.fillStyle = 'rgba(160,150,95,.45)'; c.fill();
-      c.beginPath(); c.ellipse(it.x - it.s * 0.4, it.y, it.s * 0.7, it.s * 0.55, 0, 0, 7); c.fillStyle = '#2a2622'; c.fill();
-      c.fillStyle = 'rgba(120,112,80,.45)'; c.fillRect(it.x, it.y - 0.3, it.s * 3, 0.6);
-    } else {
-      const n = 6;
-      for (let i = 0; i < n; i++) { const a = rnd() * 6.3, r = rnd() * it.s * 0.8; c.beginPath(); c.arc(it.x + Math.cos(a) * r, it.y + Math.sin(a) * r, it.s * (0.4 + rnd() * 0.4), 0, 7); c.fillStyle = '#e9e7df'; c.fill(); }
-      c.beginPath(); c.arc(it.x, it.y, it.s * 0.4, 0, 7); c.fillStyle = '#7d7a72'; c.fill();
-      c.beginPath(); c.arc(it.x + it.s * 0.3, it.y + it.s * 0.2, it.s * 0.2, 0, 7); c.fillStyle = '#3d3a35'; c.fill();
-    }
-    c.globalAlpha = 1;
-  }
-  function drawGloss() {
-    gctx.clearRect(0, 0, W, H); if (!maskCanvas || !level) return;
-    const g = gctx.createLinearGradient(0, 0, W * 0.6, H);
-    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.45, `rgba(255,255,255,${0.12 + level * 0.06})`); g.addColorStop(0.55, `rgba(200,230,255,${0.1 + level * 0.05})`); g.addColorStop(1, 'rgba(255,255,255,0)');
-    gctx.fillStyle = g; gctx.fillRect(0, 0, W, H);
-    gctx.globalCompositeOperation = 'destination-in'; gctx.drawImage(maskCanvas, 0, 0); gctx.globalCompositeOperation = 'source-over';
+  const ready = () => Object.values(L).every(i => i.complete && i.naturalWidth);
+  function amount() { return A.road * WEIGHT.road + A.bugs * WEIGHT.bugs + A.drops * WEIGHT.drops + A.smear * smearAmt; }
+  function drawLayer(img, a, b, cut) {
+    // a = alpha left of the rinse line (already rinsed), b = alpha right of it
+    if (cut === null) { if (b > 0.003) { dctx.globalAlpha = b; dctx.drawImage(img, 0, 0); } return; }
+    const x = Math.max(0, Math.min(WW, cut));
+    if (a > 0.003 && x > 0) { dctx.save(); dctx.beginPath(); dctx.rect(0, 0, x, HH); dctx.clip(); dctx.globalAlpha = a; dctx.drawImage(img, 0, 0); dctx.restore(); }
+    if (b > 0.003 && x < WW) { dctx.save(); dctx.beginPath(); dctx.rect(x, 0, WW - x, HH); dctx.clip(); dctx.globalAlpha = b; dctx.drawImage(img, 0, 0); dctx.restore(); }
   }
   function render() {
-    dctx.clearRect(0, 0, W, H);
-    for (const s of spots) { dctx.beginPath(); dctx.arc(s.x, s.y, s.r, 0, 7); dctx.strokeStyle = `rgba(150,155,160,${s.a})`; dctx.lineWidth = 0.7; dctx.stroke(); }
-    for (const it of items) if (it.a > 0.01) drawItem(dctx, it);
-    if (maskCanvas) { dctx.globalCompositeOperation = 'destination-in'; dctx.drawImage(maskCanvas, 0, 0); dctx.globalCompositeOperation = 'source-over'; }
-    const left = total ? items.reduce((a, it) => a + it.s * it.s * it.a, 0) / total : 0;
-    leftEl.textContent = Math.round(left * 100) + '%'; rinsesEl.textContent = rinses;
-    return left;
+    if (!ready()) return;
+    dctx.clearRect(0, 0, WW, HH);
+    const cut = sweep === null ? null : sweep * 2;
+    const pair = k => sweep === null ? [A[k], A[k]] : [to[k], from[k]];
+    if (A.spots > 0.003) { dctx.globalAlpha = A.spots; dctx.drawImage(L.spots, 0, 0); }
+    if (smearAmt) { const [a, b] = pair('smear'); drawLayer(smearLayer, a, b, cut); }
+    ['road', 'bugs', 'drops'].forEach(k => { const [a, b] = pair(k); drawLayer(L[k], a, b, cut); });
+    dctx.globalAlpha = 1;
+    const amt = amount(); peak = Math.max(peak, amt);
+    leftEl.textContent = (peak ? Math.round(amt / peak * 100) : 0) + '%'; rinsesEl.textContent = rinses;
+  }
+  function drawGloss() {
+    gctx.clearRect(0, 0, WW, HH); if (!level || !L.mask.complete) return;
+    const g = gctx.createLinearGradient(0, 0, WW * 0.6, HH);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.45, `rgba(255,255,255,${0.12 + level * 0.06})`); g.addColorStop(0.55, `rgba(200,230,255,${0.1 + level * 0.05})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+    gctx.fillStyle = g; gctx.fillRect(0, 0, WW, HH);
+    gctx.globalCompositeOperation = 'destination-in'; gctx.drawImage(L.mask, 0, 0); gctx.globalCompositeOperation = 'source-over';
+  }
+  L.mask.onload = drawGloss;
+  function rebuildSmear() {
+    slctx.clearRect(0, 0, WW, HH); slctx.drawImage(L.smear, 0, 0);
+    slctx.globalCompositeOperation = 'destination-in'; slctx.drawImage(smearMask, 0, 0); slctx.globalCompositeOperation = 'source-over';
+  }
+  function measureSmear() {
+    const t = document.createElement('canvas'); t.width = 218; t.height = 79; const c = t.getContext('2d'); c.drawImage(smearLayer, 0, 0, 218, 79);
+    const d = c.getImageData(0, 0, 218, 79).data; let s = 0; for (let i = 3; i < d.length; i += 4) s += d[i];
+    smearAmt = s / 255 / (218 * 79) * 300;
   }
   function fxFrame() {
-    fctx.clearRect(0, 0, W, H); let live = false;
+    fctx.clearRect(0, 0, WW, HH); let live = false;
     if (sweep !== null) {
-      live = true; sweep += 18;
-      const x = sweep, g = fctx.createLinearGradient(x - 160, 0, x + 20, 0);
-      g.addColorStop(0, 'rgba(170,215,255,0)'); g.addColorStop(0.75, 'rgba(170,215,255,.45)'); g.addColorStop(1, 'rgba(255,255,255,.75)');
-      fctx.fillStyle = g; fctx.fillRect(x - 160, 0, 180, H);
-      fctx.strokeStyle = 'rgba(255,255,255,.55)'; fctx.lineWidth = 1;
-      for (let i = 0; i < 40; i++) { const sx = x - Math.random() * 150, sy = Math.random() * H; fctx.beginPath(); fctx.moveTo(sx, sy); fctx.lineTo(sx - 6, sy + 18); fctx.stroke(); }
-      for (const it of items) if (!it.rinsed && it.x < x) { it.rinsed = true; it.target = it.a * KEEP[it.type][level]; }
-      if (level) for (let i = 0; i < 10; i++) { const bx = x - Math.random() * 120, by = 60 + Math.random() * 260; if (onPaint(bx, by)) beads.push({ x: bx, y: by, v: 0.5 + Math.random(), r: 1 + Math.random() * 1.6 * (1 + level * 0.15), life: 50 }); }
-      if (x > W + 180) { sweep = null; afterRinse(); }
+      live = true; sweep += 16;
+      const x = sweep * 2, g = fctx.createLinearGradient(x - 320, 0, x + 40, 0);
+      g.addColorStop(0, 'rgba(170,215,255,0)'); g.addColorStop(0.75, 'rgba(170,215,255,.4)'); g.addColorStop(1, 'rgba(255,255,255,.7)');
+      fctx.fillStyle = g; fctx.fillRect(x - 320, 0, 360, HH);
+      fctx.strokeStyle = 'rgba(255,255,255,.5)'; fctx.lineWidth = 2;
+      for (let i = 0; i < 40; i++) { const sx = x - Math.random() * 300, sy = Math.random() * HH; fctx.beginPath(); fctx.moveTo(sx, sy); fctx.lineTo(sx - 10, sy + 34); fctx.stroke(); }
+      if (level) for (let i = 0; i < 10; i++) { const bx = sweep - Math.random() * 120, by = 60 + Math.random() * 260; if (onPaint(bx, by)) beads.push({ x: bx, y: by, v: 0.5 + Math.random(), r: 1 + Math.random() * 1.6 * (1 + level * 0.15), life: 50 }); }
+      if (sweep > W + 180) { sweep = null; Object.keys(to).forEach(k => A[k] = to[k]); afterRinse(); }
     }
-    for (const it of items) if (it.target !== undefined && it.a > it.target) { it.a = Math.max(it.target, it.a - 0.06); live = true; }
     beads = beads.filter(b => b.life > 0);
     for (const b of beads) { live = true; b.life--; b.v += 0.12; b.y += b.v; if (!onPaint(b.x, b.y)) b.life = 0;
-      fctx.beginPath(); fctx.arc(b.x, b.y, b.r, 0, 7); fctx.fillStyle = 'rgba(255,255,255,.75)'; fctx.fill();
-      fctx.beginPath(); fctx.arc(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.35, 0, 7); fctx.fillStyle = 'rgba(255,255,255,1)'; fctx.fill(); }
-    if (live) render();
+      fctx.beginPath(); fctx.arc(b.x * 2, b.y * 2, b.r * 2, 0, 7); fctx.fillStyle = 'rgba(255,255,255,.75)'; fctx.fill();
+      fctx.beginPath(); fctx.arc(b.x * 2 - b.r * 0.6, b.y * 2 - b.r * 0.6, b.r * 0.7, 0, 7); fctx.fillStyle = '#fff'; fctx.fill(); }
+    render();
     raf = live ? requestAnimationFrame(fxFrame) : 0;
   }
   const kick = () => { if (!raf) raf = requestAnimationFrame(fxFrame); };
   function afterRinse() {
-    items.forEach(it => { delete it.rinsed; delete it.target; });
-    items = items.filter(it => it.a > 0.02);
     rinses++;
-    if (!level) for (let i = 0; i < 60; i++) { const x = 60 + Math.random() * 970, y = 60 + Math.random() * 260; if (onPaint(x, y)) spots.push({ x, y, r: 1.2 + Math.random() * 2.2, a: 0.55 }); }
-    const left = render(); busy = false; setBusy(false);
-    if (!total) { msg.textContent = 'Nothing to rinse yet. Get the car dirty first.'; return; }
-    const specks = items.filter(it => it.type !== 'mud' && it.type !== 'film' && it.a > 0.05).length;
+    if (!level && peak) A.spots = Math.min(1, A.spots + 0.85);
+    render(); busy = false; setBusy(false);
+    const amt = amount(), left = peak ? amt / peak : 0;
+    const specks = A.bugs > 0.05 || A.drops > 0.05;
+    if (!peak) { msg.textContent = 'Nothing to rinse yet. Get the car dirty first.'; rinses = 0; render(); return; }
     if (left < 0.03 && !specks) { msg.textContent = `${names[level]}: clean after ${rinses === 1 ? 'one rinse' : rinses + ' rinses'}. Grime just let go.`; wipeBtn.hidden = true; }
     else if (level) { msg.textContent = `${names[level]}: the grime rinsed off. Just a few bug and bird spots left, and one quick wipe takes care of them.`; wipeBtn.textContent = 'Quick wipe'; wipeBtn.hidden = false; }
-    else { msg.textContent = `Bare paint: ${Math.round(left * 100)}% of the dirt is still stuck${spots.length ? ', plus water spots as it dries' : ''}. It needs a hand scrub.`; wipeBtn.textContent = 'Hand scrub'; wipeBtn.hidden = false; }
+    else { msg.textContent = `Bare paint: ${Math.round(left * 100)}% of the dirt is still stuck, plus water spots as it dries. It needs a hand scrub.`; wipeBtn.textContent = 'Hand scrub'; wipeBtn.hidden = false; }
   }
   function setBusy(b) { [mudBtn, rinseBtn].forEach(x => x.disabled = b); }
-  function rinse() { if (busy) return; busy = true; setBusy(true); sweep = -40; kick(); }
-  function wipe() {
-    const was = wipeBtn.textContent; items = []; spots = []; total = 0; wipeBtn.hidden = true; render();
-    msg.textContent = was === 'Quick wipe' ? `${names[level]}: one quick wipe and it's spotless.` : 'Bare paint: clean again, after a full hand wash and scrub.';
+  function rinse() {
+    if (busy) return; busy = true; setBusy(true);
+    ['road', 'bugs', 'drops', 'smear'].forEach(k => { from[k] = A[k]; to[k] = A[k] * KEEP[k][level]; });
+    sweep = -40; kick();
   }
-  function reset() { items = []; spots = []; beads = []; total = 0; rinses = 0; wipeBtn.hidden = true; render(); }
-  function mud() {
-    for (let i = 0; i < 40; i++) add('film', 70 + Math.random() * 960, 250 + Math.random() * 60);
-    for (let i = 0; i < 170; i++) { const x = 56 + Math.random() * 980, y = 215 + Math.pow(Math.random(), 0.5) * 100; add('mud', x, y); }
-    for (let i = 0; i < 40; i++) add('mud', 56 + Math.random() * 280, 160 + Math.random() * 160);
-    for (let i = 0; i < 45; i++) add('bug', 56 + Math.random() * 220, 150 + Math.random() * 110);
-    for (let i = 0; i < 5; i++) add('drop', 140 + Math.random() * 760, 60 + Math.random() * 110);
-    render(); msg.textContent = 'Muddy, buggy and the birds found it too. Now rinse it.';
-  }
-  function setLevel(l) {
-    level = l; btns.forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.level) === l)));
-    reset(); drawGloss(); msg.textContent = `${names[l]} selected. Get it dirty, then rinse.`;
-  }
+  function clean() { ['road', 'bugs', 'drops', 'smear', 'spots'].forEach(k => A[k] = 0); smctx.clearRect(0, 0, WW, HH); slctx.clearRect(0, 0, WW, HH); smearAmt = 0; }
+  function wipe() { const was = wipeBtn.textContent; clean(); peak = 0; wipeBtn.hidden = true; render();
+    msg.textContent = was === 'Quick wipe' ? `${names[level]}: one quick wipe and it's spotless.` : 'Bare paint: clean again, after a full hand wash and scrub.'; }
+  function reset() { clean(); peak = 0; rinses = 0; beads = []; wipeBtn.hidden = true; render(); }
+  function mud() { A.road = 1; A.bugs = 1; A.drops = 1; render(); msg.textContent = 'Road spray, bugs, and the birds found it too. Now rinse it.'; }
+  function setLevel(l) { level = l; btns.forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.level) === l))); reset(); drawGloss(); msg.textContent = `${names[l]} selected. Get it dirty, then rinse.`; }
   btns.forEach(b => b.addEventListener('click', () => setLevel(Number(b.dataset.level))));
   mudBtn.addEventListener('click', mud); rinseBtn.addEventListener('click', rinse); wipeBtn.addEventListener('click', wipe);
   document.getElementById('dt-reset').addEventListener('click', () => { reset(); msg.textContent = 'Car reset. Get it dirty, then rinse.'; });
+  // finger / mouse: paint the mud smear with a soft brush
   let down = false, last = null;
-  const pos = e => { const b = fx.getBoundingClientRect(); return [(e.clientX - b.left) / b.width * W, (e.clientY - b.top) / b.height * H]; };
-  fx.addEventListener('pointerdown', e => { if (busy) return; down = true; last = pos(e); fx.setPointerCapture(e.pointerId); add('mud', ...last); render(); });
+  const pos = e => { const b = fx.getBoundingClientRect(); return [(e.clientX - b.left) / b.width * WW, (e.clientY - b.top) / b.height * HH]; };
+  // each brush dab = a clump of irregular blobs plus fine flecks, so it reads as thrown mud
+  const brush = (x, y) => {
+    const k = Math.min(2, Math.max(1, 760 / (stage.clientWidth || 760)));
+    smctx.fillStyle = '#000';
+    for (let i = 0; i < 5; i++) {
+      const a = Math.random() * 6.3, d = Math.random() * 14 * k, r = (4 + Math.random() * 9) * k;
+      const cx = x + Math.cos(a) * d, cy = y + Math.sin(a) * d * 0.7;
+      smctx.globalAlpha = 0.55 + Math.random() * 0.4; smctx.beginPath();
+      for (let t = 0; t < 9; t++) { const ang = t / 9 * 6.283, rr = r * (0.6 + Math.random() * 0.55); const px = cx + Math.cos(ang) * rr * 1.3, py = cy + Math.sin(ang) * rr * 0.85; t ? smctx.lineTo(px, py) : smctx.moveTo(px, py); }
+      smctx.closePath(); smctx.fill();
+    }
+    for (let i = 0; i < 14; i++) {
+      const a = (Math.random() - 0.5) * 2.4, d = (14 + Math.random() * 34) * k, r = (0.8 + Math.random() * 2.4) * k;
+      smctx.globalAlpha = 0.5 + Math.random() * 0.5; smctx.beginPath(); smctx.ellipse(x + Math.cos(a) * d, y + Math.sin(a) * d * 0.6, r * 1.6, r, a * 0.4, 0, 7); smctx.fill();
+    }
+    smctx.globalAlpha = 1;
+  };
+  fx.addEventListener('pointerdown', e => { if (busy) return; down = true; last = pos(e); fx.setPointerCapture(e.pointerId); A.smear = 1; brush(...last); rebuildSmear(); render(); });
   fx.addEventListener('pointermove', e => {
     if (!down) return; const p = pos(e), dx = p[0] - last[0], dy = p[1] - last[1], d = Math.hypot(dx, dy);
-    for (let s = 6; s <= d; s += 6) add('mud', last[0] + dx * s / d + (Math.random() - 0.5) * 6, last[1] + dy * s / d + (Math.random() - 0.5) * 6);
-    if (d >= 6) last = p; render();
+    for (let s = 18; s <= d; s += 18) brush(last[0] + dx * s / d, last[1] + dy * s / d);
+    if (d >= 18) last = p; rebuildSmear(); render();
   });
-  ['pointerup', 'pointercancel'].forEach(t => fx.addEventListener(t, () => { down = false; }));
+  ['pointerup', 'pointercancel'].forEach(t => fx.addEventListener(t, () => { if (!down) return; down = false; measureSmear(); render(); if (A.smear) msg.textContent = 'Muddy. Now rinse it.'; }));
+  const wait = setInterval(() => { if (ready()) { clearInterval(wait); drawGloss(); render(); } }, 200);
 })();

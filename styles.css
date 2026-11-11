@@ -1286,3 +1286,4 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .dt-actions { grid-template-columns: 1fr 1fr; }
   .dt-actions .btn { width: 100%; }
 }
+.dt-dirt { filter: blur(.35px); }
