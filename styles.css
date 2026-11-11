@@ -1288,3 +1288,9 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 }
 .dt-dirt { filter: blur(.35px); }
 @media (max-width: 600px) { .dt-actions:has(#dt-wipe[hidden]) #dt-reset { grid-column: span 2; } }
+/* "Also at the shop": red heading and red markers, matching the other section accents */
+.also h2 { color: var(--red); font-size: clamp(1.25rem, 2.6vw, 1.9rem); -webkit-text-stroke: 0.04em currentColor; paint-order: stroke fill; letter-spacing: .02em; }
+.also li { position: relative; padding-left: 22px; }
+.also li::before { content: ""; position: absolute; left: 0; top: calc(12px + .8em - 1px); width: 10px; height: 2px; background: var(--red); }
+.also a { text-decoration-color: var(--red); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.also a:hover strong { color: var(--red); }
