@@ -1191,3 +1191,17 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 @media (max-width: 560px) { .dp-sizes { grid-template-columns: 1fr 1fr; } .dp-sizes .dp-size:first-child { grid-column: span 2; } .dp-cards:has(.dp-moto-only:not([hidden])) { grid-template-columns: 1fr 1fr; } }
 [hidden] { display: none !important; }
 .dp-size.is-selected { border-color: var(--red); box-shadow: 0 0 0 2px var(--red); }
+
+/* Homepage wraps: list + buttons sit below the color picker (same order as calipers) */
+.wraps-grid:has(> .wraps-head) { grid-template-areas: "head tool" "details tool"; grid-template-rows: auto 1fr; row-gap: 0; align-items: start; }
+.wraps-head { grid-area: head; align-self: end; }
+.wraps-grid > .wrap-tool { grid-area: tool; align-self: center; }
+.wraps-details { grid-area: details; }
+.wraps-details .ticks { margin-top: 24px; }
+@media (max-width: 960px) {
+  .wraps-grid:has(> .wraps-head) { grid-template-areas: "head" "tool" "details"; grid-template-rows: none; row-gap: 0; }
+  .wraps-head { margin-bottom: 22px; }
+  .wraps-details .ticks { margin-top: 28px; }
+}
+/* Centered buttons on small screens: keep the label vertically centered */
+@media (max-width: 960px) { .wraps-copy .btn, .cal-details .btn { display: flex; width: fit-content; } }
