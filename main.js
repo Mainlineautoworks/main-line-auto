@@ -36,7 +36,7 @@ function arrowNav(buttons, select) {
 // box = where the shade layer sits in the photo: [x, y, width, height]; size defaults to 1200x900.
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261111a';
+const ASSET_V = '20261111b';
 const toLin = v => Math.pow(v / 255, 2.2);
 const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
 const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
@@ -57,7 +57,10 @@ function whenNear(el, fn, margin = '300px') {
     if (!('IntersectionObserver' in window)) return fn();
     new IntersectionObserver((es, obs) => { if (es.some(e => e.isIntersecting)) { obs.disconnect(); fn(); } }, { rootMargin: margin }).observe(el);
   };
-  if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+  // start after the page has loaded, but never wait more than 2.5s for slow trackers (iPhone Safari)
+  let started = false; const once = () => { if (!started) { started = true; go(); } };
+  if (document.readyState === 'complete') once();
+  else { window.addEventListener('load', once, { once: true }); setTimeout(once, 2500); }
 }
 function loadShade(src) {
   if (!shadeCache[src]) shadeCache[src] = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
@@ -229,10 +232,10 @@ const caliperPaint = createPainter({
   view: caliperView, img: document.getElementById('caliper-img'), canvas: document.getElementById('caliper-paint'),
   stage: document.getElementById('cv-stage'), initial: 'sports', color: '#F0BE14',
   vehicles: {
-    sports:  { img: asset('caliper-sports.webp'),  shade: asset('caliper-sports-shade.webp'),  box: [659, 274, 170, 358], alt: 'Black wheel on a red sports car' },
-    sedan:   { img: asset('caliper-sedan.webp'),   shade: asset('caliper-sedan-shade.webp'),   box: [361, 484, 212, 379], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
-    truck:   { img: asset('caliper-truck.webp'),   shade: asset('caliper-truck-shade.webp'),   box: [707, 347, 74, 162],  alt: 'Gloss black wheel on a grey pickup truck' },
-    closeup: { img: asset('caliper-closeup.webp'), shade: asset('caliper-closeup-shade.webp'), box: [128, 24, 307, 843], alt: 'Close-up of a brake caliper beside a drilled rotor' }
+    sports:  { img: asset('caliper-sports.webp'),  shade: asset('caliper-sports-shade.png'),  box: [659, 274, 170, 358], alt: 'Black wheel on a red sports car' },
+    sedan:   { img: asset('caliper-sedan.webp'),   shade: asset('caliper-sedan-shade.png'),   box: [361, 484, 212, 379], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
+    truck:   { img: asset('caliper-truck.webp'),   shade: asset('caliper-truck-shade.png'),   box: [707, 347, 74, 162],  alt: 'Gloss black wheel on a grey pickup truck' },
+    closeup: { img: asset('caliper-closeup.webp'), shade: asset('caliper-closeup-shade.png'), box: [128, 24, 307, 843], alt: 'Close-up of a brake caliper beside a drilled rotor' }
   }
 });
 wirePickers(caliperView && caliperView.closest('section'), caliperPaint, {
@@ -246,10 +249,10 @@ const wrapPaint = createPainter({
   view: document.getElementById('wrap-view'), img: document.getElementById('wrap-img'), canvas: document.getElementById('wrap-paint'),
   stage: document.getElementById('wrap-stage'), initial: 'sedan', color: '#C8102E',
   vehicles: {
-    sports: { img: asset('wrap-sports.webp'), shade: asset('wrap-sports-shade.webp'), box: [74, 219, 979, 435], size: [1117, 787], alt: 'Lamborghini Huracan with its body wrapped in the selected color' },
-    sedan: { img: asset('wrap-sedan.webp'), shade: asset('wrap-sedan-shade.webp'), box: [42, 86, 921, 314], size: [1005, 526], alt: 'BMW M3 sedan with its body wrapped in the selected color' },
-    suv: { img: asset('wrap-suv.webp'), shade: asset('wrap-suv-shade.webp'), box: [50, 182, 1132, 459], size: [1220, 784], alt: 'Volvo XC40 SUV with its body wrapped in the selected color' },
-    truck: { img: asset('wrap-truck.webp'), shade: asset('wrap-truck-shade.webp'), box: [83, 53, 838, 278], size: [990, 481], alt: 'Ram TRX pickup with its body wrapped in the selected color' }
+    sports: { img: asset('wrap-sports.webp'), shade: asset('wrap-sports-shade.png'), box: [74, 219, 979, 435], size: [1117, 787], alt: 'Lamborghini Huracan with its body wrapped in the selected color' },
+    sedan: { img: asset('wrap-sedan.webp'), shade: asset('wrap-sedan-shade.png'), box: [42, 86, 921, 314], size: [1005, 526], alt: 'BMW M3 sedan with its body wrapped in the selected color' },
+    suv: { img: asset('wrap-suv.webp'), shade: asset('wrap-suv-shade.png'), box: [50, 182, 1132, 459], size: [1220, 784], alt: 'Volvo XC40 SUV with its body wrapped in the selected color' },
+    truck: { img: asset('wrap-truck.webp'), shade: asset('wrap-truck-shade.png'), box: [83, 53, 838, 278], size: [990, 481], alt: 'Ram TRX pickup with its body wrapped in the selected color' }
   }
 });
 wirePickers(document.getElementById('wrap-view') && document.getElementById('wrap-view').closest('section'), wrapPaint);
