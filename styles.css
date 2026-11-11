@@ -1466,3 +1466,26 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .dg .dg-meter { background: rgba(255,255,255,.1); }
 .dg .dg-clock strong { color: var(--white); }
 .dg .dg-clock span { color: var(--steel); }
+
+/* Homepage teaser for the Detail Dash game */
+.dd-teaser { padding: 0 0 clamp(48px, 6vw, 80px); }
+.dd-teaser-inner { position: relative; overflow: hidden; display: flex; align-items: center; gap: 22px; padding-top: 22px; padding-bottom: 22px; border-radius: 14px; background: var(--graphite); color: var(--pearl); text-decoration: none; transition: transform .2s, box-shadow .2s; }
+.dd-teaser-inner::before { content: ""; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.641' height='60' viewBox='0 0 34.641 60'%3E%3Cpath d='M17.32 -20.00 L34.64 -10.00 L34.64 10.00 L17.32 20.00 L0.00 10.00 L0.00 -10.00 Z M17.32 40.00 L34.64 50.00 L34.64 70.00 L17.32 80.00 L0.00 70.00 L0.00 50.00 Z M0.00 10.00 L17.32 20.00 L17.32 40.00 L0.00 50.00 L-17.32 40.00 L-17.32 20.00 Z M34.64 10.00 L51.96 20.00 L51.96 40.00 L34.64 50.00 L17.32 40.00 L17.32 20.00 Z' fill='none' stroke='%23d81e2c' stroke-width='1.2'/%3E%3C/svg%3E"); background-size: 31.18px 54px; opacity: .18; pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 40%, #000 100%); mask-image: linear-gradient(90deg, transparent 40%, #000 100%); }
+.dd-teaser-inner:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -22px rgba(0,0,0,.7); }
+.dd-teaser-inner > * { position: relative; }
+.dd-teaser-icon { flex: none; display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 50%; background: var(--red); color: #fff; }
+.dd-teaser-icon svg { width: 34px; height: 34px; }
+.dd-teaser-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.dd-teaser-tag { font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--red); }
+.dd-teaser-text strong { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: clamp(1.05rem, 2vw, 1.4rem); color: #fff; }
+.dd-teaser-text span:last-child { color: var(--alloy); font-size: .95rem; }
+.dd-teaser-cta { flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 999px; border: 2px solid var(--red); color: #fff; font-weight: 700; transition: background .2s; }
+.dd-teaser-inner:hover .dd-teaser-cta { background: var(--red); }
+.dd-teaser-inner:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+@media (max-width: 700px) {
+  .dd-teaser-inner { flex-wrap: wrap; gap: 14px; padding: 20px; margin: 0 var(--gutter); }
+  .dd-teaser-icon { width: 48px; height: 48px; } .dd-teaser-icon svg { width: 28px; height: 28px; }
+  .dd-teaser-text { flex-basis: calc(100% - 62px); }
+  .dd-teaser-cta { width: 100%; justify-content: center; }
+}
