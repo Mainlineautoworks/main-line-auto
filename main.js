@@ -1073,8 +1073,9 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     const r = radios.find(x => x.checked);
     const href = BASE + (r && IDS[r.value] ? IDS[r.value] : '');
     a.href = href;
-    document.querySelectorAll('a[data-square]').forEach(b => { b.href = href; });
-    if (hint) {
+    const oneStep = document.getElementById('bk') && !document.getElementById('bk').hidden;
+    document.querySelectorAll('a[data-square]').forEach(b => { if (!oneStep) b.href = href; });
+    if (hint && !oneStep) {
       const extras = Array.from(document.querySelectorAll('.dp-addon input:checked')).map(b => b.dataset.name.toLowerCase());
       hint.textContent = extras.length
         ? 'Opens Square with your package picked. Add ' + extras.join(', ').replace(/, ([^,]*)$/, ' and $1') + ' there too, then choose a time.'
@@ -1087,7 +1088,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
 
 // Intake forms: send to the shop's Google Apps Script, which emails info@ and logs to the sheet
 (() => {
-  const forms = Array.from(document.querySelectorAll('form.intake')); if (!forms.length) return;
+  const forms = Array.from(document.querySelectorAll('form.intake:not([data-booking])')); if (!forms.length) return;
   const API = 'https://script.google.com/macros/s/AKfycbx8Sn6HCIIp_OTcchfsYQ0iToENevinNXVJ2sY2JXbneoX_sZ_59M7P2fbvEreDIJqTrA/exec';
   const MAX_PHOTOS = 5;
 
@@ -1198,5 +1199,160 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
         fallback(fields);
       }
     });
+  });
+})();
+
+// Detailing: one-step booking. Shows Square's open times for the exact package, size and add-ons,
+// then books it in Square. If Square can't be reached, the page keeps Square's own calendar.
+(() => {
+  const bk = document.getElementById('bk'); if (!bk) return;
+  const API = 'https://script.google.com/macros/s/AKfycbx8Sn6HCIIp_OTcchfsYQ0iToENevinNXVJ2sY2JXbneoX_sZ_59M7P2fbvEreDIJqTrA/exec';
+  const TZ = 'America/New_York';
+  const daysEl = document.getElementById('bk-days'), timesEl = document.getElementById('bk-times');
+  const form = document.getElementById('bk-form'), done = document.getElementById('bk-done');
+  const status = form.querySelector('.if-status'), btn = form.querySelector('button[type=submit]');
+  const whenEl = document.getElementById('bk-when');
+  const widget = document.querySelector('#book .dp-widget'), alt = document.querySelector('#book .dp-widget-alt');
+  const note = document.querySelector('#dp-booking-note p');
+  const hint = document.getElementById('dp-book-hint');
+  const started = Date.now();
+  const dayKey = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const dayName = new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'short' });
+  const dayDate = new Intl.DateTimeFormat('en-US', { timeZone: TZ, month: 'short', day: 'numeric' });
+  const timeFmt = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' });
+  const longFmt = new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'long', month: 'long', day: 'numeric' });
+  let active = false, slots = [], day = null, pick = null, reqKey = '', loadedKey = '', timer = 0;
+
+  const choice = () => {
+    const pkg = document.querySelector('input[name="dp-package"]:checked');
+    const size = document.querySelector('input[name="dp-size"]:checked');
+    const extras = pkg && /^moto/.test(pkg.value) ? [] : Array.from(document.querySelectorAll('.dp-addon input:checked'));
+    const total = document.getElementById('dp-total');
+    return { pkg: pkg ? pkg.value : 'full', pkgName: pkg ? pkg.dataset.name : '', size: size ? size.value : '2',
+      sizeLabel: size ? size.dataset.label : '', extras: extras.map(b => b.value), extraNames: extras.map(b => b.dataset.name),
+      total: total ? total.textContent : '' };
+  };
+  const keyOf = c => [c.pkg, c.size, c.extras.join(',')].join('|');
+  const hrs = m => { const h = Math.floor(m / 60), r = m % 60; return (h ? h + ' hr' : '') + (h && r ? ' ' : '') + (r ? r + ' min' : ''); };
+
+  const setNote = minutes => {
+    if (!note) return;
+    const c = choice();
+    const adds = c.extraNames.length ? ' + ' + c.extraNames.map(x => x.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1') : '';
+    note.innerHTML = 'Booking <strong>' + c.pkgName + '</strong> for a <strong>' + c.sizeLabel + '</strong>' + adds +
+      (minutes ? ' · about ' + hrs(minutes) : '') + ' · <strong>' + c.total + '</strong>. Change anything above and the times update.';
+  };
+
+  const activate = () => {
+    if (active) return; active = true;
+    bk.hidden = false;
+    if (widget) widget.hidden = true;
+    if (alt) alt.innerHTML = 'Prefer Square\'s calendar? <a class="link" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services" target="_blank" rel="noopener">Book on Square</a> or call <a class="link" href="tel:+14845741628">(484) 574-1628</a>.';
+    document.querySelectorAll('a[data-square]').forEach(a => { a.removeAttribute('target'); a.dataset.bk = '1'; a.href = '#book'; });
+    if (hint) hint.textContent = 'Pick a day and time below. Your size and add-ons come with it.';
+  };
+  const deactivate = () => {               // fall back to Square's own calendar
+    active = false; bk.hidden = true;
+    if (widget) widget.hidden = false;
+  };
+
+  const drawDays = () => {
+    const groups = {};
+    slots.forEach(t => { const k = dayKey.format(new Date(t)); (groups[k] = groups[k] || []).push(t); });
+    const keys = Object.keys(groups).sort();
+    if (!keys.includes(day)) day = keys[0] || null;
+    daysEl.innerHTML = keys.length ? '' : '<p class="bk-empty">No open times in the next two weeks for this combination. Call <a href="tel:+14845741628">(484) 574-1628</a> and we\'ll fit you in.</p>';
+    keys.forEach(k => {
+      const d = new Date(groups[k][0]);
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'bk-day' + (k === day ? ' is-on' : '');
+      b.setAttribute('aria-pressed', k === day);
+      b.innerHTML = '<span>' + dayName.format(d) + '</span><strong>' + dayDate.format(d) + '</strong><em>' + groups[k].length + ' open</em>';
+      b.addEventListener('click', () => { day = k; pick = null; drawDays(); });
+      daysEl.append(b);
+    });
+    timesEl.innerHTML = '';
+    (groups[day] || []).forEach(t => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'bk-time' + (t === pick ? ' is-on' : '');
+      b.setAttribute('aria-pressed', t === pick);
+      b.textContent = timeFmt.format(new Date(t));
+      b.addEventListener('click', () => {
+        pick = t; drawDays();
+        form.hidden = false;
+        whenEl.textContent = longFmt.format(new Date(t)) + ' at ' + timeFmt.format(new Date(t));
+        if (!form.dataset.seen) { form.dataset.seen = '1'; form.querySelector('[name=first]').focus({ preventScroll: true }); form.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      });
+      timesEl.append(b);
+    });
+    if (!slots.includes(pick)) { pick = null; form.hidden = true; }
+  };
+
+  const load = async () => {
+    const c = choice(), key = keyOf(c);
+    if (key === loadedKey) return;
+    reqKey = key;
+    if (active) { daysEl.innerHTML = '<p class="bk-empty">Finding open times…</p>'; timesEl.innerHTML = ''; }
+    try {
+      const q = new URLSearchParams({ action: 'slots', pkg: c.pkg, size: c.size, extras: c.extras.join(','), from: new Date().toISOString() });
+      const j = await (await fetch(API + '?' + q)).json();
+      if (reqKey !== key) return;                       // a newer choice is already loading
+      if (!j.ok) throw new Error(j.error || 'failed');
+      loadedKey = key; slots = j.slots || [];
+      activate(); setNote(j.minutes); drawDays();
+    } catch (err) {
+      if (reqKey !== key) return;
+      loadedKey = ''; deactivate();
+    }
+  };
+  document.addEventListener('change', e => {
+    if (!e.target.closest || !e.target.closest('.dp-step, .dp-sizes, .dp-addon, .dp-card') && !/^dp-/.test(e.target.name || '')) return;
+    clearTimeout(timer); timer = setTimeout(load, 450);
+  });
+  load();
+
+  // contact form
+  form.addEventListener('input', ev => { const f = ev.target.closest('.if'); if (f) f.classList.remove('is-bad'); });
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    status.className = 'if-status'; status.textContent = '';
+    if (!pick) { status.className = 'if-status is-error'; status.textContent = 'Pick a time first.'; return; }
+    let first = null;
+    form.querySelectorAll('input[required]').forEach(i => {
+      const v = i.value.trim();
+      const bad = !v || (i.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) || (i.type === 'tel' && v.replace(/\D/g, '').length < 10);
+      i.closest('.if').classList.toggle('is-bad', bad); if (bad && !first) first = i;
+    });
+    if (first) { first.focus(); status.className = 'if-status is-error'; status.textContent = 'Please fill in the highlighted fields.'; return; }
+    const c = choice(), val = n => (form.querySelector('[name=' + n + ']') || {}).value || '';
+    const reach = form.querySelector('[name=reach]:checked');
+    btn.disabled = true; btn.textContent = 'Booking…';
+    try {
+      const res = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ action: 'book', start: pick,
+        first: val('first').trim(), last: val('last').trim(), phone: val('phone').trim(), email: val('email').trim(), vehicle: val('vehicle').trim(),
+        reach: reach ? reach.value : '', notes: val('notes').trim(), website: val('website'), ms: Date.now() - started,
+        key: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()) }, c)) });
+      const j = await res.json();
+      if (!j.ok) throw Object.assign(new Error(j.error || 'failed'), { code: j.error });
+      const d = new Date(j.start || pick);
+      bk.querySelector('.bk-panel').hidden = true;
+      done.hidden = false;
+      done.innerHTML = '<span class="if-done-mark" aria-hidden="true">✓</span>' +
+        '<h3>' + (j.status === 'PENDING' ? 'Request sent' : 'You\'re booked') + ', ' + val('first').trim().replace(/[<>&"]/g, '') + '!</h3>' +
+        '<p class="bk-done-when">' + longFmt.format(d) + ' at ' + timeFmt.format(d) + '</p>' +
+        '<p>' + c.pkgName + ' for a ' + c.sizeLabel + (c.extraNames.length ? ' + ' + c.extraNames.join(', ').toLowerCase() : '') + ' · ' + c.total + '</p>' +
+        '<p class="bk-done-fine">' + (j.status === 'PENDING' ? 'We\'ll confirm your time shortly.' : 'Square will send your confirmation and a reminder before your appointment.') +
+        ' Need to change it? Call or text <a href="tel:+14845741628">(484) 574-1628</a>.</p>';
+      if (note) note.closest('.dp-booking-note').hidden = true;
+      if (alt) alt.hidden = true;
+      done.focus();
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Book it';
+      status.className = 'if-status is-error';
+      if (err.code === 'slot_gone') {
+        status.textContent = 'Sorry, that time was just taken. Pick another one.';
+        loadedKey = ''; pick = null; load();
+      } else {
+        status.innerHTML = 'We couldn\'t finish booking online. <a href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services" target="_blank" rel="noopener">Book on Square instead</a> or call <a href="tel:+14845741628">(484) 574-1628</a>.';
+      }
+    }
   });
 })();

@@ -1584,3 +1584,30 @@ body:has(.dp-bar.is-on) .qa { bottom: 92px; }
 }
 @media (max-width: 520px) { .intake .if-row { grid-template-columns: 1fr; } }
 .dp-book-hint { margin: 8px 0 0; font-size: .85rem; color: var(--alloy); text-align: center; }
+
+/* ---------- Detailing: one-step booking ---------- */
+.bk { max-width: 860px; margin: 0 auto; }
+.bk-panel, .bk-done { background: var(--white); border: 1px solid #DDE1E4; border-radius: 12px; padding: clamp(18px, 3vw, 32px); }
+.bk-h { font-family: var(--body); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 12px; }
+.bk-h:not(:first-child) { margin-top: 24px; }
+.bk-days { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; }
+.bk-day { flex: 0 0 auto; scroll-snap-align: start; min-width: 86px; display: grid; gap: 2px; justify-items: center; padding: 10px 12px; border: 1.5px solid var(--alloy); border-radius: 10px; background: var(--pearl); font: inherit; color: var(--graphite); cursor: pointer; }
+.bk-day span { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-mid); }
+.bk-day strong { font-size: 1.02rem; }
+.bk-day em { font-style: normal; font-size: .75rem; color: var(--steel); }
+.bk-day:hover, .bk-time:hover { border-color: var(--steel); }
+.bk-day.is-on, .bk-time.is-on { background: var(--graphite); border-color: var(--graphite); color: var(--white); }
+.bk-day.is-on span, .bk-day.is-on em { color: var(--alloy); }
+.bk-times { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.bk-time { padding: 10px 8px; border: 1.5px solid var(--alloy); border-radius: 8px; background: var(--pearl); font: inherit; font-weight: 600; color: var(--graphite); cursor: pointer; }
+.bk-day:focus-visible, .bk-time:focus-visible { outline: 3px solid rgba(215,25,42,.45); outline-offset: 2px; }
+.bk-empty { margin: 0; color: var(--text-mid); }
+.bk-form.intake { box-shadow: none; padding: 0; margin-top: 28px; border-top: 1px solid #E3E6E8; padding-top: 24px; border-radius: 0; background: transparent; }
+.bk-form .if-note { font-weight: 600; color: var(--graphite); font-size: .95rem; }
+.bk-done { text-align: center; padding: 36px 20px; }
+.bk-done .if-done-mark { display: inline-grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--red); color: #fff; font-size: 28px; }
+.bk-done h3 { margin: 14px 0 6px; font-size: 1.5rem; }
+.bk-done p { margin: 6px auto 0; max-width: 34em; color: var(--text-mid); }
+.bk-done .bk-done-when { font-size: 1.2rem; font-weight: 700; color: var(--graphite); }
+.bk-done .bk-done-fine { font-size: .9rem; margin-top: 14px; }
+.bk-done:focus { outline: none; }

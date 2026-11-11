@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611111015">
+<link rel="stylesheet" href="../styles.css?v=202611111040">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -325,6 +325,16 @@
         <span class="dp-num">i</span>
         <p>You picked <strong id="dp-pick">Full Vehicle Detail</strong> for a <strong id="dp-pick-size">4-door sedan</strong>. Choose it in the calendar below<span id="dp-pick-extras"></span>, or <a class="link" id="dp-direct" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services" target="_blank" rel="noopener">open it straight in Square</a>.</p>
       </div>
+      <div class="bk" id="bk" hidden>
+        <div class="bk-panel">
+          <h3 class="bk-h">Pick a day</h3>
+          <div class="bk-days" id="bk-days" role="group" aria-label="Available days"></div>
+          <h3 class="bk-h">Pick a time</h3>
+          <div class="bk-times" id="bk-times" role="group" aria-label="Available times"></div>
+          <form class="intake bk-form" id="bk-form" data-booking novalidate hidden><h3 class="bk-h">Your info</h3><div class="if-row"><div class="if" data-label="First name"><label for="bk-first">First name <span class="if-req" aria-hidden="true">*</span></label><input id="bk-first" name="first" type="text" autocomplete="given-name" required></div><div class="if" data-label="Last name"><label for="bk-last">Last name <span class="if-opt">optional</span></label><input id="bk-last" name="last" type="text" autocomplete="family-name"></div></div><div class="if-row"><div class="if" data-label="Phone"><label for="bk-phone">Phone <span class="if-req" aria-hidden="true">*</span></label><input id="bk-phone" name="phone" type="tel" autocomplete="tel" required></div><div class="if" data-label="Email"><label for="bk-email">Email <span class="if-req" aria-hidden="true">*</span></label><input id="bk-email" name="email" type="email" autocomplete="email" required></div></div><div class="if" data-label="Vehicle"><label for="bk-vehicle">Vehicle <span class="if-req" aria-hidden="true">*</span></label><input id="bk-vehicle" name="vehicle" type="text" placeholder="Year, make and model" required></div><fieldset class="if if-chips" data-label="Best way to reach you"><legend>Best way to reach you <span class="if-opt">optional</span></legend><div class="if-chip-row"><label class="if-chip"><input type="radio" name="reach" value="Text"><span>Text</span></label><label class="if-chip"><input type="radio" name="reach" value="Call"><span>Call</span></label><label class="if-chip"><input type="radio" name="reach" value="Email"><span>Email</span></label></div></fieldset><div class="if" data-label="Anything we should know?"><label for="bk-notes">Anything we should know? <span class="if-opt">optional</span></label><textarea id="bk-notes" name="notes" rows="3" placeholder="Pet hair, stains, gate code, pick-up request…"></textarea></div><div class="if-hp" aria-hidden="true"><label>Leave this empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div><div class="if-submit"><button class="btn btn-red" type="submit">Book it</button><p class="if-note" id="bk-when"></p></div><p class="if-status" role="status" aria-live="polite"></p></form>
+        </div>
+        <div class="bk-done" id="bk-done" tabindex="-1" hidden></div>
+      </div>
       <div class="dp-widget">
         <!-- Start Square Appointments Embed Code --><script src='https://square.site/appointments/buyer/widget/nebfqje99efjsg/L55RAA17AA9Y0.js'></script><!-- End Square Appointments Embed Code -->
         <noscript><p><a href="https://mainlineautoworks.square.site">Book online with Square</a></p></noscript>
@@ -502,6 +512,6 @@
   </div>
 </footer>
 
-<script src="../main.js?v=202611111015" defer></script>
+<script src="../main.js?v=202611111040" defer></script>
 </body>
 </html>

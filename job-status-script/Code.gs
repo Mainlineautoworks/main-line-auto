@@ -64,6 +64,7 @@ function setup() {
 /* ---------- menu: create a new job with a random code ---------- */
 
 function onOpen() {
+  squareMenu_();
   SpreadsheetApp.getUi().createMenu('Job Status')
     .addItem('New job…', 'newJob')
     .addItem('Show update form link', 'showFormLink')
@@ -120,8 +121,14 @@ function onUpdate(e) {
 /* ---------- the website asks here: ?job=CODE ---------- */
 
 function doGet(e) {
-  const code = String((e && e.parameter && e.parameter.job) || '').trim().toUpperCase();
+  const p = (e && e.parameter) || {};
   const out = o => ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+  if (p.code && p.state) return squareCallback_(p);                       // Square sends you back here after "Connect Square"
+  if (p.action === 'slots') {
+    try { return out(slotsFor_(p)); }
+    catch (err) { return out({ ok: false, error: err.message === 'not_connected' ? 'not_connected' : String(err.message) }); }
+  }
+  const code = String(p.job || '').trim().toUpperCase();
   if (!/^[A-Z0-9-]{4,20}$/.test(code)) return out({ error: 'not_found' });
   const row = findJobRow(code);
   if (!row) return out({ error: 'not_found' });
@@ -185,6 +192,11 @@ function doPost(e) {
   const out = o => ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
   try {
     const d = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    if (d.action === 'book') {
+      if (d.website || (d.ms && d.ms < 3000)) return out({ ok: false, error: 'slot_gone' });
+      const lock = LockService.getScriptLock(); lock.waitLock(20000);
+      try { return out(book_(d)); } finally { lock.releaseLock(); }
+    }
     if (d.action !== 'intake') return out({ ok: false, error: 'unknown' });
     if (d.website || (d.ms && d.ms < 3000)) return out({ ok: true });            // bots fill the hidden field or submit instantly
     const clip = (v, n) => String(v == null ? '' : v).slice(0, n || 2000);
@@ -237,5 +249,295 @@ function doPost(e) {
     return out({ ok: true });
   } catch (err) {
     return out({ ok: false, error: String(err && err.message || err) });
+  }
+}
+
+/* =====================================================================
+ * SQUARE ONE-STEP BOOKING
+ * The website's detailing builder asks here for open times and books the
+ * appointment straight into Square Appointments.
+ *
+ * One-time setup (Sheet menu: Square booking > Connect Square…):
+ *   1. developer.squareup.com > Create an app (any name) > switch to Production
+ *   2. OAuth page: paste the Redirect URL the menu shows you; copy the
+ *      Application ID and Application secret into the menu prompts
+ *   3. Click the link the menu gives you and approve
+ * The access is limited to "customer booking" permissions, which is what
+ * lets this work on Square's free Appointments plan.
+ * Keys are stored only in this script's private properties.
+ * ===================================================================== */
+
+const SQ = 'https://connect.squareup.com';
+const SQ_VERSION = '2024-12-18';
+const SQ_LOCATION = 'L55RAA17AA9Y0';
+const SQ_TZ = 'America/New_York';
+const SQ_SCOPES = ['APPOINTMENTS_READ', 'APPOINTMENTS_WRITE', 'APPOINTMENTS_ALL_READ', 'APPOINTMENTS_BUSINESS_SETTINGS_READ',
+  'CUSTOMERS_READ', 'CUSTOMERS_WRITE', 'ITEMS_READ', 'MERCHANT_PROFILE_READ'];
+
+// Website package / extra  ->  the Square service it books
+const SQ_PACKAGES = {
+  quick: 'Express Detail', exterior: 'Exterior Detail', interior: 'Interior Detail', full: 'Full Vehicle Detail',
+  supercar: 'Super Car Premium Package Detail', moto: 'Motorcycle Detail', 'moto-chain': 'Motorcycle Detail'
+};
+const SQ_EXTRAS = {
+  shampoo: 'Carpet & Upholstery Shampoo', leather: 'Multi-Stage Leather Conditioning', odor: 'Odor Elimination',
+  headlight: 'Headlight Restoration', engine: 'Engine Bay Detail', trim: 'Complete Trim Restoration',
+  clay: '"Decon" + Clay Bar', windshield: 'Windshield Ceramic Coating'
+  // floor mats have no Square service; they go in the booking note
+};
+// Website vehicle size -> words to look for in a Square service variation name
+const SQ_SIZES = {
+  moto: ['motorcycle', 'bike'], '1': ['coupe', '2 door', '2-door', 'car'], '2': ['sedan', '4 door', '4-door', 'car'],
+  '3': ['mid', 'suv', 'crossover'], '4': ['large', 'truck', 'full-size', 'xl', 'suv']
+};
+
+function squareMenu_() {
+  SpreadsheetApp.getUi().createMenu('Square booking')
+    .addItem('Connect Square…', 'connectSquare')
+    .addItem('Check Square booking', 'checkSquare')
+    .addToUi();
+}
+
+// The same web app address the website uses. Square must send you back to exactly this address.
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8Sn6HCIIp_OTcchfsYQ0iToENevinNXVJ2sY2JXbneoX_sZ_59M7P2fbvEreDIJqTrA/exec';
+function webAppUrl_() { return WEB_APP_URL || ScriptApp.getService().getUrl(); }
+
+function connectSquare() {
+  const ui = SpreadsheetApp.getUi(), props = PropertiesService.getScriptProperties();
+  const url = webAppUrl_();
+  if (!url) { ui.alert('Deploy the script as a web app first (Deploy > New deployment).'); return; }
+  ui.alert('Step 1 of 3', 'In developer.squareup.com, open your app > Production > OAuth, and set the Redirect URL to:\n\n' + url + '\n\nThen click OK.', ui.ButtonSet.OK);
+  const id = ui.prompt('Step 2 of 3', 'Paste the Production Application ID (starts with sq0idp-):', ui.ButtonSet.OK_CANCEL);
+  if (id.getSelectedButton() !== ui.Button.OK) return;
+  const secret = ui.prompt('Step 2 of 3', 'Paste the Production Application secret (starts with sq0csp-):', ui.ButtonSet.OK_CANCEL);
+  if (secret.getSelectedButton() !== ui.Button.OK) return;
+  const state = Utilities.getUuid();
+  props.setProperties({ SQ_APP_ID: id.getResponseText().trim(), SQ_APP_SECRET: secret.getResponseText().trim(), SQ_STATE: state });
+  const link = SQ + '/oauth2/authorize?client_id=' + encodeURIComponent(id.getResponseText().trim()) +
+    '&scope=' + SQ_SCOPES.join('+') + '&session=false&state=' + state;
+  const html = HtmlService.createHtmlOutput('<p style="font-family:Arial">Step 3 of 3: <a href="' + link + '" target="_blank">Click here to approve in Square</a>.</p>' +
+    '<p style="font-family:Arial;color:#666">After you approve, you\'ll see “Square connected”. Then run Square booking > Check Square booking.</p>').setWidth(420).setHeight(160);
+  ui.showModalDialog(html, 'Connect Square');
+}
+
+function squareCallback_(p) {
+  const props = PropertiesService.getScriptProperties();
+  const page = msg => HtmlService.createHtmlOutput('<div style="font-family:Arial;padding:40px;text-align:center"><h2>' + msg + '</h2><p>You can close this tab.</p></div>');
+  if (!p.state || p.state !== props.getProperty('SQ_STATE')) return page('That link expired. Run Connect Square again.');
+  if (p.error) return page('Square said: ' + String(p.error_description || p.error).replace(/</g, ''));
+  const res = UrlFetchApp.fetch(SQ + '/oauth2/token', {
+    method: 'post', contentType: 'application/json', muteHttpExceptions: true, headers: { 'Square-Version': SQ_VERSION },
+    payload: JSON.stringify({ client_id: props.getProperty('SQ_APP_ID'), client_secret: props.getProperty('SQ_APP_SECRET'),
+      code: p.code, grant_type: 'authorization_code', redirect_uri: webAppUrl_() })
+  });
+  const t = JSON.parse(res.getContentText() || '{}');
+  if (!t.access_token) return page('Square didn’t connect: ' + String((t.errors && t.errors[0] && t.errors[0].detail) || t.message || res.getResponseCode()).replace(/</g, ''));
+  props.setProperties({ SQ_TOKEN: t.access_token, SQ_REFRESH: t.refresh_token || '', SQ_EXPIRES: t.expires_at || '' });
+  if (!ScriptApp.getProjectTriggers().some(tr => tr.getHandlerFunction() === 'refreshSquare'))
+    ScriptApp.newTrigger('refreshSquare').timeBased().everyDays(7).create();
+  props.deleteProperty('SQ_STATE');
+  CacheService.getScriptCache().remove('sq_catalog');
+  return page('Square connected ✓');
+}
+
+function sqToken_() {
+  const props = PropertiesService.getScriptProperties();
+  let token = props.getProperty('SQ_TOKEN');
+  if (!token) return '';
+  const exp = Date.parse(props.getProperty('SQ_EXPIRES') || '');
+  if (exp && exp - Date.now() < 7 * 864e5 && props.getProperty('SQ_REFRESH')) {
+    const res = UrlFetchApp.fetch(SQ + '/oauth2/token', {
+      method: 'post', contentType: 'application/json', muteHttpExceptions: true, headers: { 'Square-Version': SQ_VERSION },
+      payload: JSON.stringify({ client_id: props.getProperty('SQ_APP_ID'), client_secret: props.getProperty('SQ_APP_SECRET'),
+        grant_type: 'refresh_token', refresh_token: props.getProperty('SQ_REFRESH') })
+    });
+    const t = JSON.parse(res.getContentText() || '{}');
+    if (t.access_token) {
+      token = t.access_token;
+      props.setProperties({ SQ_TOKEN: token, SQ_EXPIRES: t.expires_at || '', SQ_REFRESH: t.refresh_token || props.getProperty('SQ_REFRESH') });
+    }
+  }
+  return token;
+}
+
+// keeps the connection fresh even if nobody books for a while (setup adds a weekly trigger)
+function refreshSquare() { sqToken_(); }
+
+function sq_(method, path, body) {
+  const token = sqToken_();
+  if (!token) throw new Error('not_connected');
+  const res = UrlFetchApp.fetch(SQ + '/v2' + path, {
+    method: method, contentType: 'application/json', muteHttpExceptions: true,
+    headers: { Authorization: 'Bearer ' + token, 'Square-Version': SQ_VERSION },
+    payload: body ? JSON.stringify(body) : undefined
+  });
+  const j = JSON.parse(res.getContentText() || '{}');
+  if (res.getResponseCode() >= 300) {
+    const e = (j.errors && j.errors[0]) || {};
+    const err = new Error(e.detail || e.code || ('HTTP ' + res.getResponseCode()));
+    err.code = e.code; throw err;
+  }
+  return j;
+}
+
+// All bookable Square services: { normalizedName: { name, variations:[{id, version, name, minutes, price}] } }
+function sqCatalog_() {
+  const cache = CacheService.getScriptCache();
+  const hit = cache.get('sq_catalog'); if (hit) return JSON.parse(hit);
+  const out = {}; let cursor;
+  do {
+    const j = sq_('post', '/catalog/search-catalog-items', { product_types: ['APPOINTMENTS_SERVICE'], limit: 100, cursor: cursor });
+    (j.items || []).forEach(it => {
+      const d = it.item_data || {};
+      out[norm_(d.name)] = {
+        name: d.name,
+        variations: (d.variations || []).map(v => {
+          const vd = v.item_variation_data || {};
+          return { id: v.id, version: v.version, name: vd.name || '', minutes: Math.round((vd.service_duration || 0) / 60000),
+            price: vd.price_money ? vd.price_money.amount / 100 : null, bookable: vd.available_for_booking !== false };
+        })
+      };
+    });
+    cursor = j.cursor;
+  } while (cursor);
+  cache.put('sq_catalog', JSON.stringify(out), 6 * 3600);
+  return out;
+}
+
+function norm_(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+
+function pickVariation_(svc, size) {
+  const vs = svc.variations.filter(v => v.bookable);
+  if (!vs.length) return null;
+  if (vs.length === 1) return vs[0];
+  const words = SQ_SIZES[String(size)] || [];
+  for (const w of words) { const v = vs.find(x => norm_(x.name).indexOf(norm_(w)) >= 0); if (v) return v; }
+  return vs[0];
+}
+
+// Turn the website's choice into the Square variations to book, plus anything that only goes in the note
+function resolve_(pkg, size, extras) {
+  const cat = sqCatalog_();
+  const segs = [], missing = [];
+  const main = cat[norm_(SQ_PACKAGES[pkg])];
+  if (!main) throw new Error('package_not_found');
+  const mv = pickVariation_(main, size); if (!mv) throw new Error('package_not_bookable');
+  segs.push({ variation: mv, name: main.name });
+  (extras || []).forEach(x => {
+    const s = SQ_EXTRAS[x] && cat[norm_(SQ_EXTRAS[x])];
+    const v = s && pickVariation_(s, size);
+    if (v) segs.push({ variation: v, name: s.name }); else missing.push(x);
+  });
+  return { segs: segs, missing: missing };
+}
+
+function searchSlots_(segs, fromMs, toMs) {
+  const j = sq_('post', '/bookings/availability/search', {
+    query: { filter: {
+      start_at_range: { start_at: new Date(fromMs).toISOString(), end_at: new Date(toMs).toISOString() },
+      location_id: SQ_LOCATION,
+      segment_filters: segs.map(s => ({ service_variation_id: s.variation.id }))
+    } }
+  });
+  return j.availabilities || [];
+}
+
+function slotsFor_(p) {
+  const extras = String(p.extras || '').split(',').filter(String);
+  let r = resolve_(p.pkg, p.size, extras), avail;
+  const from = Math.max(Date.now() + 5 * 60000, Date.parse(p.from) || 0);
+  const to = from + 14 * 864e5;
+  try { avail = searchSlots_(r.segs, from, to); }
+  catch (err) {             // an add-on that can't be booked online: book the package and put the add-ons in the note
+    if (r.segs.length < 2) throw err;
+    r = { segs: r.segs.slice(0, 1), missing: extras };
+    avail = searchSlots_(r.segs, from, to);
+  }
+  const seen = {}, slots = [];
+  avail.forEach(a => { if (!seen[a.start_at]) { seen[a.start_at] = 1; slots.push(a.start_at); } });
+  return { ok: true, tz: SQ_TZ, slots: slots, services: r.segs.map(s => s.name), notBooked: r.missing,
+    minutes: r.segs.reduce((n, s) => n + s.variation.minutes, 0) };
+}
+
+function e164_(phone) {
+  const d = String(phone).replace(/\D/g, '');
+  return d.length === 10 ? '+1' + d : d.length === 11 && d[0] === '1' ? '+' + d : '';
+}
+
+function findOrCreateCustomer_(first, last, email, phone) {
+  const tryFind = filter => {
+    const j = sq_('post', '/customers/search', { limit: 1, query: { filter: filter } });
+    return j.customers && j.customers[0] && j.customers[0].id;
+  };
+  const tel = e164_(phone);
+  let id = email && tryFind({ email_address: { exact: email } });
+  if (!id && tel) id = tryFind({ phone_number: { exact: tel } });
+  if (id) return id;
+  const c = sq_('post', '/customers', { idempotency_key: Utilities.getUuid(), given_name: first, family_name: last || undefined,
+    email_address: email, phone_number: tel || undefined, note: 'Added by the website booking form' });
+  return c.customer.id;
+}
+
+function book_(d) {
+  const clip = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 200);
+  const first = clip(d.first, 60), last = clip(d.last, 60), email = clip(d.email, 120), phone = clip(d.phone, 30);
+  if (!first || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || String(phone).replace(/\D/g, '').length < 10) return { ok: false, error: 'missing' };
+  const start = Date.parse(d.start); if (!start || start < Date.now()) return { ok: false, error: 'slot_gone' };
+  const extras = (Array.isArray(d.extras) ? d.extras : []).map(String);
+  let r = resolve_(String(d.pkg), String(d.size), extras), avail;
+  // re-check the exact time and take Square's own segments for it (staff, durations)
+  const find = () => searchSlots_(r.segs, start - 60000, start + 24 * 3600000).find(a => Date.parse(a.start_at) === start);
+  try { avail = find(); } catch (err) { if (r.segs.length < 2) throw err; r = { segs: r.segs.slice(0, 1), missing: extras }; avail = find(); }
+  if (!avail) return { ok: false, error: 'slot_gone' };
+
+  const customerId = findOrCreateCustomer_(first, last, email, phone);
+  const note = [
+    'Booked on the website.',
+    'Vehicle: ' + clip(d.vehicle, 120) + (d.sizeLabel ? ' (' + clip(d.sizeLabel, 40) + ')' : ''),
+    'Package: ' + clip(d.pkgName, 80),
+    d.extraNames && d.extraNames.length ? 'Add-ons: ' + d.extraNames.map(x => clip(x, 60)).join(', ') : '',
+    d.total ? 'Website price: ' + clip(d.total, 20) : '',
+    d.reach ? 'Best way to reach: ' + clip(d.reach, 20) : '',
+    d.notes ? 'Notes: ' + clip(d.notes, 1500) : ''
+  ].filter(String).join('\n');
+  const j = sq_('post', '/bookings', {
+    idempotency_key: clip(d.key, 60) || Utilities.getUuid(),
+    booking: {
+      start_at: avail.start_at, location_id: SQ_LOCATION, customer_id: customerId, customer_note: note,
+      appointment_segments: avail.appointment_segments.map(s => ({
+        duration_minutes: s.duration_minutes, team_member_id: s.team_member_id,
+        service_variation_id: s.service_variation_id, service_variation_version: s.service_variation_version }))
+    }
+  });
+  const b = j.booking || {};
+  // log it next to the other website requests
+  try {
+    const ss = SpreadsheetApp.getActive();
+    let sh = ss.getSheetByName(REQUESTS);
+    if (!sh) { sh = ss.insertSheet(REQUESTS); sh.getRange(1, 1, 1, 9).setValues([['Received', 'Form', 'Name', 'Phone', 'Email', 'Vehicle', 'Details', 'Photos', 'Status']]).setFontWeight('bold'); sh.setFrozenRows(1); }
+    sh.appendRow([new Date(), 'Detail booking', (first + ' ' + last).trim(), phone, email, clip(d.vehicle, 120),
+      Utilities.formatDate(new Date(avail.start_at), SQ_TZ, 'EEE MMM d, h:mm a') + '\n' + note, '', 'Booked in Square']);
+  } catch (err) {}
+  return { ok: true, id: b.id, status: b.status, start: avail.start_at };
+}
+
+function checkSquare() {
+  const ui = SpreadsheetApp.getUi();
+  try {
+    CacheService.getScriptCache().remove('sq_catalog');
+    const cat = sqCatalog_();
+    const lines = [];
+    Object.keys(SQ_PACKAGES).forEach(k => {
+      const s = cat[norm_(SQ_PACKAGES[k])];
+      lines.push((s ? '✓ ' : '✗ ') + k + ' → ' + SQ_PACKAGES[k] + (s ? '  [' + s.variations.map(v => (v.name || 'default') + ' ' + v.minutes + 'm').join(', ') + ']' : '  NOT FOUND'));
+    });
+    Object.keys(SQ_EXTRAS).forEach(k => { lines.push((cat[norm_(SQ_EXTRAS[k])] ? '✓ ' : '– ') + 'add-on ' + k + ' → ' + SQ_EXTRAS[k]); });
+    const test = slotsFor_({ pkg: 'full', size: '2' });
+    lines.push('', 'Open times found for a Full Vehicle Detail in the next 2 weeks: ' + test.slots.length);
+    let profile = '';
+    try { const bp = sq_('get', '/bookings/business-booking-profile'); profile = '\nOnline booking: ' + (bp.business_booking_profile.booking_enabled ? 'on' : 'OFF') + ', acceptance: ' + bp.business_booking_profile.booking_policy; } catch (err) {}
+    ui.alert('Square booking check', lines.join('\n') + profile, ui.ButtonSet.OK);
+  } catch (err) {
+    ui.alert('Square booking check', err.message === 'not_connected' ? 'Not connected yet. Run Square booking > Connect Square… first.' : 'Error: ' + err.message, ui.ButtonSet.OK);
   }
 }

@@ -7,8 +7,8 @@ Saved Nov 10, 2026. Done items are checked.
       (the old site's Full Windshield button opened the $65 Sun Banner booking; fixed here)
 - [x] Detailing: "open it straight in Square" link follows the package the customer built
 - [x] Estimate forms on Home, Tint, PPF & Ceramic, Calipers and Wraps, sent to info@ with photos (needs the Apps Script update below)
-- [ ] Paste the new `job-status-script/Code.gs` into Apps Script, then Deploy > Manage deployments > edit > New version
-- [ ] Decide on one-step booking (website builds the detail and books the time in Square directly)
+- [x] Apps Script updated (version 2) with estimate forms + Square booking
+- [x] One-step detailing booking: Square connected; website shows open times and books package + size + add-ons in Square
 - [ ] Squarespace store product pages (/auto-detailing/p/..., /tint-2-go/p/...): point to Square booking or drop
 - [ ] Second Square site (direct-detailing-services.square.site): keep or drop
 - [ ] Google Forms: corporate event registration and office park detailing: keep or rebuild
