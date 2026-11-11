@@ -1054,3 +1054,4 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .tv-tag-on { left: 8px; } .tv-tag-off { right: 8px; }
   .tv-handle span { width: 34px; height: 34px; margin: -17px 0 0 -17px; }
 }
+.tv-stage { background: #C9CBCD; }

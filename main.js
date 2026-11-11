@@ -295,7 +295,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     20: '20%: dark and private. Our most requested shade for rear windows.',
     5: '5%: limo tint. Maximum privacy; typically rear glass only.'
   };
-  film.style.webkitMaskImage = film.style.maskImage = `url(${asset('tint-viz-mask.png')})`;
+  film.style.webkitMaskImage = film.style.maskImage = `url(${asset('tint-viz-side-mask.png')})`;
   function setShade() {
     const vlt = stops[Number(range.value)];
     film.style.opacity = ((100 - vlt) / 100 * 0.93).toFixed(3);
