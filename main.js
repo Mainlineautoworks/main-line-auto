@@ -36,7 +36,7 @@ function arrowNav(buttons, select) {
 // box = where the shade layer sits in the photo: [x, y, width, height]; size defaults to 1200x900.
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261110d';
+const ASSET_V = '20261110e';
 const toLin = v => Math.pow(v / 255, 2.2);
 const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
 const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
@@ -197,7 +197,7 @@ const caliperPaint = createPainter({
   vehicles: {
     sports:  { img: asset('caliper-sports.webp'),  shade: asset('caliper-sports-shade.png'),  box: [659, 274, 170, 358], alt: 'Black wheel on a red sports car' },
     sedan:   { img: asset('caliper-sedan.webp'),   shade: asset('caliper-sedan-shade.png'),   box: [361, 484, 212, 379], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
-    truck:   { img: asset('caliper-truck.webp'),   shade: asset('caliper-truck-shade.png'),   box: [703, 350, 79, 162],  alt: 'Gloss black wheel on a grey pickup truck' },
+    truck:   { img: asset('caliper-truck.webp'),   shade: asset('caliper-truck-shade.png'),   box: [707, 347, 74, 162],  alt: 'Gloss black wheel on a grey pickup truck' },
     closeup: { img: asset('caliper-closeup.webp'), shade: asset('caliper-closeup-shade.png'), box: [128, 24, 307, 843], alt: 'Close-up of a brake caliper beside a drilled rotor' }
   }
 });

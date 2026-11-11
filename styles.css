@@ -1211,3 +1211,14 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .wraps-head { margin-bottom: 10px; }
   .wraps-head > p { margin-bottom: 0; }
 }
+/* Calipers: same spacing as the wraps section */
+.calipers:not(.subpage .calipers) { padding-top: clamp(56px, 7.5vw, 96px); }
+@media (max-width: 760px) {
+  .calipers:not(.subpage .calipers) { padding-top: 48px; }
+}
+@media (max-width: 960px) {
+  .cal-head { margin-bottom: 10px; }
+  .cal-controls { margin-top: 0; }
+  .cal-controls .picker-label:first-child { margin-top: 20px; }
+  .cal-details .ticks { margin-top: 28px; }
+}
