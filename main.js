@@ -869,7 +869,8 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
       if (n > 6) { paintCells[gy * GW + gx] = 1; paintCount++; }
     }
   };
-  const k = () => Math.min(2.2, Math.max(1, 760 / (stage.clientWidth || 760)));
+  // bigger brush on small screens so fingers can hit it, but scaled gently so phones aren't a speed run
+  const k = () => Math.min(1.2, Math.max(1, Math.sqrt(760 / (stage.clientWidth || 760))));
   let best = null; try { best = Number(localStorage.getItem('mla-detail-dash')) || null; } catch (e) {}
   const showBest = () => { $('dg-best').textContent = best ? `Best: ${best.toFixed(1)}s` : 'Best: none yet'; };
   showBest();
