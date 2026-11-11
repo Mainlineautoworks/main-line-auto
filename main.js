@@ -1231,8 +1231,13 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   const timeFmt = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' });
   const longFmt = new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'long', month: 'long', day: 'numeric' });
   let active = false, slots = [], day = null, pick = null, reqKey = '', loadedKey = '', timer = 0;
+  const MODE = bk.dataset.mode || 'detail';            // 'detail' (detailing builder) or 'tint' (tint package picker)
 
   const choice = () => {
+    if (MODE === 'tint') {
+      const r = document.querySelector('input[name="tk-pkg"]:checked');
+      return r ? { pkg: r.value, pkgName: r.dataset.name, size: '', sizeLabel: '', extras: [], extraNames: [], total: r.dataset.price } : null;
+    }
     const pkg = document.querySelector('input[name="dp-package"]:checked');
     const size = document.querySelector('input[name="dp-size"]:checked');
     const extras = pkg && /^moto/.test(pkg.value) ? [] : Array.from(document.querySelectorAll('.dp-addon input:checked'));
@@ -1244,9 +1249,15 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   const keyOf = c => [c.pkg, c.size, c.extras.join(',')].join('|');
   const hrs = m => { const h = Math.floor(m / 60), r = m % 60; return (h ? h + ' hr' : '') + (h && r ? ' ' : '') + (r ? r + ' min' : ''); };
 
+  const describe = c => c.pkgName + (c.sizeLabel ? ' for a ' + c.sizeLabel : '') + (c.extraNames.length ? ' + ' + c.extraNames.join(', ').toLowerCase() : '');
   const setNote = minutes => {
     if (!note) return;
     const c = choice();
+    if (MODE === 'tint') {
+      note.innerHTML = c ? 'Booking <strong>' + c.pkgName + '</strong>' + (minutes ? ' · about ' + hrs(minutes) : '') + (c.total ? ' · <strong>' + c.total + '</strong>' : '') + '. Pick a day and time below.'
+        : 'Pick your package, then a day and time. It goes straight into our calendar.';
+      return;
+    }
     const adds = c.extraNames.length ? ' + ' + c.extraNames.map(x => x.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1') : '';
     note.innerHTML = 'Booking <strong>' + c.pkgName + '</strong> for a <strong>' + c.sizeLabel + '</strong>' + adds +
       (minutes ? ' · about ' + hrs(minutes) : '') + ' · <strong>' + c.total + '</strong>. Change anything above and the times update.';
@@ -1296,7 +1307,9 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   };
 
   const load = async () => {
-    const c = choice(), key = keyOf(c);
+    // nothing picked yet (tint): ask Square about one package just to confirm booking works, then wait for a pick
+    const real = choice(), probe = !real, c = real || { pkg: 'tint-front2', size: '', extras: [] };
+    const key = probe ? 'probe' : keyOf(c);
     if (key === loadedKey) return;
     reqKey = key;
     if (active) { daysEl.innerHTML = '<p class="bk-empty">Finding open times…</p>'; timesEl.innerHTML = ''; }
@@ -1305,6 +1318,11 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
       const j = await (await fetch(API + '?' + q)).json();
       if (reqKey !== key) return;                       // a newer choice is already loading
       if (!j.ok) throw new Error(j.error || 'failed');
+      if (probe) {
+        activate(); setNote(0); loadedKey = 'probe'; slots = []; pick = null; form.hidden = true;
+        daysEl.innerHTML = '<p class="bk-empty">Pick a package above to see open times.</p>'; timesEl.innerHTML = '';
+        return;
+      }
       loadedKey = key; slots = j.slots || [];
       activate(); setNote(j.minutes); drawDays();
     } catch (err) {
@@ -1313,8 +1331,16 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     }
   };
   document.addEventListener('change', e => {
+    if (e.target.name === 'tk-pkg') { clearTimeout(timer); timer = setTimeout(load, 50); return; }
     if (!e.target.closest || !e.target.closest('.dp-step, .dp-sizes, .dp-addon, .dp-card') && !/^dp-/.test(e.target.name || '')) return;
     clearTimeout(timer); timer = setTimeout(load, 450);
+  });
+  // tint package cards: "Book now" picks that package here instead of leaving for Square
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[data-tint]'); if (!a || !active) return;
+    const r = document.querySelector('input[name="tk-pkg"][value="' + a.dataset.tint + '"]'); if (!r) return;
+    e.preventDefault(); r.checked = true; load();
+    document.getElementById('book').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
   load();
 
@@ -1332,12 +1358,14 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     });
     if (first) { first.focus(); status.className = 'if-status is-error'; status.textContent = 'Please fill in the highlighted fields.'; return; }
     const c = choice(), val = n => (form.querySelector('[name=' + n + ']') || {}).value || '';
+    if (!c) { status.className = 'if-status is-error'; status.textContent = 'Pick a package first.'; return; }
+    const shade = val('shade');
     const reach = form.querySelector('[name=reach]:checked');
     btn.disabled = true; btn.textContent = 'Booking…';
     try {
       const res = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ action: 'book', start: pick,
         first: val('first').trim(), last: val('last').trim(), phone: val('phone').trim(), email: val('email').trim(), vehicle: val('vehicle').trim(),
-        reach: reach ? reach.value : '', notes: val('notes').trim(), website: val('website'), ms: Date.now() - started,
+        reach: reach ? reach.value : '', notes: ((shade ? 'Shade: ' + shade + '. ' : '') + val('notes')).trim(), website: val('website'), ms: Date.now() - started,
         key: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()) }, c)) });
       const j = await res.json();
       if (!j.ok) throw Object.assign(new Error(j.error || 'failed'), { code: j.error });
@@ -1347,7 +1375,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
       done.innerHTML = '<span class="if-done-mark" aria-hidden="true">✓</span>' +
         '<h3>' + (j.status === 'PENDING' ? 'Request sent' : 'You\'re booked') + ', ' + val('first').trim().replace(/[<>&"]/g, '') + '!</h3>' +
         '<p class="bk-done-when">' + longFmt.format(d) + ' at ' + timeFmt.format(d) + '</p>' +
-        '<p>' + c.pkgName + ' for a ' + c.sizeLabel + (c.extraNames.length ? ' + ' + c.extraNames.join(', ').toLowerCase() : '') + ' · ' + c.total + '</p>' +
+        '<p>' + describe(c) + (c.total ? ' · ' + c.total : '') + '</p>' +
         '<p class="bk-done-fine">' + (j.status === 'PENDING' ? 'We\'ll confirm your time shortly.' : 'Square will send your confirmation and a reminder before your appointment.') +
         ' Need to change it? Call or text <a href="tel:+14845741628">(484) 574-1628</a>.</p>';
       if (note) note.closest('.dp-booking-note').hidden = true;

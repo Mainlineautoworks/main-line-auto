@@ -17,7 +17,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110110">
+<link rel="stylesheet" href="../styles.css?v=202611110120">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -246,7 +246,7 @@
           <p class="tw-price">$65</p>
           <p class="tw-pkg-desc">A tinted band across the top of the windshield that cuts glare from the sun overhead and gives the car a sleek look.</p>
           <ul><li>Top of the windshield, above the AS-1 line</li><li>Less glare and eye strain</li><li>A clean, finished look</li></ul>
-          <div class="tw-pkg-cta"><a class="btn tw-book" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/Q372BNGHDKY4KVCILYGBH6XF" target="_blank" rel="noopener">Book now</a></div>
+          <div class="tw-pkg-cta"><a class="btn tw-book" data-tint="tint-strip" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/Q372BNGHDKY4KVCILYGBH6XF" target="_blank" rel="noopener">Book now</a></div>
         </article>
         <article class="tw-pkg">
           <span class="tw-sale">Sale</span>
@@ -257,7 +257,7 @@
           <p class="tw-price">$150</p>
           <p class="tw-pkg-desc">Premium ceramic tint on the driver and front passenger windows. A popular way to match the factory privacy glass on many SUVs and trucks.</p>
           <ul><li>High-quality ceramic film</li><li>99% UV blocking</li><li>Up to 95% heat blocking</li></ul>
-          <div class="tw-pkg-cta"><a class="btn tw-book" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/LRVVSMLJRXWJZQCJGZ35ZRC6" target="_blank" rel="noopener">Book now</a></div>
+          <div class="tw-pkg-cta"><a class="btn tw-book" data-tint="tint-front2" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/LRVVSMLJRXWJZQCJGZ35ZRC6" target="_blank" rel="noopener">Book now</a></div>
         </article>
         <article class="tw-pkg is-featured">
           <span class="tw-sale">Sale</span>
@@ -268,7 +268,7 @@
           <p class="tw-price">$399 – $450</p>
           <p class="tw-pkg-desc">Premium ceramic tint on every side window and the rear window, for heat rejection, UV protection and glare reduction all the way around.</p>
           <ul><li>All side windows and the rear window</li><li>High-quality ceramic film</li><li>99% UV blocking</li><li>Up to 95% heat blocking</li></ul>
-          <div class="tw-pkg-cta two"><a class="btn tw-book" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/RWJDZ2ISK47KLEFQ6REBIGX2" target="_blank" rel="noopener">Sedan</a><a class="btn tw-book" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/5CY4XPJ4OREXG6B3CLFY6CO3" target="_blank" rel="noopener">SUV</a></div>
+          <div class="tw-pkg-cta two"><a class="btn tw-book" data-tint="tint-sedan" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/RWJDZ2ISK47KLEFQ6REBIGX2" target="_blank" rel="noopener">Sedan</a><a class="btn tw-book" data-tint="tint-suv" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/5CY4XPJ4OREXG6B3CLFY6CO3" target="_blank" rel="noopener">SUV</a></div>
         </article>
         <article class="tw-pkg">
           
@@ -279,7 +279,7 @@
           <p class="tw-price">$250</p>
           <p class="tw-pkg-desc">Clear or lightly shaded ceramic film on the whole windshield. Blocks heat and glare while keeping crystal-clear visibility.</p>
           <ul><li>Advanced heat and infrared rejection</li><li>99% UV protection</li><li>Reduced glare for safer driving</li><li>Clear or lightly shaded finish</li></ul>
-          <div class="tw-pkg-cta"><a class="btn tw-book" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/GUDPRBIWX2O5LCPZDV3GZOP6" target="_blank" rel="noopener">Book now</a></div>
+          <div class="tw-pkg-cta"><a class="btn tw-book" data-tint="tint-windshield" href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/GUDPRBIWX2O5LCPZDV3GZOP6" target="_blank" rel="noopener">Book now</a></div>
         </article>
         <article class="tw-pkg">
           
@@ -290,7 +290,7 @@
           <p class="tw-price tw-price-vary">Price varies</p>
           <p class="tw-pkg-desc">Old, faded or bubbling film safely stripped from your glass, with no damage and no adhesive left behind.</p>
           <ul><li>Removing old, purple or bubbling tint</li><li>Prep for a new ceramic tint install</li><li>Back to clear, original glass</li></ul>
-          <div class="tw-pkg-cta"><a class="btn tw-book" href="#estimate" data-pick="Tint removal">Get a quote</a></div>
+          <div class="tw-pkg-cta"><a class="btn tw-book" href="#estimate" data-pick="Tint removal" data-tint="tint-removal">Book or get a quote</a></div>
         </article>
       </div>
       <p class="tw-legend"><span class="tw-key"></span> Red shows where the film goes</p>
@@ -303,6 +303,22 @@
       <div class="wp-head">
         <h2 id="book-h">Book your tint</h2>
         <p>Pick your package and an open time. Your appointment goes straight into our calendar.</p>
+      </div>
+      <div class="dp-booking-note" id="dp-booking-note" aria-live="polite">
+        <span class="dp-num">i</span>
+        <p>Pick your package, then a day and time. It goes straight into our calendar.</p>
+      </div>
+      <div class="bk" id="bk" data-mode="tint" hidden>
+        <div class="bk-panel">
+          <h3 class="bk-h">Pick your package</h3>
+          <div class="bk-pkgs" role="radiogroup" aria-label="Tint package"><label class="bk-pkg"><input type="radio" name="tk-pkg" value="tint-strip" data-name="Windshield sun strip" data-price="$65"><span><strong>Windshield sun strip</strong><em>$65</em></span></label><label class="bk-pkg"><input type="radio" name="tk-pkg" value="tint-front2" data-name="2 front windows" data-price="$150"><span><strong>2 front windows</strong><em>$150</em></span></label><label class="bk-pkg"><input type="radio" name="tk-pkg" value="tint-sedan" data-name="Full vehicle · Sedan" data-price="$399"><span><strong>Full vehicle · Sedan</strong><em>$399</em></span></label><label class="bk-pkg"><input type="radio" name="tk-pkg" value="tint-suv" data-name="Full vehicle · SUV / Truck" data-price="$450"><span><strong>Full vehicle · SUV / Truck</strong><em>$450</em></span></label><label class="bk-pkg"><input type="radio" name="tk-pkg" value="tint-windshield" data-name="Full windshield" data-price="$250"><span><strong>Full windshield</strong><em>$250</em></span></label><label class="bk-pkg"><input type="radio" name="tk-pkg" value="tint-removal" data-name="Tint removal" data-price=""><span><strong>Tint removal</strong><em>Price varies</em></span></label></div>
+          <h3 class="bk-h">Pick a day</h3>
+          <div class="bk-days" id="bk-days" role="group" aria-label="Available days"></div>
+          <h3 class="bk-h">Pick a time</h3>
+          <div class="bk-times" id="bk-times" role="group" aria-label="Available times"></div>
+          <form class="intake bk-form" id="bk-form" data-booking novalidate hidden><h3 class="bk-h">Your info</h3><div class="if-row"><div class="if" data-label="First name"><label for="tk-first">First name <span class="if-req" aria-hidden="true">*</span></label><input id="tk-first" name="first" type="text" autocomplete="given-name" required></div><div class="if" data-label="Last name"><label for="tk-last">Last name <span class="if-opt">optional</span></label><input id="tk-last" name="last" type="text" autocomplete="family-name"></div></div><div class="if-row"><div class="if" data-label="Phone"><label for="tk-phone">Phone <span class="if-req" aria-hidden="true">*</span></label><input id="tk-phone" name="phone" type="tel" autocomplete="tel" required></div><div class="if" data-label="Email"><label for="tk-email">Email <span class="if-req" aria-hidden="true">*</span></label><input id="tk-email" name="email" type="email" autocomplete="email" required></div></div><div class="if" data-label="Vehicle"><label for="tk-vehicle">Vehicle <span class="if-req" aria-hidden="true">*</span></label><input id="tk-vehicle" name="vehicle" type="text" placeholder="Year, make and model" required></div><div class="if" data-label="Shade you&#x27;re leaning toward"><label for="tk-shade">Shade you&#x27;re leaning toward <span class="if-opt">optional</span></label><select id="tk-shade" name="shade"><option>Not sure yet, help me pick</option><option>75% (lightest)</option><option>50%</option><option>35%</option><option>20%</option><option>5% (darkest)</option></select></div><fieldset class="if if-chips" data-label="Best way to reach you"><legend>Best way to reach you <span class="if-opt">optional</span></legend><div class="if-chip-row"><label class="if-chip"><input type="radio" name="reach" value="Text"><span>Text</span></label><label class="if-chip"><input type="radio" name="reach" value="Call"><span>Call</span></label><label class="if-chip"><input type="radio" name="reach" value="Email"><span>Email</span></label></div></fieldset><div class="if" data-label="Anything we should know?"><label for="tk-notes">Anything we should know? <span class="if-opt">optional</span></label><textarea id="tk-notes" name="notes" rows="3" placeholder="Old tint to remove, aftermarket glass, questions…"></textarea></div><div class="if-hp" aria-hidden="true"><label>Leave this empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div><div class="if-submit"><button class="btn btn-red" type="submit">Book it</button><p class="if-note" id="bk-when"></p></div><p class="if-status" role="status" aria-live="polite"></p></form>
+        </div>
+        <div class="bk-done" id="bk-done" tabindex="-1" hidden></div>
       </div>
       <div class="dp-widget">
         <!-- Start Square Appointments Embed Code --><script src='https://square.site/appointments/buyer/widget/nebfqje99efjsg/L55RAA17AA9Y0.js'></script><!-- End Square Appointments Embed Code -->
@@ -547,6 +563,6 @@
     <p>© <span id="year">2026</span> Main Line Auto Works</p>
   </div>
 </footer>
-<script src="../main.js?v=202611110100" defer></script>
+<script src="../main.js?v=202611110120" defer></script>
 </body>
 </html>

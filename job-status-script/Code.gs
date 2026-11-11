@@ -304,7 +304,10 @@ const SQ_SCOPES = ['APPOINTMENTS_READ', 'APPOINTMENTS_WRITE', 'APPOINTMENTS_ALL_
 // Website package / extra  ->  the Square service it books
 const SQ_PACKAGES = {
   quick: 'Express Detail', exterior: 'Exterior Detail', interior: 'Interior Detail', full: 'Full Vehicle Detail',
-  supercar: 'Super Car Premium Package Detail', moto: 'Motorcycle Detail', 'moto-chain': 'Motorcycle Detail'
+  supercar: 'Super Car Premium Package Detail', moto: 'Motorcycle Detail', 'moto-chain': 'Motorcycle Detail',
+  // window tint (tint page)
+  'tint-strip': 'Windshield Sun Banner', 'tint-front2': '2 Front Windows Tinted', 'tint-sedan': 'Sedan Full Vehicle Tinting',
+  'tint-suv': 'Truck / SUV Full Vehicle Tinting', 'tint-windshield': 'Full Windshield Tinted', 'tint-removal': 'Window Tint Removal'
 };
 const SQ_EXTRAS = {
   shampoo: 'Carpet & Upholstery Shampoo', leather: 'Multi-Stage Leather Conditioning', odor: 'Odor Elimination',
