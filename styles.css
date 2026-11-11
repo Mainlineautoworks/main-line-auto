@@ -1294,3 +1294,23 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .also li::before { content: ""; position: absolute; left: 0; top: calc(12px + .8em - 1px); width: 10px; height: 2px; background: var(--red); }
 .also a { text-decoration-color: var(--red); text-decoration-thickness: 2px; text-underline-offset: 4px; }
 .also a:hover strong { color: var(--red); }
+
+/* Homepage tint: options sit right above the photo on phones; note, details and buttons below */
+.tint-stack { grid-template-areas: "head view" "details view"; grid-template-rows: auto 1fr; row-gap: 0; align-items: start; }
+.tint-stack .tint-head { grid-area: head; align-self: end; }
+.tint-stack .windshield { grid-area: view; align-self: center; }
+.tint-stack .tint-details { grid-area: details; }
+.tint-stack .shade-picker { margin-bottom: 18px; }
+.tint-stack .tint-details .shade-note { margin-top: 0; }
+.tint-stack .tint-details .small { margin-top: 0; }
+@media (max-width: 960px) {
+  .tint-stack { grid-template-columns: 1fr; grid-template-areas: "head" "view" "details"; grid-template-rows: none; }
+  .tint-stack .shade-picker { margin-bottom: 14px; }
+  .tint-stack .tint-details { margin-top: 18px; }
+  .tint-stack .tint-details .shade-note { min-height: 0; }
+  .tint-stack .wraps-actions { margin-top: 22px; }
+}
+@media (max-width: 960px) {
+  .tint-stack .shade-picker { flex-wrap: nowrap; gap: 6px; }
+  .tint-stack .shade-picker button { flex: 1 1 0; min-width: 0; padding-left: 0; padding-right: 0; }
+}

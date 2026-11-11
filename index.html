@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=202611110690">
+<link rel="stylesheet" href="styles.css?v=202611110710">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -477,8 +477,8 @@
   </section>
 
   <section class="tint" id="tint" aria-labelledby="tint-h">
-    <div class="wrap tint-grid">
-      <div class="tint-copy">
+    <div class="wrap tint-grid tint-stack">
+      <div class="tint-copy tint-head">
         <h2 id="tint-h">Window tint</h2>
         <p>Tint is measured in VLT: how much visible light the film lets through. Lower number, darker glass. Try a few to see how each one reads.</p>
         <div class="shade-picker" role="radiogroup" aria-label="Tint darkness">
@@ -488,17 +488,19 @@
           <button role="radio" aria-checked="false" data-vlt="20">20%</button>
           <button role="radio" aria-checked="false" data-vlt="5">5%</button>
         </div>
+      </div>
+      <div class="windshield" aria-hidden="true">
+        <img src="assets/img/window-tint.webp" alt="" width="1800" height="1203" loading="lazy">
+        <div class="film" id="film"></div>
+        <span class="vlt-readout" id="vlt-readout">35</span>
+      </div>
+      <div class="tint-copy tint-details">
         <p class="shade-note" id="shade-note" aria-live="polite"></p>
         <p class="small">Want the heat rejection without the darkness? Ceramic tint blocks far more heat than standard film at the same shade. Ask us what's legal for each window in Pennsylvania.</p>
         <div class="wraps-actions">
           <a class="btn btn-red" href="#estimate">Get a tint estimate</a>
           <a class="link link-light" href="window-tint/">Everything about window tint &rarr;</a>
         </div>
-      </div>
-      <div class="windshield" aria-hidden="true">
-        <img src="assets/img/window-tint.webp" alt="" width="1800" height="1203" loading="lazy">
-        <div class="film" id="film"></div>
-        <span class="vlt-readout" id="vlt-readout">35</span>
       </div>
     </div>
   </section>
