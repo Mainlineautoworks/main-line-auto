@@ -1222,3 +1222,11 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .cal-controls .picker-label:first-child { margin-top: 20px; }
   .cal-details .ticks { margin-top: 28px; }
 }
+/* Calipers heading block: same airy spacing as the wraps heading */
+.cal-head h2 { margin-bottom: 22px; }
+.cal-head p { font-size: inherit; line-height: inherit; }
+@media (max-width: 960px) {
+  .cal-head h2 { margin-bottom: 22px; }
+  .cal-head p { font-size: inherit; }
+  .cal-head { margin-bottom: clamp(28px, 6vw, 48px); }
+}
