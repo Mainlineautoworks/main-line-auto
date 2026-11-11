@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110340">
+<link rel="stylesheet" href="../styles.css?v=202611110370">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -192,26 +192,35 @@
     </div>
   </section>
 
-  <section class="tint" id="tint" aria-labelledby="tint-h">
-    <div class="wrap tint-grid">
-      <div class="tint-copy">
+  <section class="tint tv" id="tint" aria-labelledby="tint-h">
+    <div class="wrap tv-grid">
+      <div class="tint-copy tv-copy">
         <h2 id="tint-h">Preview your shade</h2>
-        <p>Tint is measured in VLT: how much visible light the film lets through. Lower number, darker glass. Try a few to see how each one reads.</p>
-        <div class="shade-picker" role="radiogroup" aria-label="Tint darkness">
-          <button role="radio" aria-checked="false" data-vlt="70">70%</button>
-          <button role="radio" aria-checked="false" data-vlt="50">50%</button>
-          <button role="radio" aria-checked="true" data-vlt="35">35%</button>
-          <button role="radio" aria-checked="false" data-vlt="20">20%</button>
-          <button role="radio" aria-checked="false" data-vlt="5">5%</button>
-        </div>
-        <p class="shade-note" id="shade-note" aria-live="polite"></p>
-        <p class="small">Want the heat rejection without the darkness? Ceramic tint blocks far more heat than standard film at the same shade. See the Pennsylvania rules below.</p>
+        <p>Tint is measured in VLT: how much visible light the film lets through. Lower number, darker glass. Choose a shade, then drag across the car to compare it with factory glass.</p>
+      </div>
+      <div class="tv-more">
+        <p class="small">Want the heat rejection without the darkness? Ceramic tint blocks far more heat than standard film at the same shade. See the <a href="#pa-law">Pennsylvania rules</a> below.</p>
         <a class="btn btn-red" href="#estimate">Get a tint estimate</a>
       </div>
-      <div class="windshield" aria-hidden="true">
-        <img src="../assets/img/mobile-detailing.webp" alt="" width="1320" height="1166">
-        <div class="film" id="film"></div>
-        <span class="vlt-readout" id="vlt-readout">35</span>
+      <div class="tv-view">
+        <div class="tv-stage" id="tv-stage" style="--split:55%">
+          <img src="../assets/img/tint-viz-car.webp?v=1" alt="White BMW M3 sedan, with the side windows tinted on one side of the slider" width="800" height="417">
+          <div class="tv-film" id="tv-film" aria-hidden="true"></div>
+          <div class="tv-handle" aria-hidden="true"><span></span></div>
+          <span class="tv-tag tv-tag-on" aria-hidden="true">With tint</span>
+          <span class="tv-tag tv-tag-off" aria-hidden="true">Factory glass</span>
+          <input type="range" class="tv-compare" id="tv-compare" min="0" max="100" value="55" aria-label="Drag to compare tinted and factory glass">
+        </div>
+        <p class="tv-hint">Drag across the car to turn the tint on and off.</p>
+        <div class="tv-shade">
+          <div class="tv-shade-top">
+            <label for="tv-range" class="picker-label">Tint shade</label>
+            <output class="tv-readout" id="tv-readout" for="tv-range">35%</output>
+          </div>
+          <input type="range" id="tv-range" class="tv-range" min="0" max="5" step="1" value="3" aria-valuetext="35% VLT">
+          <div class="tv-ticks" aria-hidden="true"><span>75%</span><span>70%</span><span>50%</span><span>35%</span><span>20%</span><span>5%</span></div>
+          <p class="tv-note" id="tv-note" aria-live="polite"></p>
+        </div>
       </div>
     </div>
   </section>
@@ -518,6 +527,6 @@
     <p>© <span id="year">2026</span> Main Line Auto Works</p>
   </div>
 </footer>
-<script src="../main.js?v=202611110300" defer></script>
+<script src="../main.js?v=202611110350" defer></script>
 </body>
 </html>

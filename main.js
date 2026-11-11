@@ -279,3 +279,33 @@ document.querySelectorAll('.coat-carousel').forEach(wrapEl => {
 });
 
 const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+// Tint visualizer (tint page): shade slider + before/after wipe on the BMW photo
+(() => {
+  const stage = document.getElementById('tv-stage'); if (!stage) return;
+  const film = document.getElementById('tv-film');
+  const range = document.getElementById('tv-range'), compare = document.getElementById('tv-compare');
+  const readout = document.getElementById('tv-readout'), note = document.getElementById('tv-note');
+  const stops = [75, 70, 50, 35, 20, 5];
+  const notes = {
+    75: '75%: nearly clear. Cuts heat and UV with almost no change in look.',
+    70: '70%: barely there. Takes the edge off glare without changing the look.',
+    50: '50%: a light, factory-style tint. Subtle from outside.',
+    35: '35%: a noticeable, clean tint. Still easy to see out of at night.',
+    20: '20%: dark and private. Our most requested shade for rear windows.',
+    5: '5%: limo tint. Maximum privacy; typically rear glass only.'
+  };
+  film.style.webkitMaskImage = film.style.maskImage = `url(${asset('tint-viz-mask.png')})`;
+  function setShade() {
+    const vlt = stops[Number(range.value)];
+    film.style.opacity = ((100 - vlt) / 100 * 0.93).toFixed(3);
+    readout.textContent = vlt + '%';
+    range.setAttribute('aria-valuetext', vlt + '% VLT');
+    note.textContent = notes[vlt];
+    range.style.setProperty('--fill', (Number(range.value) / 5 * 100) + '%');
+  }
+  function setSplit() { stage.style.setProperty('--split', compare.value + '%'); }
+  range.addEventListener('input', setShade);
+  compare.addEventListener('input', setSplit);
+  setShade(); setSplit();
+})();

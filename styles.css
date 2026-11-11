@@ -1002,3 +1002,55 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 @media (max-width: 680px) { .tw-pkgs > .tw-pkg { flex-basis: 100%; } }
 .tw-pkg-art { padding: 10px 8px 4px; }
 .tw-pkg-art img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
+
+/* Tint visualizer (BMW, shade slider + before/after wipe) */
+.tv-grid { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(32px, 6vw, 88px); align-items: center; }
+.tv-shade { margin: 26px 0 8px; }
+.tv-shade-top { display: flex; align-items: baseline; justify-content: space-between; }
+.tv-shade-top .picker-label { margin: 0; }
+.tv-readout { font-family: var(--display); font-size: 1.6rem; color: var(--white); }
+.tv-range { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; margin: 14px 0 8px; border-radius: 99px; cursor: pointer;
+  background: linear-gradient(90deg, var(--red) 0 var(--fill, 60%), rgba(255,255,255,.18) var(--fill, 60%) 100%); }
+.tv-range::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--white); border: 4px solid var(--red); box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+.tv-range::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--white); border: 4px solid var(--red); }
+.tv-ticks { display: flex; justify-content: space-between; font-size: .8rem; color: var(--steel); }
+.tv-ticks span { width: 0; display: flex; justify-content: center; white-space: nowrap; }
+.tv-ticks span:first-child { justify-content: flex-start; } .tv-ticks span:last-child { justify-content: flex-end; }
+.tv-note { min-height: 3em; margin: 14px 0 6px; color: var(--pearl); }
+.tv-copy .small a { color: var(--pearl); }
+.tv-view { min-width: 0; }
+.tv-stage { position: relative; border-radius: 16px; overflow: hidden; background: #fff; user-select: none; touch-action: pan-y; }
+.tv-stage img { display: block; width: 100%; height: auto; }
+.tv-film { position: absolute; inset: 0; background: #07090B; pointer-events: none;
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  clip-path: inset(0 calc(100% - var(--split)) 0 0); transition: opacity .25s; }
+.tv-handle { position: absolute; top: 0; bottom: 0; left: var(--split); width: 2px; margin-left: -1px; background: var(--red); pointer-events: none; }
+.tv-handle span { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; background: var(--red); box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+.tv-handle span::before, .tv-handle span::after { content: ""; position: absolute; top: 50%; width: 0; height: 0; margin-top: -6px; border: 6px solid transparent; }
+.tv-handle span::before { left: 5px; border-right-color: #fff; }
+.tv-handle span::after { right: 5px; border-left-color: #fff; }
+.tv-tag { position: absolute; top: 12px; padding: 5px 10px; border-radius: 999px; font-size: .74rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; pointer-events: none; }
+.tv-tag-on { left: 12px; background: var(--graphite); color: var(--white); }
+.tv-tag-off { right: 12px; background: rgba(29,33,37,.08); color: var(--graphite); }
+.tv-compare { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; -webkit-appearance: none; appearance: none; }
+.tv-compare::-webkit-slider-thumb { -webkit-appearance: none; width: 48px; height: 600px; }
+.tv-stage:has(.tv-compare:focus-visible) .tv-handle span { outline: 3px solid var(--white); outline-offset: 2px; }
+.tv-hint { margin: 12px 0 0; font-size: .88rem; color: var(--steel); text-align: center; }
+@media (max-width: 960px) { .tv-grid { grid-template-columns: 1fr; } .tv-view { order: -1; } }
+.tv-grid { grid-template-areas: "copy view" "more view"; grid-template-rows: auto 1fr; row-gap: 0; align-items: start; }
+.tv-copy { grid-area: copy; align-self: end; }
+.tv-more { grid-area: more; }
+.tv-view { grid-area: view; }
+.tv-more .small { font-size: .9rem; color: var(--steel); margin-top: 6px; }
+.tv-more .small a { color: var(--pearl); }
+.tv-shade { margin: 20px 0 0; }
+.tv-hint { margin-top: 10px; }
+@media (max-width: 960px) {
+  .tv-grid { grid-template-columns: 1fr; grid-template-areas: "copy" "view" "more"; }
+  .tv-view { order: 0; margin: 8px 0 22px; }
+}
+@media (max-width: 560px) {
+  .tv-tag { top: 8px; padding: 3px 8px; font-size: .62rem; }
+  .tv-tag-on { left: 8px; } .tv-tag-off { right: 8px; }
+  .tv-handle span { width: 34px; height: 34px; margin: -17px 0 0 -17px; }
+}
