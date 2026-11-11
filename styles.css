@@ -903,3 +903,20 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 }
 .wraps-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; }
 @media (max-width: 960px) { .wraps-actions { flex-direction: column; } .wraps-copy .wraps-actions .btn { margin: 0; } }
+
+/* Caliper painting subpage variants */
+.subpage .calipers { border-top: 1px solid rgba(140,149,157,.22); padding-top: clamp(48px, 6vw, 80px); }
+.wp-cards-light .wp-card { background: var(--white); border: 1px solid #DDE1E4; border-top: 3px solid var(--red); }
+.wp-cards-light .wp-card h3 { color: var(--graphite); }
+.wp-cards-light .wp-card p { color: var(--text-mid); }
+.wp-cards-light .wp-card ul { border-top-color: #E1E4E7; }
+.wp-cards-light .wp-card li { color: var(--graphite); }
+.wp-inline { color: var(--red); font-weight: 600; text-decoration: none; }
+.wp-inline:hover { text-decoration: underline; }
+.wp-steps-dark li { background: var(--gunmetal); border-color: transparent; }
+.wp-steps-dark h3 { color: var(--white); }
+.wp-steps-dark p { color: var(--alloy); }
+.wp-care-light h3 { color: var(--graphite); }
+.link-light { color: var(--white); }
+.cal-details .wraps-actions { margin-top: 4px; }
+@media (max-width: 960px) { .cal-details .wraps-actions .btn { margin: 0; } }

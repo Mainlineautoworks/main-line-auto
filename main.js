@@ -201,7 +201,7 @@ const caliperPaint = createPainter({
     closeup: { img: asset('caliper-closeup.webp'), shade: asset('caliper-closeup-shade.png'), box: [128, 24, 307, 843], alt: 'Close-up of a brake caliper beside a drilled rotor' }
   }
 });
-wirePickers(document.getElementById('calipers'), caliperPaint, {
+wirePickers(caliperView && caliperView.closest('section'), caliperPaint, {
   onVehicle: () => setMode('photo'),
   onColor: (hex, opts) => { if (viewer()) viewer().setColor(hex, opts); },
   onFinish: f => { if (viewer()) viewer().setFinish(f); }
