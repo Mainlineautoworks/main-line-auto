@@ -40,6 +40,15 @@ const ASSET_V = '20261110f';
 const toLin = v => Math.pow(v / 255, 2.2);
 const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
 const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
+// Lighting presets for the wrap preview. con/shine/gain/tint change how the paint reads;
+// bands are reflected light streaks [position, width, strength, slant, top, bottom] across the body.
+const LIGHTS = {
+  studio:   { con: 1,    shine: 1,   gain: 1,    tint: [1, 1, 1],         bands: [], bandTint: [1, 1, 1] },
+  sun:      { con: 1.3,  shine: 1.7, gain: 1.12, tint: [1.06, 1.0, 0.92], bands: [[0.34, 0.06, 0.6, 0.35, 0, 0.62], [0.72, 0.04, 0.35, 0.35, 0, 0.55]], bandTint: [1, 0.97, 0.88] },
+  overcast: { con: 0.62, shine: 0.45, gain: 0.95, tint: [0.96, 0.98, 1.02], bands: [[0.5, 0.42, 0.22, 0, 0, 0.5]], bandTint: [0.9, 0.95, 1] },
+  garage:   { con: 1.05, shine: 1.15, gain: 0.98, tint: [0.98, 1.0, 1.02], bands: [[0.25, 0.016, 0.42, 0.5, 0.02, 0.55], [0.52, 0.016, 0.42, 0.5, 0.02, 0.55], [0.79, 0.016, 0.42, 0.5, 0.02, 0.55]], bandTint: [0.95, 0.98, 1] },
+  night:    { con: 1.2,  shine: 0.9, gain: 0.85, tint: [1.0, 0.92, 0.82], bands: [[0.22, 0.04, 0.55, -0.2, 0, 0.65], [0.64, 0.06, 0.25, -0.2, 0, 0.7]], bandTint: [1, 0.62, 0.25] }
+};
 const shadeCache = {};
 function loadShade(src) {
   if (!shadeCache[src]) shadeCache[src] = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
@@ -50,6 +59,7 @@ function createPainter({ view, img, canvas, stage, vehicles, initial, color }) {
   const ctx = canvas.getContext('2d');
   let lit = null, hi = null, alpha = null, out = null, mean = 0.1, loadId = 0, hidden = false;
   let cur = hexLin(color), goal = cur, fin = FIN.gloss, goalFin = fin, metal = 0, anim = 0;
+  let light = LIGHTS.studio, lw = 0, lh = 0;
   function decode(im) {
     const t = document.createElement('canvas'); t.width = im.naturalWidth; t.height = im.naturalHeight;
     const tc = t.getContext('2d'); tc.drawImage(im, 0, 0);
@@ -99,10 +109,26 @@ function createPainter({ view, img, canvas, stage, vehicles, initial, color }) {
   function render() {
     if (!lit) return;
     canvas.style.visibility = hidden ? 'hidden' : '';
-    const o = out.data, [con, shine] = fin, hiGain = shine * (metal ? 1.6 : 1);
+    const o = out.data, [con0, shine] = fin, L = light;
+    const con = con0 * L.con, hiGain = shine * (metal ? 1.6 : 1) * L.shine;
+    // reflected light streaks: sharp on gloss, spread out and faint on matte
+    const spread = 1 + (1 - shine) * 4.5, bandK = Math.pow(shine, 0.8);
+    const W = canvas.width, Hh = canvas.height;
     for (let i = 0; i < lit.length; i++) {
-      const s = Math.max(0, mean + (lit[i] - mean) * con), h = hi[i] * hiGain;
-      for (let c = 0; c < 3; c++) o[i * 4 + c] = 255 * Math.pow(Math.min(1, cur[c] * s + h), 1 / 2.2);
+      if (!alpha[i]) { o[i * 4 + 3] = 0; continue; }
+      const s = Math.max(0, mean + (lit[i] - mean) * con) * L.gain;
+      let h = hi[i] * hiGain, b = 0;
+      if (L.bands.length) {
+        // reflections ride on the brighter, upward-facing panels and break up across body lines
+        const x = (i % W) / W, y = ((i / W) | 0) / Hh, r = Math.min(1.4, lit[i] / mean), follow = r * r * 0.7;
+        for (const [pos, wid, str, slant, y0, y1] of L.bands) {
+          if (y < y0 || y > y1) continue;
+          const fade = Math.min(1, (y - y0) / 0.12, (y1 - y) / 0.12);
+          const u = x + (y - 0.5) * slant + Math.sin(y * 18 + pos * 9) * 0.012, d = (u - pos) / (wid * spread);
+          b += Math.exp(-d * d) * str * bandK * follow * fade;
+        }
+      }
+      for (let c = 0; c < 3; c++) o[i * 4 + c] = 255 * Math.pow(Math.min(1, cur[c] * s * L.tint[c] + h + b * L.bandTint[c]), 1 / 2.2);
       o[i * 4 + 3] = alpha[i];
     }
     ctx.putImageData(out, 0, 0);
@@ -131,7 +157,8 @@ function createPainter({ view, img, canvas, stage, vehicles, initial, color }) {
     setVehicle,
     showOriginal(on) { hidden = on; render(); },
     setColor(hex, opts = {}) { hidden = false; goal = hexLin(hex).map(v => opts.metallic ? v * 0.7 : v); metal = opts.metallic ? 1 : 0; animate(); },
-    setFinish(name) { goalFin = FIN[name] || FIN.gloss; animate(); }
+    setFinish(name) { goalFin = FIN[name] || FIN.gloss; animate(); },
+    setLight(name) { light = LIGHTS[name] || LIGHTS.studio; render(); }
   };
 }
 // Resolve images next to main.js, so subpages (e.g. /vinyl-wraps/) load the same files.
@@ -219,6 +246,24 @@ const wrapPaint = createPainter({
   }
 });
 wirePickers(document.getElementById('wrap-view') && document.getElementById('wrap-view').closest('section'), wrapPaint);
+// Wrap lighting switcher: scene look comes from CSS on the view, paint reflections from the painter
+(() => {
+  const view = document.getElementById('wrap-view'); if (!view || !wrapPaint) return;
+  const section = view.closest('section'), btns = Array.from(section.querySelectorAll('.light-picker button'));
+  const note = section.querySelector('.light-note');
+  const notes = {
+    studio: 'Even studio light, like our shop.',
+    sun: 'Direct sun: gloss throws sharp reflections, matte stays flat and even.',
+    overcast: 'Overcast: soft light. Color looks truest, and finishes look closest to each other.',
+    garage: 'Garage lights: watch the tube reflections stay crisp on gloss and blur out on satin and matte.',
+    night: 'Night under streetlights: darker colors fade into shadow, and gloss picks up the orange glow.'
+  };
+  arrowNav(btns, btn => {
+    btns.forEach(b => b.setAttribute('aria-checked', String(b === btn)));
+    view.dataset.light = btn.dataset.light; wrapPaint.setLight(btn.dataset.light);
+    if (note) note.textContent = notes[btn.dataset.light];
+  });
+})();
 
 // Tint picker: film opacity = light the film blocks (1 - VLT)
 const notes = {
