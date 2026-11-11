@@ -131,7 +131,7 @@ function doGet(e) {
 /* ---------- helpers ---------- */
 
 function findJobRow(code) {
-  const sheet = SpreadsheetApp.getActive().getSheetByName(JOBS);
+  const sheet = SpreadsheetApp.getActive().getSheetByName(JOBS); if (!sheet) return 0;
   const n = sheet.getLastRow() - 1; if (n < 1) return 0;
   const codes = sheet.getRange(2, 1, n, 1).getValues().flat().map(c => String(c).trim().toUpperCase());
   const i = codes.indexOf(code); return i < 0 ? 0 : i + 2;
