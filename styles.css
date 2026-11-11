@@ -1205,3 +1205,9 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 }
 /* Centered buttons on small screens: keep the label vertically centered */
 @media (max-width: 960px) { .wraps-copy .btn, .cal-details .btn { display: flex; width: fit-content; } }
+/* Wrap photo frame: wider shape so the car fills it with less empty space above and below */
+.wraps .wrap-view { aspect-ratio: 16 / 10; }
+@media (max-width: 960px) {
+  .wraps-head { margin-bottom: 10px; }
+  .wraps-head > p { margin-bottom: 0; }
+}
