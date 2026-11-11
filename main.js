@@ -1060,3 +1060,131 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   form.addEventListener('submit', e => { e.preventDefault(); const q = input.value.trim(); if (!q) return; input.value = ''; log.querySelectorAll('.qa-chips').forEach(c => c.remove()); answer(q, match(q)); });
   log.addEventListener('click', e => { if (e.target.closest('.qa-links a') && window.matchMedia('(max-width: 600px)').matches) open(false); });
 })();
+
+// Detailing: link the chosen package straight to its Square booking page
+(() => {
+  const a = document.getElementById('dp-direct'); if (!a) return;
+  const BASE = 'https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services/';
+  const IDS = { quick: '7ZTIGMXDQ4HL6HVRJS6JO6DX', exterior: 'BSPHHWFPNNUTGAX5LX7GCDA5', interior: 'IGODDNWH3K5ATIKPHMQZYW3N',
+    full: 'IASMDZ6XEM3SARRHGXZR75L4', supercar: '3DCT6QACKJQJA2OJTKCCOPBN', moto: 'O5BF7TKXDWUPEFAOJORQ262T', 'moto-chain': 'O5BF7TKXDWUPEFAOJORQ262T' };
+  const radios = Array.from(document.querySelectorAll('input[name="dp-package"]'));
+  const sync = () => { const r = radios.find(x => x.checked); a.href = BASE + (r && IDS[r.value] ? IDS[r.value] : ''); };
+  document.addEventListener('change', e => { if (e.target.name === 'dp-package' || e.target.name === 'dp-size') setTimeout(sync, 0); });
+  sync();
+})();
+
+// Intake forms: send to the shop's Google Apps Script, which emails info@ and logs to the sheet
+(() => {
+  const forms = Array.from(document.querySelectorAll('form.intake')); if (!forms.length) return;
+  const API = 'https://script.google.com/macros/s/AKfycbx8Sn6HCIIp_OTcchfsYQ0iToENevinNXVJ2sY2JXbneoX_sZ_59M7P2fbvEreDIJqTrA/exec';
+  const MAX_PHOTOS = 5;
+
+  // "Get a quote" buttons pre-check the matching option in this page's form
+  document.addEventListener('click', ev => {
+    const a = ev.target.closest('a[data-pick]'); if (!a) return;
+    const box = forms[0].querySelector(`input[value="${CSS.escape(a.dataset.pick)}"]`);
+    if (box) box.checked = true;
+  });
+
+  const shrink = file => new Promise(resolve => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve({ name: file.name.replace(/\.[^.]+$/, '') + '.jpg', type: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.82).split(',')[1] });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+
+  const collect = form => Array.from(form.querySelectorAll('[data-label]')).filter(el => !el.classList.contains('if-photos')).map(el => {
+    const label = el.dataset.label;
+    const picks = Array.from(el.querySelectorAll('input[type=checkbox]:checked, input[type=radio]:checked')).map(i => i.value);
+    const ctl = el.querySelector('input:not([type=checkbox]):not([type=radio]), textarea, select');
+    return [label, picks.length ? picks.join(', ') : (ctl ? ctl.value.trim() : '')];
+  });
+
+  forms.forEach(form => {
+    const started = Date.now();
+    const status = form.querySelector('.if-status');
+    const btn = form.querySelector('button[type=submit]');
+    const fileIn = form.querySelector('.if-photos input[type=file]');
+    const thumbs = form.querySelector('.if-thumbs');
+    let files = [];
+
+    const drawThumbs = () => {
+      thumbs.innerHTML = '';
+      files.forEach((f, i) => {
+        const li = document.createElement('li');
+        const im = document.createElement('img'); im.src = URL.createObjectURL(f); im.alt = '';
+        const x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove ' + f.name);
+        x.addEventListener('click', () => { files.splice(i, 1); drawThumbs(); });
+        li.append(im, x); thumbs.append(li);
+      });
+    };
+    if (fileIn) fileIn.addEventListener('change', () => {
+      files = files.concat(Array.from(fileIn.files).filter(f => /^image\//.test(f.type) || /\.(heic|heif)$/i.test(f.name))).slice(0, MAX_PHOTOS);
+      fileIn.value = ''; drawThumbs();
+    });
+
+    // clear an error as soon as the field is fixed
+    const clearBad = ev => {
+      const f = ev.target.closest('.if'); if (f) f.classList.remove('is-bad');
+      if (!form.querySelector('.is-bad') && status.classList.contains('is-error')) { status.className = 'if-status'; status.textContent = ''; }
+    };
+    form.addEventListener('input', clearBad);
+    form.addEventListener('change', clearBad);
+
+    const validate = () => {
+      let first = null;
+      form.querySelectorAll('.if').forEach(f => f.classList.remove('is-bad'));
+      form.querySelectorAll('input[required], textarea[required]').forEach(i => {
+        const bad = !i.value.trim() || (i.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(i.value.trim())) ||
+          (i.type === 'tel' && i.value.replace(/\D/g, '').length < 10);
+        if (bad) { i.closest('.if').classList.add('is-bad'); first = first || i; }
+      });
+      form.querySelectorAll('fieldset[data-required]').forEach(fs => {
+        if (!fs.querySelector('input:checked')) { fs.classList.add('is-bad'); first = first || fs.querySelector('input'); }
+      });
+      if (first) { first.focus({ preventScroll: true }); first.closest('.if').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      return !first;
+    };
+
+    const fallback = fields => {
+      const body = fields.filter(f => f[1]).map(f => f[0] + ': ' + f[1]).join('\n');
+      const href = 'mailto:info@mainlineautoworks.com?subject=' + encodeURIComponent(form.dataset.form + ' request') + '&body=' + encodeURIComponent(body);
+      status.className = 'if-status is-error';
+      status.innerHTML = 'We couldn\'t send that just now. <a href="' + href + '">Send it by email instead</a> or call <a href="tel:+14845741628">(484) 574-1628</a>.';
+    };
+
+    form.addEventListener('submit', async ev => {
+      ev.preventDefault();
+      status.className = 'if-status'; status.textContent = '';
+      if (!validate()) { status.className = 'if-status is-error'; status.textContent = 'Please fill in the highlighted fields.'; return; }
+      const fields = collect(form);
+      btn.disabled = true; btn.textContent = files.length ? 'Uploading photos…' : 'Sending…';
+      try {
+        const photos = (await Promise.all(files.map(shrink))).filter(Boolean);
+        btn.textContent = 'Sending…';
+        const res = await fetch(API, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'intake', form: form.dataset.form, page: location.href, fields, photos,
+            website: form.querySelector('[name=website]').value, ms: Date.now() - started })
+        });
+        const out = await res.json();
+        if (!out.ok) throw new Error(out.error || 'failed');
+        const first = (fields.find(f => f[0] === 'First name') || [, ''])[1];
+        form.classList.add('is-sent');
+        form.innerHTML = '<div class="if-done"><span class="if-done-mark" aria-hidden="true">✓</span><h3>Thanks' + (first ? ', ' + first.replace(/[<>&"]/g, '') : '') +
+          '!</h3><p>Your request is in. We\'ll reach out soon with a price. Need us sooner? Call <a href="tel:+14845741628">(484) 574-1628</a>.</p></div>';
+        form.querySelector('h3').setAttribute('tabindex', '-1'); form.querySelector('h3').focus();
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'Send request';
+        fallback(fields);
+      }
+    });
+  });
+})();

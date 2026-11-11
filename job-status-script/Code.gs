@@ -7,14 +7,23 @@
  *              customer name and email that never reach the website.
  *   Updates  : one row per update, filled in by the "Job update" Google Form.
  *
+ *   Requests : one row per estimate form sent from the website (created automatically).
+ *
  * The website asks this script for ONE job at a time by its code, so the sheet stays private.
+ * The website's estimate forms post here too: each one is emailed to INBOX with the photos attached.
+ *
+ * After pasting a new version: Deploy > Manage deployments > pencil icon > Version: New version > Deploy.
+ * (Keep the same deployment so the website address doesn't change.)
  */
 
 const STAGES = ['Checked in', 'Prep & inspection', 'Install', 'Curing & finishing', 'Final inspection', 'Ready for pick-up'];
 const JOBS = 'Jobs';
 const UPDATES = 'Updates';
-const SITE = 'https://mainlineautoworks.com/track/';   // change if the site address changes
+const SITE = 'https://mainlineautoworks.github.io/main-line-auto/track/';   // switch to https://mainlineautoworks.com/track/ after the domain swap
 const SHOP = 'Main Line Auto Works';
+const INBOX = 'info@mainlineautoworks.com';           // where website estimate forms are sent
+const REQUESTS = 'Requests';
+const UPLOADS = 'Website form photos';                 // Google Drive folder for uploaded photos
 
 /* ---------- one-time setup ---------- */
 
@@ -167,4 +176,66 @@ function addUpdate(code, stageIndex, note, photo) {
 function randomCode(n) {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // no 0/O or 1/I/L, so codes are easy to read over the phone
   let s = ''; for (let i = 0; i < n; i++) s += chars[Math.floor(Math.random() * chars.length)]; return s;
+}
+
+
+/* ---------- website estimate forms post here ---------- */
+
+function doPost(e) {
+  const out = o => ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+  try {
+    const d = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    if (d.action !== 'intake') return out({ ok: false, error: 'unknown' });
+    if (d.website || (d.ms && d.ms < 3000)) return out({ ok: true });            // bots fill the hidden field or submit instantly
+    const clip = (v, n) => String(v == null ? '' : v).slice(0, n || 2000);
+    const fields = (Array.isArray(d.fields) ? d.fields : []).slice(0, 40).map(f => [clip(f[0], 80), clip(f[1])]);
+    const get = label => (fields.find(f => f[0] === label) || ['', ''])[1].trim();
+    const formName = clip(d.form, 60) || 'Website';
+    const name = (get('First name') + ' ' + get('Last name')).trim();
+    const email = get('Email'), phone = get('Phone'), vehicle = get('Vehicle');
+    if (!name || !phone || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return out({ ok: false, error: 'missing' });
+
+    // photos: attach to the email and keep a copy in Drive
+    const blobs = (Array.isArray(d.photos) ? d.photos : []).slice(0, 5).map((p, i) =>
+      Utilities.newBlob(Utilities.base64Decode(String(p.data || '')), 'image/jpeg',
+        (name.replace(/[^\w]+/g, '-') + '-' + (i + 1) + '.jpg')));
+    const links = [];
+    if (blobs.length) {
+      const it = DriveApp.getFoldersByName(UPLOADS);
+      const folder = it.hasNext() ? it.next() : DriveApp.createFolder(UPLOADS);
+      blobs.forEach(b => links.push(folder.createFile(b.copyBlob()).getUrl()));
+    }
+
+    const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    const rows = fields.filter(f => f[1]).map(f =>
+      '<tr><td style="padding:6px 14px 6px 0;color:#5b636a;vertical-align:top;white-space:nowrap">' + esc(f[0]) +
+      '</td><td style="padding:6px 0;font-weight:600">' + esc(f[1]) + '</td></tr>').join('');
+    const tel = phone.replace(/[^\d+]/g, '');
+    const html = '<div style="font-family:Arial,sans-serif;font-size:15px;color:#1D2125">' +
+      '<h2 style="margin:0 0 4px">' + esc(formName) + ' request</h2>' +
+      '<p style="margin:0 0 16px;color:#5b636a">From the website · <a href="tel:' + tel + '">Call</a> · <a href="sms:' + tel + '">Text</a> · Reply to this email to answer ' + esc(name.split(' ')[0]) + '</p>' +
+      '<table style="border-collapse:collapse">' + rows + '</table>' +
+      (blobs.length ? '<p style="margin-top:16px">' + blobs.length + ' photo' + (blobs.length > 1 ? 's' : '') + ' attached.</p>' : '') +
+      '<p style="margin-top:16px;color:#8C959D;font-size:12px">Sent from ' + esc(clip(d.page, 300)) + '</p></div>';
+    MailApp.sendEmail({
+      to: INBOX, replyTo: email, name: SHOP + ' website',
+      subject: formName + ' request: ' + name + (vehicle ? ' · ' + vehicle : ''),
+      htmlBody: html, attachments: blobs
+    });
+
+    // log it
+    const ss = SpreadsheetApp.getActive();
+    let sh = ss.getSheetByName(REQUESTS);
+    if (!sh) {
+      sh = ss.insertSheet(REQUESTS);
+      sh.getRange(1, 1, 1, 9).setValues([['Received', 'Form', 'Name', 'Phone', 'Email', 'Vehicle', 'Details', 'Photos', 'Status']]).setFontWeight('bold');
+      sh.setFrozenRows(1);
+    }
+    const skip = ['First name', 'Last name', 'Phone', 'Email', 'Vehicle'];
+    sh.appendRow([new Date(), formName, name, phone, email, vehicle,
+      fields.filter(f => f[1] && skip.indexOf(f[0]) < 0).map(f => f[0] + ': ' + f[1]).join('\n'), links.join('\n'), 'New']);
+    return out({ ok: true });
+  } catch (err) {
+    return out({ ok: false, error: String(err && err.message || err) });
+  }
 }

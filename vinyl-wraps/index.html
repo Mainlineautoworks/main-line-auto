@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110860">
+<link rel="stylesheet" href="../styles.css?v=202611111000">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -356,16 +356,18 @@
     </div>
   </section>
 
-  <section class="cta" id="estimate" aria-labelledby="estimate-h">
-    <div class="wrap cta-inner">
-      <div>
+  <section class="cta cta-form" id="estimate" aria-labelledby="estimate-h">
+    <div class="wrap cta-form-grid">
+      <div class="cta-form-intro">
         <h2 id="estimate-h">Get a free wrap estimate</h2>
         <p>Tell us the car and the look you're after. We'll come back with options and a price.</p>
+        <p class="cta-form-alt">Rather talk it through?</p>
+        <div class="hero-actions">
+          <a class="btn btn-dark" href="tel:+14845741628">Call (484) 574-1628</a>
+          <a class="btn btn-ghost" href="mailto:info@mainlineautoworks.com">Email us</a>
+        </div>
       </div>
-      <div class="hero-actions">
-        <a class="btn btn-dark" href="tel:+14845741628">Call (484) 574-1628</a>
-        <a class="btn btn-ghost" href="mailto:info@mainlineautoworks.com?subject=Wrap%20estimate%20request&amp;body=Year%2C%20make%20and%20model%3A%0AFull%20or%20partial%20wrap%3A%0AColor%20and%20finish%20I'm%20considering%3A%0ABest%20way%20to%20reach%20me%3A%0A">Email for an estimate</a>
-      </div>
+      <form class="intake" data-form="Vinyl wrap" novalidate><div class="if-row"><div class="if" data-label="First name"><label for="wrap-first">First name <span class="if-req" aria-hidden="true">*</span></label><input id="wrap-first" name="first" type="text" autocomplete="given-name" required></div><div class="if" data-label="Last name"><label for="wrap-last">Last name <span class="if-opt">optional</span></label><input id="wrap-last" name="last" type="text" autocomplete="family-name"></div></div><div class="if-row"><div class="if" data-label="Phone"><label for="wrap-phone">Phone <span class="if-req" aria-hidden="true">*</span></label><input id="wrap-phone" name="phone" type="tel" autocomplete="tel" required></div><div class="if" data-label="Email"><label for="wrap-email">Email <span class="if-req" aria-hidden="true">*</span></label><input id="wrap-email" name="email" type="email" autocomplete="email" required></div></div><div class="if" data-label="Vehicle"><label for="wrap-vehicle">Vehicle <span class="if-req" aria-hidden="true">*</span></label><input id="wrap-vehicle" name="vehicle" type="text" placeholder="Year, make and model" required></div><fieldset class="if if-chips" data-label="Coverage" data-required><legend>Coverage <span class="if-req" aria-hidden="true">*</span></legend><div class="if-chip-row"><label class="if-chip"><input type="checkbox" name="coverage" value="Full color change"><span>Full color change</span></label><label class="if-chip"><input type="checkbox" name="coverage" value="Partial (roof, hood, mirrors)"><span>Partial (roof, hood, mirrors)</span></label><label class="if-chip"><input type="checkbox" name="coverage" value="Chrome delete"><span>Chrome delete</span></label><label class="if-chip"><input type="checkbox" name="coverage" value="Stripes &amp; accents"><span>Stripes &amp; accents</span></label><label class="if-chip"><input type="checkbox" name="coverage" value="Not sure yet"><span>Not sure yet</span></label></div></fieldset><fieldset class="if if-chips" data-label="Finish"><legend>Finish <span class="if-opt">optional</span></legend><div class="if-chip-row"><label class="if-chip"><input type="checkbox" name="finish" value="Gloss"><span>Gloss</span></label><label class="if-chip"><input type="checkbox" name="finish" value="Satin"><span>Satin</span></label><label class="if-chip"><input type="checkbox" name="finish" value="Matte"><span>Matte</span></label><label class="if-chip"><input type="checkbox" name="finish" value="Metallic"><span>Metallic</span></label><label class="if-chip"><input type="checkbox" name="finish" value="Color-shift"><span>Color-shift</span></label><label class="if-chip"><input type="checkbox" name="finish" value="Carbon fiber"><span>Carbon fiber</span></label><label class="if-chip"><input type="checkbox" name="finish" value="Not sure"><span>Not sure</span></label></div></fieldset><div class="if" data-label="Color ideas"><label for="wrap-color">Color ideas <span class="if-opt">optional</span></label><input id="wrap-color" name="color" type="text" placeholder="Brand, color name, or a car you saw"></div><div class="if" data-label="Questions or notes"><label for="wrap-notes">Questions or notes <span class="if-opt">optional</span></label><textarea id="wrap-notes" name="notes" rows="3"></textarea></div><div class="if if-photos" data-label="Photos"><label for="wrap-photos">Photos <span class="if-opt">optional</span></label><p class="if-hint">Photos of the car help us check paint condition before we quote.</p><label class="if-drop"><input id="wrap-photos" type="file" accept="image/*" multiple><span>Add photos</span></label><ul class="if-thumbs" aria-live="polite"></ul></div><fieldset class="if if-chips" data-label="Best way to reach you"><legend>Best way to reach you <span class="if-opt">optional</span></legend><div class="if-chip-row"><label class="if-chip"><input type="radio" name="reach" value="Text"><span>Text</span></label><label class="if-chip"><input type="radio" name="reach" value="Call"><span>Call</span></label><label class="if-chip"><input type="radio" name="reach" value="Email"><span>Email</span></label></div></fieldset><div class="if-hp" aria-hidden="true"><label>Leave this empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div><div class="if-submit"><button class="btn btn-red" type="submit">Send request</button><p class="if-note">Goes straight to our team. We'll get back to you with a price.</p></div><p class="if-status" role="status" aria-live="polite"></p></form>
     </div>
   </section>
 
@@ -388,6 +390,6 @@
     <p>© <span id="year">2026</span> Main Line Auto Works</p>
   </div>
 </footer>
-<script src="../main.js?v=202611110930" defer></script>
+<script src="../main.js?v=202611111000" defer></script>
 </body>
 </html>

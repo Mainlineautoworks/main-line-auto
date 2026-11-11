@@ -1528,3 +1528,58 @@ body:has(.dp-bar.is-on) .qa { bottom: 92px; }
   .qa-panel { position: fixed; inset: auto 0 0 0; width: 100%; height: 85vh; border-radius: 16px 16px 0 0; }
 }
 @media print { .qa { display: none; } }
+
+/* ---------- Intake forms in the estimate section ---------- */
+.cta-form .cta-form-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+.cta-form-intro { position: sticky; top: 100px; }
+.cta-form-intro .hero-actions { margin-top: 14px; }
+.cta-form .cta-form-alt { margin-top: 28px; font-weight: 600; }
+.intake { background: var(--white); color: var(--graphite); border-radius: 8px; padding: clamp(20px, 3vw, 36px); box-shadow: 0 24px 60px rgba(29,33,37,.25); display: grid; gap: 18px; }
+.intake .if { display: grid; gap: 6px; min-width: 0; border: 0; margin: 0; padding: 0; }
+.intake .if-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.intake label, .intake legend { font-weight: 600; font-size: .95rem; padding: 0; }
+.intake .if-req { color: var(--red); }
+.intake .if-opt { color: var(--steel); font-weight: 400; font-size: .85rem; margin-left: 4px; }
+.intake .if-hint { margin: 0 0 4px; font-size: .88rem; color: var(--text-mid); max-width: none; }
+.intake input[type=text], .intake input[type=tel], .intake input[type=email], .intake input[type=date], .intake select, .intake textarea {
+  width: 100%; font: inherit; font-size: 1rem; color: var(--graphite); background: var(--pearl); border: 1.5px solid var(--alloy); border-radius: var(--radius); padding: 11px 12px; }
+.intake textarea { resize: vertical; min-height: 92px; }
+.intake input:focus, .intake select:focus, .intake textarea:focus { outline: none; border-color: var(--graphite); background: #fff; box-shadow: 0 0 0 3px rgba(29,33,37,.12); }
+.intake .if.is-bad input, .intake .if.is-bad textarea { border-color: var(--red); background: #fff5f5; }
+.intake fieldset.is-bad legend, .intake .if.is-bad > label { color: var(--red); }
+.intake .if-sub { margin: 6px 0 2px; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--steel); font-weight: 600; max-width: none; }
+.intake .if-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.intake .if-chip { position: relative; font-weight: 500; cursor: pointer; }
+.intake .if-chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.intake .if-chip span { display: inline-block; padding: 8px 14px; border: 1.5px solid var(--alloy); border-radius: 999px; background: var(--pearl); font-size: .92rem; line-height: 1.2; transition: background .15s, border-color .15s, color .15s; }
+.intake .if-chip:hover span { border-color: var(--steel); }
+.intake .if-chip input:checked + span { background: var(--graphite); border-color: var(--graphite); color: var(--white); }
+.intake .if-chip input:focus-visible + span { outline: 3px solid rgba(215,25,42,.45); outline-offset: 2px; }
+.intake fieldset.is-bad .if-chip span { border-color: var(--red); }
+.intake .if-drop { position: relative; display: flex; align-items: center; justify-content: center; border: 1.5px dashed var(--steel); border-radius: var(--radius); padding: 16px; background: var(--pearl); cursor: pointer; font-weight: 600; }
+.intake .if-drop:hover { border-color: var(--graphite); }
+.intake .if-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.intake .if-drop span::before { content: "+"; margin-right: 8px; color: var(--red); font-size: 1.2em; }
+.intake .if-thumbs { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.intake .if-thumbs:empty { display: none; }
+.intake .if-thumbs li { position: relative; width: 72px; height: 72px; }
+.intake .if-thumbs img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
+.intake .if-thumbs button { position: absolute; top: -6px; right: -6px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: var(--graphite); color: #fff; font-size: 16px; line-height: 1; cursor: pointer; }
+.intake .if-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.intake .if-submit { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 4px; }
+.intake .if-submit .btn { min-width: 190px; }
+.intake .if-submit .btn:disabled { opacity: .7; cursor: progress; }
+.intake .if-note { margin: 0; font-size: .85rem; color: var(--text-mid); max-width: 26em; }
+.intake .if-status { margin: 0; font-size: .95rem; max-width: none; }
+.intake .if-status:empty { display: none; }
+.intake .if-status.is-error { color: var(--red-deep); font-weight: 600; }
+.intake .if-status a { color: inherit; }
+.intake .if-done { text-align: center; padding: 28px 8px; }
+.intake .if-done-mark { display: inline-grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--red); color: #fff; font-size: 28px; }
+.intake .if-done h3 { margin: 16px 0 8px; font-size: 1.4rem; outline: none; }
+.intake .if-done p { margin: 0 auto; max-width: 26em; color: var(--text-mid); }
+@media (max-width: 860px) {
+  .cta-form .cta-form-grid { grid-template-columns: 1fr; }
+  .cta-form-intro { position: static; }
+}
+@media (max-width: 520px) { .intake .if-row { grid-template-columns: 1fr; } }
