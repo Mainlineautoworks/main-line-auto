@@ -677,3 +677,47 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   ['pointerup', 'pointercancel'].forEach(t => fx.addEventListener(t, () => { if (!down) return; down = false; measureSmear(); render(); if (A.smear) msg.textContent = 'Muddy. Now rinse it.'; }));
   const wait = setInterval(() => { if (ready()) { clearInterval(wait); drawGloss(); render(); } }, 200);
 })();
+
+// Job tracker (/track/): looks up a tracking code in jobs.json and shows progress + updates
+(() => {
+  const form = document.getElementById('tr-form'); if (!form) return;
+  const input = document.getElementById('tr-code'), result = document.getElementById('tr-result'), missing = document.getElementById('tr-missing');
+  const STAGES = ['Checked in', 'Prep & inspection', 'Install', 'Curing & finishing', 'Final inspection', 'Ready for pick-up'];
+  const dataUrl = new URL('../../jobs.json', ASSET_BASE).href;
+  let jobs = null;
+  const load = () => jobs ? Promise.resolve(jobs) : fetch(dataUrl + '?t=' + Date.now(), { cache: 'no-store' }).then(r => r.json()).then(j => (jobs = j));
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const fmtDate = d => { const t = new Date(d + 'T12:00:00'); return isNaN(t) ? d : t.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
+  const img = p => p ? new URL('../../' + p.replace(/^\/+/, ''), ASSET_BASE).href : '';
+  function show(code) {
+    code = code.trim().toUpperCase(); if (!code) return;
+    load().then(all => {
+      const key = Object.keys(all).find(k => k !== '_how_to' && k.toUpperCase() === code);
+      const job = key && all[key];
+      result.hidden = !job; missing.hidden = !!job;
+      if (!job) { missing.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      const st = Math.max(0, Math.min(5, Number(job.stage) || 0));
+      document.getElementById('tr-code-out').textContent = (key === 'DEMO' ? 'Sample job · ' : 'Tracking code · ') + key;
+      document.getElementById('tr-vehicle').textContent = job.vehicle || 'Your vehicle';
+      document.getElementById('tr-services').innerHTML = (job.services || []).map(s => `<li>${esc(s)}</li>`).join('');
+      document.getElementById('tr-ready').textContent = st === 5 ? 'Ready now' : (job.ready ? fmtDate(job.ready) : 'We’ll confirm soon');
+      document.getElementById('tr-status').textContent = STAGES[st];
+      document.querySelectorAll('#tr-steps li').forEach((li, i) => { li.className = i < st ? 'done' : i === st ? 'now' : ''; li.removeAttribute('aria-current'); if (i === st) li.setAttribute('aria-current', 'step'); });
+      document.getElementById('tr-steps').style.setProperty('--f', st / 5);
+      document.getElementById('tr-feed').innerHTML = (job.updates || []).map(u => `
+        <li>
+          <div class="tr-dot" aria-hidden="true"></div>
+          <div class="tr-entry">
+            <p class="tr-meta"><span>${esc(STAGES[Math.max(0, Math.min(5, Number(u.stage) || 0))])}</span>${esc(u.date || '')}</p>
+            <p>${esc(u.note || '')}</p>
+            ${u.photo ? `<img src="${esc(img(u.photo))}" alt="Photo from the shop: ${esc(u.note || 'progress update')}" loading="lazy">` : ''}
+          </div>
+        </li>`).join('') || '<li class="tr-empty">No updates yet. Check back soon.</li>';
+      history.replaceState(null, '', '?job=' + encodeURIComponent(key));
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(() => { result.hidden = true; missing.hidden = false; });
+  }
+  form.addEventListener('submit', e => { e.preventDefault(); show(input.value); });
+  document.getElementById('tr-demo').addEventListener('click', () => { input.value = 'DEMO'; show('DEMO'); });
+  const q = new URLSearchParams(location.search).get('job'); if (q) { input.value = q; show(q); }
+})();

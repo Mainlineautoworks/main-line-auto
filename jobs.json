@@ -1,0 +1,15 @@
+{
+  "_how_to": "Each job is keyed by its tracking code. stage: 0 Checked in, 1 Prep & inspection, 2 Install, 3 Curing & finishing, 4 Final inspection, 5 Ready for pick-up. Keep names, phone numbers and plates out of this file: it is public.",
+  "DEMO": {
+    "vehicle": "BMW M3 Competition",
+    "services": ["Full color change wrap, satin", "Full Front PPF", "Level II 5-Year ceramic coating"],
+    "stage": 3,
+    "ready": "2026-11-14",
+    "updates": [
+      { "date": "2026-11-12 3:40 PM", "stage": 3, "note": "Ceramic coating is on and curing overnight. Looking glossy.", "photo": "assets/img/ceramic.webp" },
+      { "date": "2026-11-11 5:15 PM", "stage": 2, "note": "Wrap is fully installed. Front PPF went on this afternoon.", "photo": "assets/img/ppf.webp" },
+      { "date": "2026-11-10 11:00 AM", "stage": 1, "note": "Full wash, clay and iron decon done. Paint looks great, no surprises.", "photo": "" },
+      { "date": "2026-11-10 8:30 AM", "stage": 0, "note": "Checked in. Keys tagged and photos taken all the way around.", "photo": "" }
+    ]
+  }
+}
