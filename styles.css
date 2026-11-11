@@ -1000,3 +1000,5 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .tw-pricing .wp-pay a { color: var(--graphite); }
 @media (max-width: 1080px) { .tw-pkgs > .tw-pkg { flex-basis: calc((100% - 20px) / 2); } }
 @media (max-width: 680px) { .tw-pkgs > .tw-pkg { flex-basis: 100%; } }
+.tw-pkg-art { padding: 10px 8px 4px; }
+.tw-pkg-art img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
