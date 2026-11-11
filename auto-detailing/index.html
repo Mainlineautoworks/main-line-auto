@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110430">
+<link rel="stylesheet" href="../styles.css?v=202611110440">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -49,7 +49,7 @@
       <a href="./" aria-current="page">Detailing</a>
       <a href="../#visit">Visit</a>
     </nav>
-    <a class="btn btn-red btn-sm" href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book a detail</a>
+    <a class="btn btn-red btn-sm" href="#book">Book a detail</a>
     <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-nav">Menu</button>
   </div>
   <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile" hidden>
@@ -236,15 +236,33 @@
           <ul class="dp-lines" id="dp-lines"></ul>
           <div class="dp-total"><span>Starting at</span><strong id="dp-total">$205</strong></div>
           <p class="dp-fine">"From" prices are for the smallest vehicle size. Larger vehicles and heavy soiling cost more. We'll confirm before we start.</p>
-          <a class="btn btn-red dp-book" href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book this detail</a>
+          <a class="btn btn-red dp-book" href="#book">Pick a time</a>
           <a class="btn btn-ghost-dark dp-call" href="tel:+14845741628">Call (484) 574-1628</a>
           <p class="dp-pickup">Pick-up and drop-off available</p>
         </aside>
       </div>
       <div class="dp-bar" id="dp-bar" aria-hidden="true">
         <div><span>Starting at</span><strong id="dp-bar-total">$205</strong></div>
-        <a class="btn btn-red" href="#dp-sum-h" tabindex="-1">Review &amp; book</a>
+        <a class="btn btn-red" href="#book" tabindex="-1">Pick a time</a>
       </div>
+    </div>
+  </section>
+
+  <section class="wp-section dp-booking" id="book" aria-labelledby="book-time-h">
+    <div class="wrap">
+      <div class="wp-head">
+        <h2 id="book-time-h">Pick a time</h2>
+        <p>See open times and book your detail right here. Your appointment goes straight into our calendar.</p>
+      </div>
+      <div class="dp-booking-note" id="dp-booking-note" aria-live="polite">
+        <span class="dp-num">i</span>
+        <p>You picked <strong id="dp-pick">Full Vehicle Detail</strong>. Choose it in the calendar below<span id="dp-pick-extras"></span>.</p>
+      </div>
+      <div class="dp-widget">
+        <!-- Start Square Appointments Embed Code --><script src='https://square.site/appointments/buyer/widget/nebfqje99efjsg/L55RAA17AA9Y0.js'></script><!-- End Square Appointments Embed Code -->
+        <noscript><p><a href="https://mainlineautoworks.square.site">Book online with Square</a></p></noscript>
+      </div>
+      <p class="dp-widget-alt">Calendar not loading? <a class="link" href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book on our Square site</a> or call <a class="link" href="tel:+14845741628">(484) 574-1628</a>.</p>
     </div>
   </section>
 
@@ -296,7 +314,7 @@
           <span class="coat-badge">Sale</span>
           <p class="dp-moto-price"><s>$175</s> <strong>$160</strong></p>
           <p>Add <strong>drive chain care</strong> for $40: chain cleaned of all residue and finished with a motorcycle-specific lubricant.</p>
-          <a class="btn btn-red" href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book a motorcycle detail</a>
+          <a class="btn btn-red" href="#book">Book a motorcycle detail</a>
         </div>
       </div>
     </div>
@@ -311,7 +329,7 @@
         <h2 id="mobile-h">Mobile detailing</h2>
         <p>Our van carries its own filtered water and its own power, so we never tap your home's or your office's. You get the same equipment and products we use in the shop, in your driveway or office lot.</p>
         <p>Rather drop it off? We'll pick your car up and bring it back while you're at work.</p>
-        <a class="btn btn-dark" href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book a mobile detail</a>
+        <a class="btn btn-dark" href="#book">Book a mobile detail</a>
       </div>
     </div>
   </section>
@@ -379,7 +397,7 @@
         <p>Pick a time online, or call and we'll fit you in.</p>
       </div>
       <div class="hero-actions">
-        <a class="btn btn-dark" href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book online</a>
+        <a class="btn btn-dark" href="#book">Book online</a>
         <a class="btn btn-ghost" href="tel:+14845741628">Call (484) 574-1628</a>
       </div>
     </div>
@@ -397,7 +415,7 @@
       <p>1444 Phoenixville Pike<br>West Chester, PA 19380</p>
     </div>
     <div>
-      <p><a href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book online</a><br><a href="https://www.instagram.com/mainlineautoworks/" target="_blank" rel="noopener">Instagram</a><br><a href="https://squareup.com/gift/MLZG3Z7PYS6BK/order" target="_blank" rel="noopener">Gift cards</a></p>
+      <p><a href="#book">Book online</a><br><a href="https://www.instagram.com/mainlineautoworks/" target="_blank" rel="noopener">Instagram</a><br><a href="https://squareup.com/gift/MLZG3Z7PYS6BK/order" target="_blank" rel="noopener">Gift cards</a></p>
     </div>
   </div>
   <div class="wrap footer-base">
@@ -405,6 +423,6 @@
   </div>
 </footer>
 
-<script src="../main.js?v=202611110430" defer></script>
+<script src="../main.js?v=202611110440" defer></script>
 </body>
 </html>

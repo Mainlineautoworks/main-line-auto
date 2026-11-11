@@ -330,6 +330,9 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     lines.innerHTML = rows.join('');
     total.textContent = money(sum);
     const barTotal = document.getElementById('dp-bar-total'); if (barTotal) barTotal.textContent = money(sum);
+    const pick = document.getElementById('dp-pick'), extras = document.getElementById('dp-pick-extras');
+    if (pick) pick.textContent = pkg.dataset.name;
+    if (extras) extras.textContent = picked.length ? ', then add ' + picked.map(b => b.dataset.name.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1') : '';
   }
   radios.forEach(r => r.addEventListener('change', update));
   boxes.forEach(b => b.addEventListener('change', update));
