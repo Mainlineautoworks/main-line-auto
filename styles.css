@@ -1446,3 +1446,23 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .dp-booking { padding-bottom: clamp(28px, 4vw, 44px); }
 .dp-booking + .dg { padding-top: clamp(28px, 4vw, 44px); }
 .dg .wp-head { margin-bottom: clamp(20px, 3vw, 32px); }
+
+/* Detail Dash: dark "arcade" panel so it stands apart from the booking and compare sections */
+.dg { position: relative; overflow: hidden; background: var(--graphite); color: var(--pearl); }
+.dp-booking + .dg { padding-top: clamp(48px, 6vw, 80px); padding-bottom: clamp(48px, 6vw, 80px); }
+.dg::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.641' height='60' viewBox='0 0 34.641 60'%3E%3Cpath d='M17.32 -20.00 L34.64 -10.00 L34.64 10.00 L17.32 20.00 L0.00 10.00 L0.00 -10.00 Z M17.32 40.00 L34.64 50.00 L34.64 70.00 L17.32 80.00 L0.00 70.00 L0.00 50.00 Z M0.00 10.00 L17.32 20.00 L17.32 40.00 L0.00 50.00 L-17.32 40.00 L-17.32 20.00 Z M34.64 10.00 L51.96 20.00 L51.96 40.00 L34.64 50.00 L17.32 40.00 L17.32 20.00 Z' fill='none' stroke='%23d81e2c' stroke-width='1.2'/%3E%3C/svg%3E"); background-size: 31.18px 54px; opacity: .16;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 10%, transparent 75%); mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 10%, transparent 75%); }
+.dg .wrap { position: relative; }
+.dg .wp-head h2 { color: var(--white); }
+.dg .wp-head p { color: var(--alloy); }
+.dg .wp-head .pp-tag { color: var(--red); }
+.dg .dg-steps li { background: var(--gunmetal); border-color: rgba(255,255,255,.08); color: var(--steel); }
+.dg .dg-steps li span { background: rgba(255,255,255,.08); color: var(--alloy); }
+.dg .dg-steps li.now { color: var(--white); border-color: var(--red); }
+.dg .dg-steps li.done { color: var(--pearl); }
+.dg .dg-steps li.done span { background: var(--pearl); color: var(--graphite); }
+.dg .dg-stage { box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 24px 60px -24px rgba(0,0,0,.8); }
+.dg .dg-tool span { color: var(--alloy); }
+.dg .dg-meter { background: rgba(255,255,255,.1); }
+.dg .dg-clock strong { color: var(--white); }
+.dg .dg-clock span { color: var(--steel); }
