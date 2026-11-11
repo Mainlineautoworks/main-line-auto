@@ -742,6 +742,47 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   const NEED = 0.82, CELL = 10, GW = Math.ceil(W / CELL), GH = Math.ceil(H / CELL);
   let paintCells = null, paintCount = 0, touched = new Uint8Array(GW * GH), step = -1, t0 = 0, tick = 0, done = [false, false], playing = false, down = false, last = null;
   const imgs = {}; ['road', 'bugs', 'drops'].forEach(k => { imgs[k] = new Image(); imgs[k].src = asset(`grime-${k}.webp`); });
+  const foamTex = new Image(); foamTex.src = asset('foam-tex.webp');
+  const fm = document.createElement('canvas'); fm.width = WW; fm.height = HH; const fmc = fm.getContext('2d');   // where foam sits, and how thick
+  let parts = [], drips = [], nozzle = null, loop = 0;
+  function drawFoam() {
+    const f = layers.foam; f.clearRect(0, 0, WW, HH); if (!foamTex.complete) return;
+    f.globalCompositeOperation = 'source-over'; f.drawImage(foamTex, 0, 0);
+    f.globalCompositeOperation = 'destination-in'; f.drawImage(fm, 0, 0); f.globalCompositeOperation = 'source-over';
+  }
+  const eraseFoam = (X, Y, RR, a) => { fmc.globalCompositeOperation = 'destination-out'; soft(fmc, X, Y, RR, `rgba(0,0,0,${a})`, 'rgba(0,0,0,0)'); fmc.globalCompositeOperation = 'source-over'; };
+  // foam cannon: a cone of spray from the nozzle, foam piles up where it lands and slowly drips
+  function foamLoop() {
+    const f = layers.fx; f.clearRect(0, 0, WW, HH); let live = false;
+    if (nozzle && down && step === 0) {
+      live = true; const [nx, ny, tx, ty, r] = nozzle;
+      for (let i = 0; i < 26; i++) { const a = Math.random() * 6.283, d = Math.sqrt(Math.random()) * r; parts.push({ x: nx, y: ny, tx: tx + Math.cos(a) * d, ty: ty + Math.sin(a) * d * 0.8, t: 0, life: 7 + Math.random() * 5 }); }
+    }
+    fmc.fillStyle = '#000';
+    for (const p of parts) {
+      p.t++; const k1 = p.t / p.life, px = p.x + (p.tx - p.x) * k1, py = p.y + (p.ty - p.y) * k1 + Math.sin(k1 * 3.14) * -6 * R;
+      f.beginPath(); f.arc(px, py, (1 + k1 * 2.2) * R, 0, 7); f.fillStyle = `rgba(255,255,255,${0.55 + k1 * 0.35})`; f.fill();
+      if (p.t >= p.life) { // splat into the foam layer
+        const s = (3 + Math.random() * 7) * R; fmc.globalAlpha = 0.18 + Math.random() * 0.22; fmc.beginPath(); fmc.ellipse(p.tx, p.ty, s * 1.2, s, Math.random() * 3, 0, 7); fmc.fill(); fmc.globalAlpha = 1;
+        if (Math.random() < 0.006) drips.push({ x: p.tx, y: p.ty, len: 0, max: (10 + Math.random() * 34) * R, w: (2 + Math.random() * 3) * R });
+      }
+    }
+    parts = parts.filter(p => p.t < p.life); if (parts.length) live = true;
+    for (const d of drips) { if (d.len >= d.max) continue; live = true; d.len += 0.7 * R; fmc.globalAlpha = 0.35; fmc.beginPath(); fmc.ellipse(d.x, d.y + d.len, d.w, d.w * 1.5, 0, 0, 7); fmc.fill(); fmc.globalAlpha = 1; }
+    drips = drips.filter(d => d.len < d.max);
+    if (nozzle && down && step === 0) { // the foam cannon itself
+      const [nx, ny, tx, ty] = nozzle, ang = Math.atan2(ty - ny, tx - nx);
+      f.save(); f.translate(nx, ny); f.rotate(ang);
+      f.fillStyle = '#23272c'; f.beginPath(); f.roundRect(-70 * R, -5 * R, 62 * R, 10 * R, 4 * R); f.fill();
+      f.fillStyle = '#b08a3e'; f.beginPath(); f.roundRect(-10 * R, -6.5 * R, 12 * R, 13 * R, 3 * R); f.fill();
+      const cone = f.createLinearGradient(0, 0, 60 * R, 0); cone.addColorStop(0, 'rgba(255,255,255,.55)'); cone.addColorStop(1, 'rgba(255,255,255,0)');
+      f.fillStyle = cone; f.beginPath(); f.moveTo(2 * R, -4 * R); f.lineTo(70 * R, -26 * R); f.lineTo(70 * R, 26 * R); f.lineTo(2 * R, 4 * R); f.closePath(); f.fill();
+      f.restore();
+    } else if (last && playing && step < 5 && step > 0) { const r = TOOLS[step].r * k() * R; f.beginPath(); f.arc(last[0] * R, last[1] * R, r, 0, 7); f.strokeStyle = 'rgba(216,30,44,.85)'; f.lineWidth = 2.5 * R; f.stroke(); }
+    drawFoam();
+    loop = live ? requestAnimationFrame(foamLoop) : 0;
+  }
+  const kickFoam = () => { if (!loop) loop = requestAnimationFrame(foamLoop); };
   const zi = new Image(); zi.src = asset('ppf-zones.png');
   zi.onload = () => {
     const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'); x.drawImage(zi, 0, 0);
@@ -756,7 +797,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   const showBest = () => { $('dg-best').textContent = best ? `Best: ${best.toFixed(1)}s` : 'Best: none yet'; };
   showBest();
   function dirty() {
-    Object.values(layers).forEach(c => c.clearRect(0, 0, WW, HH));
+    Object.values(layers).forEach(c => c.clearRect(0, 0, WW, HH)); fmc.clearRect(0, 0, WW, HH); parts = []; drips = []; nozzle = null;
     const d = layers.dirt; ['road', 'bugs', 'drops'].forEach(n => { if (imgs[n].complete) d.drawImage(imgs[n], 0, 0); });
     d.globalCompositeOperation = 'source-atop'; d.fillStyle = 'rgba(120,100,75,.10)'; d.fillRect(0, 0, WW, HH); d.globalCompositeOperation = 'source-over';
     // dull, dusty tires
@@ -778,17 +819,12 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   function soft(ctx, x, y, r, inner, outer) { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, inner); g.addColorStop(1, outer); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); }
   function stamp(x, y) {
     const r = TOOLS[step].r * k(), X = x * R, Y = y * R, RR = r * R;
-    if (step === 0) { // foam: thick white suds
-      const f = layers.foam;
-      for (let i = 0; i < 14; i++) { const a = Math.random() * 6.3, d = Math.random() * RR, s = (4 + Math.random() * 10) * R;
-        const px = X + Math.cos(a) * d, py = Y + Math.sin(a) * d; soft(f, px, py, s, 'rgba(255,255,255,.95)', 'rgba(235,242,250,.0)');
-        f.beginPath(); f.arc(px - s * 0.3, py - s * 0.3, s * 0.25, 0, 7); f.fillStyle = 'rgba(255,255,255,.9)'; f.fill(); }
-    } else if (step === 1) { // scrub: grime lifts into the suds
+    if (step === 0) { // foam cannon: aim from up and to the left, spray lands around the pointer
+      nozzle = [X - 150 * R * k(), Y - 95 * R * k(), X, Y, RR]; kickFoam();    } else if (step === 1) { // scrub: grime lifts into the suds
       const d = layers.dirt; d.globalCompositeOperation = 'destination-out'; soft(d, X, Y, RR, 'rgba(0,0,0,.9)', 'rgba(0,0,0,0)'); d.globalCompositeOperation = 'source-over';
-      const f = layers.foam; f.globalCompositeOperation = 'destination-out'; soft(f, X, Y, RR * 0.9, 'rgba(0,0,0,.35)', 'rgba(0,0,0,0)'); f.globalCompositeOperation = 'source-over';
-      soft(f, X, Y, RR * 0.6, 'rgba(205,190,165,.18)', 'rgba(205,190,165,0)');
+      eraseFoam(X, Y, RR * 0.9, 0.3); drawFoam();
     } else if (step === 2) { // rinse: suds and leftover grime wash away, droplets stay
-      ['foam', 'dirt'].forEach(n => { const c = layers[n]; c.globalCompositeOperation = 'destination-out'; soft(c, X, Y, RR, 'rgba(0,0,0,1)', 'rgba(0,0,0,0)'); c.globalCompositeOperation = 'source-over'; });
+      eraseFoam(X, Y, RR, 1); drawFoam(); const c = layers.dirt; c.globalCompositeOperation = 'destination-out'; soft(c, X, Y, RR, 'rgba(0,0,0,1)', 'rgba(0,0,0,0)'); c.globalCompositeOperation = 'source-over';
       const w = layers.water; for (let i = 0; i < 6; i++) { const a = Math.random() * 6.3, d = Math.random() * RR, s = (1.2 + Math.random() * 2.6) * R; const px = X + Math.cos(a) * d, py = Y + Math.sin(a) * d;
         w.beginPath(); w.arc(px, py, s, 0, 7); w.fillStyle = 'rgba(170,200,225,.55)'; w.fill(); w.beginPath(); w.arc(px - s * 0.35, py - s * 0.35, s * 0.35, 0, 7); w.fillStyle = 'rgba(255,255,255,.95)'; w.fill(); }
     } else if (step === 3) { // dry
@@ -801,9 +837,9 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     if (c >= NEED) finishStep();
   }
   function finishStep() {
-    if (step === 0) { const f = layers.foam; f.fillStyle = 'rgba(255,255,255,.55)'; f.fillRect(0, 0, WW, HH); }
+    if (step === 0) { fmc.globalAlpha = 0.75; fmc.fillStyle = '#000'; fmc.fillRect(0, 0, WW, HH); fmc.globalAlpha = 1; parts = []; nozzle = null; drawFoam(); }
     if (step === 1) { const d = layers.dirt; d.globalCompositeOperation = 'destination-out'; d.fillStyle = 'rgba(0,0,0,.85)'; d.fillRect(0, 0, WW, HH); d.globalCompositeOperation = 'source-over'; }
-    if (step === 2) { layers.foam.clearRect(0, 0, WW, HH); layers.dirt.clearRect(0, 0, WW, HH); }
+    if (step === 2) { fmc.clearRect(0, 0, WW, HH); drips = []; drawFoam(); layers.dirt.clearRect(0, 0, WW, HH); }
     if (step === 3) layers.water.clearRect(0, 0, WW, HH);
     if (step === 4) { const s = layers.shine; s.clearRect(0, 0, WW, HH); const g = s.createLinearGradient(0, 0, WW * 0.7, HH);
       g.addColorStop(0.25, 'rgba(255,255,255,0)'); g.addColorStop(0.42, 'rgba(255,255,255,.55)'); g.addColorStop(0.5, 'rgba(210,235,255,.35)'); g.addColorStop(0.62, 'rgba(255,255,255,0)'); s.fillStyle = g; s.fillRect(0, 0, WW, HH); }
@@ -822,6 +858,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     if (done[0] && done[1]) win();
   }
   function cursor(x, y) {
+    if (step === 0 && (down || loop)) return;
     const f = layers.fx; f.clearRect(0, 0, WW, HH); if (!playing || step > 4) return;
     const r = TOOLS[step].r * k() * R; f.beginPath(); f.arc(x * R, y * R, r, 0, 7); f.strokeStyle = 'rgba(216,30,44,.85)'; f.lineWidth = 2.5 * R; f.stroke();
     if (step === 2 && down) { f.strokeStyle = 'rgba(190,225,255,.75)'; f.lineWidth = 1.5 * R; for (let i = 0; i < 12; i++) { const ox = x * R - (60 + Math.random() * 40) * R, oy = y * R - (90 + Math.random() * 30) * R; f.beginPath(); f.moveTo(ox, oy); f.lineTo(x * R + (Math.random() - 0.5) * r, y * R + (Math.random() - 0.5) * r); f.stroke(); } }
@@ -839,7 +876,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     for (let s = stepLen; s <= d; s += stepLen) { stamp(last[0] + dx * s / d, last[1] + dy * s / d); if (!playing || step > 4) break; }
     if (d >= stepLen) last = p;
   });
-  ['pointerup', 'pointercancel'].forEach(t => fx.addEventListener(t, () => { down = false; }));
+  ['pointerup', 'pointercancel'].forEach(t => fx.addEventListener(t, () => { down = false; nozzle = null; kickFoam(); }));
   fx.addEventListener('pointerleave', () => { if (!down) layers.fx.clearRect(0, 0, WW, HH); });
   function start() {
     dirty(); done = [false, false]; setStep(0); playing = true; t0 = performance.now();
