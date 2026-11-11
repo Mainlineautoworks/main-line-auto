@@ -751,6 +751,67 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     f.globalCompositeOperation = 'destination-in'; f.drawImage(fm, 0, 0); f.globalCompositeOperation = 'source-over';
   }
   const eraseFoam = (X, Y, RR, a) => { fmc.globalCompositeOperation = 'destination-out'; soft(fmc, X, Y, RR, `rgba(0,0,0,${a})`, 'rgba(0,0,0,0)'); fmc.globalCompositeOperation = 'source-over'; };
+  let ptr = null, hover = false, bits = [];
+  const PORES = Array.from({ length: 34 }, () => [Math.random() - 0.5, Math.random() - 0.5, 0.6 + Math.random()]);
+  function wand(f, nx, ny, tx, ty, len, thick, tipCol) {
+    const ang = Math.atan2(ty - ny, tx - nx); f.save(); f.translate(nx, ny); f.rotate(ang);
+    f.fillStyle = 'rgba(0,0,0,.18)'; f.beginPath(); f.roundRect(-len * R + 3 * R, -thick * R / 2 + 4 * R, len * R - 8 * R, thick * R, 4 * R); f.fill();
+    f.fillStyle = '#23272c'; f.beginPath(); f.roundRect(-len * R, -thick * R / 2, len * R - 8 * R, thick * R, 4 * R); f.fill();
+    f.fillStyle = 'rgba(255,255,255,.18)'; f.fillRect(-len * R + 4 * R, -thick * R / 2 + 1.5 * R, len * R - 16 * R, 2 * R);
+    f.fillStyle = tipCol; f.beginPath(); f.roundRect(-10 * R, -(thick / 2 + 1.5) * R, 12 * R, (thick + 3) * R, 3 * R); f.fill();
+    f.restore(); return ang;
+  }
+  function drawTool(f, x, y, now) {
+    const K = k(), X = x * R, Y = y * R, r = TOOLS[step].r * K * R;
+    if (step > 0) { f.setLineDash([5 * R, 5 * R]); f.beginPath(); f.arc(X, Y, r, 0, 7); f.strokeStyle = 'rgba(216,30,44,.45)'; f.lineWidth = 1.5 * R; f.stroke(); f.setLineDash([]); }
+    if (step === 0) { // foam cannon
+      const nx = X - 150 * R * K, ny = Y - 95 * R * K; wand(f, nx, ny, X, Y, 70, 10, '#b08a3e');
+      if (down) { const ang = Math.atan2(Y - ny, X - nx); f.save(); f.translate(nx, ny); f.rotate(ang);
+        const cone = f.createLinearGradient(0, 0, 60 * R, 0); cone.addColorStop(0, 'rgba(255,255,255,.55)'); cone.addColorStop(1, 'rgba(255,255,255,0)');
+        f.fillStyle = cone; f.beginPath(); f.moveTo(2 * R, -4 * R); f.lineTo(70 * R, -26 * R); f.lineTo(70 * R, 26 * R); f.lineTo(2 * R, 4 * R); f.closePath(); f.fill(); f.restore(); }
+    } else if (step === 1) { // sponge, scrubbing back and forth while pressed
+      const wob = down ? Math.sin(now / 55) : 0;
+      f.save(); f.translate(X + wob * 4 * R, Y + Math.cos(now / 55) * (down ? 2 : 0) * R); f.rotate(-0.22 + wob * 0.12);
+      const w = 74 * K * R, h = 48 * K * R;
+      f.fillStyle = 'rgba(0,0,0,.22)'; f.beginPath(); f.roundRect(-w / 2 + 4 * R, -h / 2 + 6 * R, w, h, 10 * R); f.fill();
+      const gr = f.createLinearGradient(0, -h / 2, 0, h / 2); gr.addColorStop(0, '#FFD45E'); gr.addColorStop(1, '#E9A62C');
+      f.fillStyle = gr; f.beginPath(); f.roundRect(-w / 2, -h / 2, w, h, 10 * R); f.fill();
+      f.fillStyle = '#3E9C5A'; f.beginPath(); f.roundRect(-w / 2, h / 2 - h * 0.26, w, h * 0.26, [0, 0, 10 * R, 10 * R]); f.fill();
+      f.fillStyle = 'rgba(176,112,20,.55)'; for (const [px, py, s] of PORES) { if (py * h > h / 2 - h * 0.3) continue; f.beginPath(); f.arc(px * w * 0.9, py * h * 0.8, s * 1.4 * R, 0, 7); f.fill(); }
+      f.fillStyle = 'rgba(255,255,255,.85)'; for (let i = 0; i < 5; i++) { f.beginPath(); f.arc(-w / 2 + (i + 0.5) * w / 5, h / 2 - h * 0.28, (3 + (i % 2) * 2) * R, 0, 7); f.fill(); }
+      f.restore();
+    } else if (step === 2) { // pressure washer wand with a flat fan of water
+      const nx = X - 140 * R * K, ny = Y - 110 * R * K, ang = wand(f, nx, ny, X, Y, 90, 7, '#9aa3ac');
+      if (down) { f.save(); f.translate(nx, ny); f.rotate(ang); const dist = Math.hypot(X - nx, Y - ny);
+        const fan = f.createLinearGradient(0, 0, dist, 0); fan.addColorStop(0, 'rgba(210,235,255,.65)'); fan.addColorStop(1, 'rgba(210,235,255,.12)');
+        f.fillStyle = fan; f.beginPath(); f.moveTo(2 * R, -2 * R); f.lineTo(dist, -r * 0.9); f.lineTo(dist, r * 0.9); f.lineTo(2 * R, 2 * R); f.closePath(); f.fill();
+        f.strokeStyle = 'rgba(255,255,255,.7)'; f.lineWidth = 1 * R; for (let i = 0; i < 9; i++) { const sp = (Math.random() - 0.5) * r * 1.6; f.beginPath(); f.moveTo(4 * R, 0); f.lineTo(dist, sp); f.stroke(); }
+        f.restore(); }
+    } else if (step === 3) { // air blower
+      const nx = X - 125 * R * K, ny = Y - 85 * R * K, ang = Math.atan2(Y - ny, X - nx);
+      f.save(); f.translate(nx, ny); f.rotate(ang);
+      f.fillStyle = 'rgba(0,0,0,.2)'; f.beginPath(); f.ellipse(-46 * R, 8 * R, 34 * R, 20 * R, 0, 0, 7); f.fill();
+      f.fillStyle = '#2B3137'; f.beginPath(); f.ellipse(-48 * R, 0, 34 * R, 20 * R, 0, 0, 7); f.fill();
+      f.fillStyle = '#D7192A'; f.beginPath(); f.roundRect(-70 * R, -4 * R, 30 * R, 8 * R, 3 * R); f.fill();
+      f.fillStyle = '#3C444B'; f.beginPath(); f.moveTo(-16 * R, -11 * R); f.lineTo(10 * R, -6 * R); f.lineTo(10 * R, 6 * R); f.lineTo(-16 * R, 11 * R); f.closePath(); f.fill();
+      f.fillStyle = '#1D2125'; f.beginPath(); f.roundRect(-58 * R, -30 * R, 20 * R, 14 * R, 4 * R); f.fill();
+      if (down) { const dist = Math.hypot(X - nx, Y - ny); f.strokeStyle = 'rgba(235,245,255,.55)'; f.lineWidth = 1.6 * R;
+        for (let i = 0; i < 6; i++) { const off = ((now / 6 + i * 23) % 60) * R, sp = (i - 2.5) * 5 * R; f.beginPath(); f.moveTo(12 * R + off, sp * 0.3);
+          f.quadraticCurveTo(dist * 0.6 + off * 0.3, sp + Math.sin(now / 80 + i) * 4 * R, dist, sp * 2.2); f.stroke(); } }
+      f.restore();
+    } else if (step === 4) { // dual-action polisher, seen from above
+      const spin = now / (down ? 18 : 140), orb = down ? 3 * R : 0, cx = X + Math.cos(now / 22) * orb, cy = Y + Math.sin(now / 22) * orb, pr = 30 * K * R;
+      f.fillStyle = 'rgba(0,0,0,.22)'; f.beginPath(); f.arc(cx + 4 * R, cy + 6 * R, pr * 1.06, 0, 7); f.fill();
+      f.save(); f.translate(X, Y); f.rotate(-0.7);
+      f.fillStyle = '#2B3137'; f.beginPath(); f.roundRect(pr * 0.3, -11 * R, 78 * R * K, 22 * R, 10 * R); f.fill();
+      f.fillStyle = '#D7192A'; f.fillRect(pr * 0.3 + 30 * R * K, -11 * R, 14 * R * K, 22 * R); f.restore();
+      f.fillStyle = '#E8692E'; f.beginPath(); f.arc(cx, cy, pr, 0, 7); f.fill();
+      f.fillStyle = '#C9521F'; f.beginPath(); f.arc(cx, cy, pr * 0.62, 0, 7); f.fill();
+      f.fillStyle = '#23272c'; f.beginPath(); f.arc(cx, cy, pr * 0.42, 0, 7); f.fill();
+      f.strokeStyle = 'rgba(255,255,255,.35)'; f.lineWidth = 2 * R; for (let i = 0; i < 3; i++) { const a0 = spin + i * 2.09; f.beginPath(); f.arc(cx, cy, pr * 0.82, a0, a0 + 0.9); f.stroke(); }
+      f.fillStyle = '#9aa3ac'; f.beginPath(); f.arc(cx, cy, pr * 0.12, 0, 7); f.fill();
+    }
+  }
   // foam cannon: a cone of spray from the nozzle, foam piles up where it lands and slowly drips
   function foamLoop() {
     const f = layers.fx; f.clearRect(0, 0, WW, HH); let live = false;
@@ -770,15 +831,12 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     parts = parts.filter(p => p.t < p.life); if (parts.length) live = true;
     for (const d of drips) { if (d.len >= d.max) continue; live = true; d.len += 0.7 * R; fmc.globalAlpha = 0.35; fmc.beginPath(); fmc.ellipse(d.x, d.y + d.len, d.w, d.w * 1.5, 0, 0, 7); fmc.fill(); fmc.globalAlpha = 1; }
     drips = drips.filter(d => d.len < d.max);
-    if (nozzle && down && step === 0) { // the foam cannon itself
-      const [nx, ny, tx, ty] = nozzle, ang = Math.atan2(ty - ny, tx - nx);
-      f.save(); f.translate(nx, ny); f.rotate(ang);
-      f.fillStyle = '#23272c'; f.beginPath(); f.roundRect(-70 * R, -5 * R, 62 * R, 10 * R, 4 * R); f.fill();
-      f.fillStyle = '#b08a3e'; f.beginPath(); f.roundRect(-10 * R, -6.5 * R, 12 * R, 13 * R, 3 * R); f.fill();
-      const cone = f.createLinearGradient(0, 0, 60 * R, 0); cone.addColorStop(0, 'rgba(255,255,255,.55)'); cone.addColorStop(1, 'rgba(255,255,255,0)');
-      f.fillStyle = cone; f.beginPath(); f.moveTo(2 * R, -4 * R); f.lineTo(70 * R, -26 * R); f.lineTo(70 * R, 26 * R); f.lineTo(2 * R, 4 * R); f.closePath(); f.fill();
-      f.restore();
-    } else if (last && playing && step < 5 && step > 0) { const r = TOOLS[step].r * k() * R; f.beginPath(); f.arc(last[0] * R, last[1] * R, r, 0, 7); f.strokeStyle = 'rgba(216,30,44,.85)'; f.lineWidth = 2.5 * R; f.stroke(); }
+    for (const p of bits) { p.t++; p.x += p.vx; p.y += p.vy; p.vy += p.g; const al = 1 - p.t / p.life;
+      if (p.kind === 'bub') { f.beginPath(); f.arc(p.x, p.y, p.r, 0, 7); f.strokeStyle = `rgba(255,255,255,${al * 0.9})`; f.lineWidth = 1.2 * R; f.stroke(); f.beginPath(); f.arc(p.x - p.r * 0.35, p.y - p.r * 0.35, p.r * 0.25, 0, 7); f.fillStyle = `rgba(255,255,255,${al})`; f.fill(); }
+      else if (p.kind === 'drop') { f.beginPath(); f.ellipse(p.x, p.y, p.r * 1.6, p.r, Math.atan2(p.vy, p.vx), 0, 7); f.fillStyle = `rgba(200,225,245,${al * 0.9})`; f.fill(); }
+      else { f.beginPath(); f.arc(p.x, p.y, p.r * (1 + p.t / p.life), 0, 7); f.fillStyle = `rgba(255,255,255,${al * 0.7})`; f.fill(); } }
+    bits = bits.filter(p => p.t < p.life); if (bits.length) live = true;
+    if (ptr && playing && hover && step < 5) { drawTool(f, ptr[0], ptr[1], performance.now()); live = true; }
     drawFoam();
     loop = live ? requestAnimationFrame(foamLoop) : 0;
   }
@@ -832,6 +890,9 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     } else if (step === 4) { // wax & buff: build up a glossy sheen
       soft(layers.shine, X, Y, RR, 'rgba(255,255,255,.16)', 'rgba(255,255,255,0)');
     }
+    if (step === 1 && Math.random() < 0.6) bits.push({ kind: 'bub', x: X + (Math.random() - 0.5) * RR * 1.4, y: Y + (Math.random() - 0.5) * RR, vx: (Math.random() - 0.5) * 0.6 * R, vy: -(0.3 + Math.random() * 0.6) * R, g: 0, r: (2 + Math.random() * 4) * R, t: 0, life: 40 });
+    if (step === 3) { const dx = X - (X - 125 * R * k()), dy = Y - (Y - 85 * R * k()), dl = Math.hypot(dx, dy); for (let i = 0; i < 4; i++) bits.push({ kind: 'drop', x: X + (Math.random() - 0.5) * RR, y: Y + (Math.random() - 0.5) * RR, vx: (dx / dl * 3 + (Math.random() - 0.5) * 2) * R, vy: (dy / dl * 3 + (Math.random() - 0.5) * 2) * R, g: 0.08 * R, r: (1.2 + Math.random() * 1.6) * R, t: 0, life: 22 }); }
+    if (step === 4 && Math.random() < 0.3) bits.push({ kind: 'glint', x: X + (Math.random() - 0.5) * RR, y: Y + (Math.random() - 0.5) * RR, vx: 0, vy: 0, g: 0, r: 2 * R, t: 0, life: 18 });
     mark(x, y, r * 0.8);
     const c = coverage(); bar(c / NEED);
     if (c >= NEED) finishStep();
@@ -857,18 +918,13 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     });
     if (done[0] && done[1]) win();
   }
-  function cursor(x, y) {
-    if (step === 0 && (down || loop)) return;
-    const f = layers.fx; f.clearRect(0, 0, WW, HH); if (!playing || step > 4) return;
-    const r = TOOLS[step].r * k() * R; f.beginPath(); f.arc(x * R, y * R, r, 0, 7); f.strokeStyle = 'rgba(216,30,44,.85)'; f.lineWidth = 2.5 * R; f.stroke();
-    if (step === 2 && down) { f.strokeStyle = 'rgba(190,225,255,.75)'; f.lineWidth = 1.5 * R; for (let i = 0; i < 12; i++) { const ox = x * R - (60 + Math.random() * 40) * R, oy = y * R - (90 + Math.random() * 30) * R; f.beginPath(); f.moveTo(ox, oy); f.lineTo(x * R + (Math.random() - 0.5) * r, y * R + (Math.random() - 0.5) * r); f.stroke(); } }
-  }
+  function cursor(x, y) { ptr = [x, y]; kickFoam(); }
   const pos = e => { const b = stage.getBoundingClientRect(); return [(e.clientX - b.left) / b.width * W, (e.clientY - b.top) / b.height * H]; };
   const fx = $('dg-fx');
   fx.addEventListener('pointerdown', e => {
     if (!playing || !paintCells) return; const p = pos(e);
     if (step === 5) { tireTap(...p); return; }
-    down = true; last = p; fx.setPointerCapture(e.pointerId); stamp(...p); cursor(...p);
+    hover = true; down = true; last = p; fx.setPointerCapture(e.pointerId); cursor(...p); stamp(...p);
   });
   fx.addEventListener('pointermove', e => {
     const p = pos(e); cursor(...p); if (!down || !playing || step > 4) return;
@@ -876,15 +932,16 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     for (let s = stepLen; s <= d; s += stepLen) { stamp(last[0] + dx * s / d, last[1] + dy * s / d); if (!playing || step > 4) break; }
     if (d >= stepLen) last = p;
   });
-  ['pointerup', 'pointercancel'].forEach(t => fx.addEventListener(t, () => { down = false; nozzle = null; kickFoam(); }));
-  fx.addEventListener('pointerleave', () => { if (!down) layers.fx.clearRect(0, 0, WW, HH); });
+  ['pointerup', 'pointercancel'].forEach(t => fx.addEventListener(t, e => { down = false; nozzle = null; if (e.pointerType !== 'mouse') hover = false; kickFoam(); }));
+  fx.addEventListener('pointerenter', e => { hover = true; cursor(...pos(e)); });
+  fx.addEventListener('pointerleave', () => { if (!down) { hover = false; kickFoam(); } });
   function start() {
     dirty(); done = [false, false]; setStep(0); playing = true; t0 = performance.now();
     $('dg-start').hidden = true; $('dg-end').hidden = true; stage.classList.add('is-playing');
     clearInterval(tick); tick = setInterval(() => { $('dg-time').textContent = ((performance.now() - t0) / 1000).toFixed(1) + 's'; }, 100);
   }
   function win() {
-    playing = false; clearInterval(tick); stage.classList.remove('is-playing'); layers.fx.clearRect(0, 0, WW, HH);
+    playing = false; clearInterval(tick); stage.classList.remove('is-playing'); bits = []; kickFoam();
     document.querySelectorAll('#dg-steps li').forEach(li => { li.className = 'done'; }); bar(1);
     const s = (performance.now() - t0) / 1000; $('dg-time').textContent = s.toFixed(1) + 's';
     const stars = s < 60 ? 3 : s < 100 ? 2 : 1, isBest = !best || s < best;
