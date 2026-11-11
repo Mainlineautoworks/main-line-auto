@@ -1316,7 +1316,7 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 }
 
 /* Wrap lighting switcher */
-.wrap-view .cv-stage { position: relative; transition: filter .45s; }
+.wrap-view .cv-stage { transition: filter .45s; }
 .wrap-view .light-fx { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .45s, background .45s; }
 .wrap-view[data-light="sun"] .cv-stage { filter: brightness(1.06) contrast(1.1) saturate(1.08); }
 .wrap-view[data-light="sun"] .light-fx { opacity: 1; mix-blend-mode: soft-light; background: radial-gradient(120% 90% at 18% 0%, rgba(255,214,150,.55), rgba(255,200,120,0) 60%), linear-gradient(180deg, rgba(255,230,190,.25), rgba(0,0,0,0)); }
