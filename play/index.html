@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Google Analytics + Tag Manager (same IDs as the old site) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-927PVGSFBV"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-927PVGSFBV');</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-P46Q6HCC');</script>
+<title>Detail Dash Mini Game | Main Line Auto Works</title>
+<meta name="description" content="Can you detail this BMW M3? Foam it, scrub it, rinse, dry, wax and dress the tires. Beat the clock for three stars.">
+<link rel="canonical" href="https://mainlineautoworks.com/play/">
+<meta property="og:title" content="Detail Dash Mini Game">
+<meta property="og:description" content="Can you detail this BMW M3? Foam it, scrub it, rinse, dry, wax and dress the tires. Beat the clock for three stars.">
+<meta property="og:image" content="https://mainlineautoworks.com/assets/img/og-detail-dash.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://mainlineautoworks.com/play/">
+<meta property="og:site_name" content="Main Line Auto Works">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Detail Dash Mini Game">
+<meta name="twitter:image" content="https://mainlineautoworks.com/assets/img/og-detail-dash.jpg">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#1D2125">
+<link rel="icon" href="../assets/img/favicon.png">
+<link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../styles.css?v=202611110130">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="topbar">
+  <p>Pick-up and drop-off available. <a href="tel:+14845741628">Call (484) 574-1628</a></p>
+</div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="../" aria-label="Main Line Auto Works, home">
+      <img src="../assets/img/logo-light-360.webp" alt="Main Line Auto Works" width="180" height="55">
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="../vinyl-wraps/">Wraps</a>
+      <a href="../caliper-painting/">Calipers</a>
+      <a href="../ppf-ceramic-coating/">PPF &amp; Ceramic</a>
+      <a href="../window-tint/">Tint</a>
+      <a href="./" aria-current="page">Detailing</a>
+      <a href="../track/">Job Status</a>
+    </nav>
+    <a class="btn btn-red btn-sm" href="#book">Book a detail</a>
+    <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+  </div>
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile" hidden>
+    <a href="../vinyl-wraps/">Vinyl wraps</a>
+    <a href="../caliper-painting/">Caliper color change</a>
+    <a href="../ppf-ceramic-coating/">PPF and Ceramic Coating</a>
+    <a href="../window-tint/">Window tint</a>
+    <a href="./" aria-current="page">Detailing</a>
+    <a href="../track/">Job Status</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="wp-section dg" id="detail-dash" aria-labelledby="dg-h">
+    <div class="wrap">
+      <div class="wp-head">
+        <p class="pp-tag">Play</p>
+        <h1 id="dg-h">Detail Dash</h1>
+        <p>Think you can detail this M3? Foam it, scrub it, rinse, dry, wax and dress the tires. Beat the clock for three stars.</p>
+      </div>
+      <ol class="dg-steps" id="dg-steps" aria-label="Steps">
+        <li data-step="0"><span>1</span>Foam</li><li data-step="1"><span>2</span>Scrub</li><li data-step="2"><span>3</span>Rinse</li>
+        <li data-step="3"><span>4</span>Dry</li><li data-step="4"><span>5</span>Wax</li><li data-step="5"><span>6</span>Tires</li>
+      </ol>
+      <div class="rc-stage dg-stage" id="dg-stage">
+        <img src="../assets/img/tint-viz-side.webp?v=1" alt="Side view of a dirty white BMW M3 to detail in the game" width="1090" height="395">
+        <canvas class="dg-layer dg-shine" id="dg-shine" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-tires" id="dg-tires" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-dirt" id="dg-dirt" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-paint dg-foam" id="dg-foam" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-paint dg-water" id="dg-water" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-fx" id="dg-fx" aria-label="Drag across the car to use the current tool"></canvas>
+        <div class="dg-panel" id="dg-start">
+          <p class="dg-panel-title">Ready to detail?</p>
+          <p>Drag across the car with each tool. Fill the bar to move to the next step.</p>
+          <button type="button" class="btn btn-red" id="dg-go">Start the clock</button>
+        </div>
+        <div class="dg-panel" id="dg-end" hidden>
+          <p class="dg-stars" id="dg-stars" aria-hidden="true"></p>
+          <p class="dg-panel-title" id="dg-end-title">Spotless!</p>
+          <p id="dg-end-msg"></p>
+          <div class="dg-end-actions">
+            <a class="btn btn-red" href="../auto-detailing/#book">Book the real thing</a>
+            <button type="button" class="btn rc-reset" id="dg-again">Play again</button>
+          </div>
+        </div>
+      </div>
+      <div class="dg-hud">
+        <div class="dg-tool"><strong id="dg-tool-name">Foam cannon</strong><span id="dg-tool-tip">Drag over the paint to cover the whole car in foam.</span></div>
+        <div class="dg-meter" aria-hidden="true"><span id="dg-bar"></span></div>
+        <div class="dg-clock"><strong id="dg-time">0.0s</strong><span id="dg-best">Best: none yet</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wp-section" aria-labelledby="real-h">
+    <div class="wrap" style="text-align:center;max-width:720px">
+      <h2 id="real-h">Want it done for real?</h2>
+      <p>Main Line Auto Works details cars by hand at our West Chester, PA shop: foam, hand wash, decon, wax and tire dressing, inside and out.</p>
+      <div class="hero-actions" style="justify-content:center">
+        <a class="btn btn-red" href="../auto-detailing/#book">Book a detail</a>
+        <a class="btn btn-dark" href="../auto-detailing/">See detailing packages</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <img src="../assets/img/logo-light-360.webp" alt="Main Line Auto Works" width="160" height="49" loading="lazy">
+    <div>
+      <p><a href="tel:+14845741628">(484) 574-1628</a><br><a href="mailto:info@mainlineautoworks.com">info@mainlineautoworks.com</a></p>
+    </div>
+    <div>
+      <p>1444 Phoenixville Pike<br>West Chester, PA 19380</p>
+    </div>
+    <div>
+      <p><a href="#book">Book online</a><br><a href="https://www.instagram.com/mainlineautoworks/" target="_blank" rel="noopener">Instagram</a><br><a href="https://squareup.com/gift/MLZG3Z7PYS6BK/order" target="_blank" rel="noopener">Gift cards</a><br><a href="../track/">Job Status</a></p>
+    </div>
+  </div>
+  <div class="wrap footer-base">
+    <p>© <span id="year">2026</span> Main Line Auto Works</p>
+  </div>
+</footer>
+
+<script src="../main.js?v=202611110910" defer></script>
+</body>
+</html>
