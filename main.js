@@ -684,14 +684,24 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   const input = document.getElementById('tr-code'), result = document.getElementById('tr-result'), missing = document.getElementById('tr-missing');
   const STAGES = ['Checked in', 'Prep & inspection', 'Install', 'Curing & finishing', 'Final inspection', 'Ready for pick-up'];
   const dataUrl = new URL('../../jobs.json', ASSET_BASE).href;
+  // Live jobs come from the shop's Google Sheet (via its Apps Script web app, set in data-api on the form);
+  // the DEMO job and any fallback jobs come from jobs.json.
   let jobs = null;
-  const load = () => jobs ? Promise.resolve(jobs) : fetch(dataUrl + '?t=' + Date.now(), { cache: 'no-store' }).then(r => r.json()).then(j => (jobs = j));
+  const loadLocal = () => jobs ? Promise.resolve(jobs) : fetch(dataUrl + '?t=' + Date.now(), { cache: 'no-store' }).then(r => r.json()).then(x => (jobs = x));
+  const load = code => {
+    const api = form.dataset.api || '';
+    if (!api || code === 'DEMO') return loadLocal();
+    return fetch(api + '?job=' + encodeURIComponent(code), { cache: 'no-store' }).then(r => r.json())
+      .then(x => x && !x.error ? { [code]: x } : loadLocal().catch(() => ({})));
+  };
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const fmtDate = d => { const t = new Date(d + 'T12:00:00'); return isNaN(t) ? d : t.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
   const img = p => p ? new URL('../../' + p.replace(/^\/+/, ''), ASSET_BASE).href : '';
   function show(code) {
     code = code.trim().toUpperCase(); if (!code) return;
-    load().then(all => {
+    result.classList.add('is-loading');
+    load(code).then(all => {
+      result.classList.remove('is-loading');
       const key = Object.keys(all).find(k => k !== '_how_to' && k.toUpperCase() === code);
       const job = key && all[key];
       result.hidden = !job; missing.hidden = !!job;
@@ -715,7 +725,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
         </li>`).join('') || '<li class="tr-empty">No updates yet. Check back soon.</li>';
       history.replaceState(null, '', '?job=' + encodeURIComponent(key));
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }).catch(() => { result.hidden = true; missing.hidden = false; });
+    }).catch(() => { result.classList.remove('is-loading'); result.hidden = true; missing.hidden = false; });
   }
   form.addEventListener('submit', e => { e.preventDefault(); show(input.value); });
   document.getElementById('tr-demo').addEventListener('click', () => { input.value = 'DEMO'; show('DEMO'); });
