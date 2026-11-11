@@ -964,3 +964,98 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   $('dg-go').addEventListener('click', start); $('dg-again').addEventListener('click', start);
   const ready = setInterval(() => { if (Object.values(imgs).every(i => i.complete && i.naturalWidth)) { clearInterval(ready); dirty(); } }, 150);
 })();
+
+// ---------------------------------------------------------------------------------------------
+// Quick-answers chat helper (every page). No AI: typed questions are matched to the answers below
+// by keywords. To change a price or answer, edit HELP_ANSWERS. `need` = groups of words; a question
+// matches when it contains at least one word from every group.
+(() => {
+  const ROOT = new URL('../../', ASSET_BASE).href;
+  const L = p => ROOT + p;
+  const PHONE = '<a href="tel:+14845741628">(484) 574-1628</a>';
+  const HELP_ANSWERS = [
+    { id: 'tint-front', need: [['tint', 'film', 'window'], ['front', 'two', '2 ', 'driver', 'passenger']], a: `Tinting the <b>2 front windows is $150</b> (on sale), with premium ceramic film: 99% UV blocking and up to 95% heat blocking. Heads-up: in Pennsylvania the front side windows have to let more than 70% of light through, and we'll help you stay legal.`, links: [['See tint packages', 'window-tint/#pricing'], ['Book now', 'https://mainlineautoworks.square.site']] },
+    { id: 'tint-full', need: [['tint', 'film', 'window'], ['full', 'whole', 'all', 'entire', 'every']], a: `A <b>full vehicle tint is $399 to $450</b> (on sale) depending on sedan or SUV. That covers all side windows and the rear window in premium ceramic film.`, links: [['See tint packages', 'window-tint/#pricing']] },
+    { id: 'tint-windshield', need: [['windshield', 'sun strip', 'brow', 'visor strip']], a: `<b>Full windshield: $250</b>, a clear or lightly shaded ceramic film for heat and glare. <b>Windshield sun strip: $65.</b>`, links: [['See tint packages', 'window-tint/#pricing']] },
+    { id: 'tint-removal', need: [['tint', 'film'], ['remove', 'removal', 'strip', 'old', 'purple', 'bubbl']], a: `Tint removal is priced by the car, so it varies. Send us your year, make and model for a quick quote, or call ${PHONE}.`, links: [['Get a quote', 'window-tint/#estimate']] },
+    { id: 'tint-law', need: [['legal', 'law', 'illegal', 'allowed', 'ticket', 'pennsylvania', ' pa ', 'how dark', 'darkest']], a: `In Pennsylvania, cars (sedans and coupes) need more than 70% light through on all side and rear windows. On SUVs, vans and trucks, the front side windows need more than 70%, but the rear windows can be any darkness. On every vehicle, only the top strip of the windshield can be tinted. We'll check your car and recommend a legal shade.`, links: [['Pennsylvania tint law', 'window-tint/#pa-law']] },
+    { id: 'tint', need: [['tint', 'window film', 'limo', 'vlt']], a: `Our tint prices:<br>• 2 front windows: <b>$150</b><br>• Full vehicle: <b>$399–$450</b><br>• Full windshield: <b>$250</b><br>• Windshield sun strip: <b>$65</b><br>• Tint removal: price varies<br>All in premium ceramic film.`, links: [['Tint page', 'window-tint/'], ['Preview shades', 'window-tint/#tint']] },
+    { id: 'detail-time', need: [['detail', 'wash', 'clean'], ['how long', 'time', 'hours', 'take']], a: `An interior or exterior detail takes about <b>2 to 4 hours</b>. A full detail takes about <b>4 to 8 hours</b>, longer for heavy soiling, pet hair or stains.` },
+    { id: 'detail', need: [['detail', 'wash', 'interior', 'exterior', 'clean', 'vacuum', 'shampoo', 'super car']], a: `Detailing starts at:<br>• Quick Detail: <b>$85–$135</b><br>• Exterior: <b>$75–$165</b><br>• Interior: <b>$85–$195</b><br>• Full Vehicle: <b>$205–$295</b><br>• Super Car Premium: <b>$320–$595</b><br>Prices depend on vehicle size. Pick your vehicle on the Detailing page to see your exact price.`, links: [['Build your detail', 'auto-detailing/#packages'], ['Pick a time', 'auto-detailing/#book']] },
+    { id: 'moto', need: [['motorcycle', 'bike', 'harley', 'motorbike']], a: `<b>Motorcycle Detail: $160</b> (on sale, was $175), or <b>$205 with drive chain care</b> (was $225).`, links: [['Book a motorcycle detail', 'auto-detailing/#packages']] },
+    { id: 'ceramic', need: [['ceramic', 'coating', 'sealant', 'hydrophobic']], a: `We offer three ceramic levels:<br>• <b>Level I Sealant</b>: about 6 months, same day<br>• <b>Level II 5-Year Coating</b>: our most popular<br>• <b>Level III 10-Year Coating</b><br>Levels II and III include a complimentary express interior detail. Pricing depends on your car and paint condition, so we give you an exact quote after a free look.`, links: [['Ceramic packages', 'ppf-ceramic-coating/#ceramic'], ['Free estimate', '#estimate']] },
+    { id: 'ppf', need: [['ppf', 'paint protection', 'clear bra', 'film', 'rock chip', 'chips']], a: `Paint protection film packages:<br>• <b>Partial Front</b><br>• <b>Full Front</b> (most popular)<br>• <b>Track Performance</b><br>• <b>Full Body</b><br>The price depends on your vehicle and coverage, so ask for a free estimate. You can also try the rock chip test to see what each package covers.`, links: [['PPF packages', 'ppf-ceramic-coating/#ppf'], ['Rock chip test', 'ppf-ceramic-coating/#rock-chip-test']] },
+    { id: 'wrap-paint', need: [['wrap'], ['damage', 'hurt', 'ruin', 'paint safe', 'remove', 'come off', 'lease']], a: `Not on healthy factory paint. Quality wrap film is designed to come off cleanly, and it protects the paint while it's on. Leased cars can usually be wrapped and unwrapped before turn-in. We inspect the paint first and tell you about anything we see.`, links: [['Wrap FAQ', 'vinyl-wraps/#faq-h']] },
+    { id: 'wrap', need: [['wrap', 'vinyl', 'color change', 'chrome delete', 'stripe', 'satin', 'matte']], a: `We do full color changes, partial wraps (roof, hood, mirrors), chrome delete and stripes, in gloss, satin, matte, metallic, color-shift and carbon fiber. Pricing depends on the car and the film, and estimates are free. Try colors on a real car with our wrap preview.`, links: [['Wraps page', 'vinyl-wraps/'], ['Try a color', 'vinyl-wraps/#visualizer']] },
+    { id: 'caliper', need: [['caliper', 'brake']], a: `We paint brake calipers any color in a high-heat finish built for brake temperatures, with custom decals available. Pricing depends on the car, and the estimate is free. Try a color on a real wheel first.`, links: [['Calipers page', 'caliper-painting/'], ['Try a color', 'caliper-painting/#calipers']] },
+    { id: 'rental', need: [['rental', 'rent', 'loaner', 'courtesy', 'car while']], a: `Rental cars are <b>coming in spring 2027</b>. You'll be able to rent a car right at our shop while yours is with us. Until then, we offer pick-up and drop-off.` },
+    { id: 'pickup', need: [['pick up', 'pickup', 'pick-up', 'drop off', 'dropoff', 'tow', 'come to me', 'mobile']], a: `Yes, we can <b>pick up and drop off</b> your car at your home or office. All work is done in our West Chester shop. Call ${PHONE} to set it up.` },
+    { id: 'pay', need: [['klarna', 'afterpay', 'finance', 'financing', 'payment plan', 'pay over time', 'monthly']], a: `Yes. Larger jobs can be split into smaller payments with <b>Klarna or Afterpay</b>. Ask about it when you get your estimate.` },
+    { id: 'status', need: [['status', 'track', 'ready yet', 'is my car', 'my car done', 'progress']], a: `Check your car on our Job Status page with the tracking code we texted you at drop-off.`, links: [['Job Status', 'track/']] },
+    { id: 'gift', need: [['gift']], a: `Yes, we sell e-gift cards from $25.`, links: [['Buy a gift card', 'https://squareup.com/gift/MLZG3Z7PYS6BK/order']] },
+    { id: 'location', need: [['where', 'address', 'location', 'directions', 'located', 'find you']], a: `We're at <b>1444 Phoenixville Pike, West Chester, PA 19380</b>, minutes from West Chester Borough and right off Route 202.`, links: [['Get directions', 'https://www.google.com/maps/dir/?api=1&destination=1444+Phoenixville+Pike+West+Chester+PA+19380']] },
+    { id: 'hours', need: [['hour', 'open', 'close', 'saturday', 'sunday', 'weekend']], a: `Give us a call at ${PHONE} to check today's hours. You can also book a detail online any time.`, links: [['Book online', 'auto-detailing/#book']] },
+    { id: 'book', need: [['book', 'appointment', 'schedule', 'estimate', 'quote', 'price', 'cost', 'how much']], a: `For detailing, you can pick a time online. For wraps, calipers, PPF, ceramic and tint, estimates are free: call ${PHONE}, or send us your year, make and model.`, links: [['Book a detail', 'auto-detailing/#book'], ['Free estimate', '#estimate']] },
+    { id: 'contact', need: [['call', 'phone', 'text', 'email', 'contact', 'talk', 'human', 'person']], a: `Call or text us at ${PHONE}, or email <a href="mailto:info@mainlineautoworks.com">info@mainlineautoworks.com</a>.` }
+  ];
+  const CHIPS = [['Tint prices', 'tint'], ['Detailing prices', 'detail'], ['Ceramic coating', 'ceramic'], ['PPF', 'ppf'], ['Book or get an estimate', 'book'], ['Rental cars', 'rental'], ['Location', 'location']];
+  const byId = id => HELP_ANSWERS.find(x => x.id === id);
+  function match(text) {
+    const q = ' ' + text.toLowerCase().replace(/[^a-z0-9$ ]/g, ' ').replace(/\s+/g, ' ') + ' ';
+    let best = null, bestScore = 0;
+    HELP_ANSWERS.forEach((e, i) => {
+      if (!e.need.every(g => g.some(w => q.includes(w)))) return;
+      const score = e.need.length * 10 - i * 0.01;     // more specific answers win; earlier answers break ties
+      if (score > bestScore) { best = e; bestScore = score; }
+    });
+    return best;
+  }
+  const href = h => /^https?:|^tel:|^mailto:/.test(h) ? h : h.startsWith('#') ? (document.getElementById(h.slice(1)) ? h : L('') + h) : L(h);
+  const ui = document.createElement('div'); ui.className = 'qa';
+  ui.innerHTML = `
+    <button type="button" class="qa-launch" aria-expanded="false" aria-controls="qa-panel">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 9.5h8M8 12.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Questions?</span>
+    </button>
+    <section class="qa-panel" id="qa-panel" role="dialog" aria-label="Quick answers" hidden>
+      <header class="qa-head"><div><strong>Main Line Auto Works</strong><span>Quick answers</span></div>
+        <button type="button" class="qa-close" aria-label="Close">&times;</button></header>
+      <div class="qa-log" aria-live="polite"></div>
+      <form class="qa-form" autocomplete="off"><label class="sr-only" for="qa-in">Type a question</label>
+        <input id="qa-in" type="text" placeholder="Type a question…" maxlength="140">
+        <button type="submit" aria-label="Send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l16-8-6 16-2-6z" fill="currentColor"/></svg></button></form>
+    </section>`;
+  document.body.appendChild(ui);
+  const launch = ui.querySelector('.qa-launch'), panel = ui.querySelector('.qa-panel'), log = ui.querySelector('.qa-log');
+  const form = ui.querySelector('.qa-form'), input = ui.querySelector('#qa-in');
+  function bubble(html, who, links) {
+    const b = document.createElement('div'); b.className = 'qa-msg qa-' + who;
+    if (who === 'me') b.textContent = html; else b.innerHTML = html;
+    if (links && links.length) { const l = document.createElement('div'); l.className = 'qa-links'; links.forEach(([t, h]) => { const a = document.createElement('a'); a.href = href(h); a.textContent = t; if (/^https?:/.test(h)) { a.target = '_blank'; a.rel = 'noopener'; } l.appendChild(a); }); b.appendChild(l); }
+    log.appendChild(b); log.scrollTop = log.scrollHeight;
+  }
+  function chips() {
+    const c = document.createElement('div'); c.className = 'qa-chips';
+    CHIPS.forEach(([t, id]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.addEventListener('click', () => { log.querySelectorAll('.qa-chips').forEach(x => x.remove()); answer(t, byId(id)); }); c.appendChild(b); });
+    log.appendChild(c); log.scrollTop = log.scrollHeight;
+  }
+  function answer(q, e) {
+    bubble(q, 'me');
+    setTimeout(() => {
+      if (e) bubble(e.a, 'bot', e.links);
+      else bubble(`I don't have a quick answer for that one. Our team can help: call or text ${PHONE}.`, 'bot', [['Free estimate', '#estimate']]);
+      chips();
+    }, 350);
+  }
+  let started = false;
+  function open(on) {
+    panel.hidden = !on; launch.setAttribute('aria-expanded', String(on)); ui.classList.toggle('is-open', on);
+    if (on && !started) { started = true; bubble('Hi! Ask about prices, packages, booking or anything else. Tap a topic or type a question.', 'bot'); chips(); }
+    if (on) setTimeout(() => input.focus(), 50); else launch.focus();
+  }
+  launch.addEventListener('click', () => open(panel.hidden));
+  ui.querySelector('.qa-close').addEventListener('click', () => open(false));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) open(false); });
+  form.addEventListener('submit', e => { e.preventDefault(); const q = input.value.trim(); if (!q) return; input.value = ''; log.querySelectorAll('.qa-chips').forEach(c => c.remove()); answer(q, match(q)); });
+  log.addEventListener('click', e => { if (e.target.closest('.qa-links a') && window.matchMedia('(max-width: 600px)').matches) open(false); });
+})();
