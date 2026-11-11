@@ -36,7 +36,7 @@ function arrowNav(buttons, select) {
 // box = where the shade layer sits in the photo: [x, y, width, height]; size defaults to 1200x900.
 // Bump ASSET_V whenever a photo or shade layer changes, so phones never pair a cached old
 // photo with a new shade layer (that is what makes the repaint look shifted).
-const ASSET_V = '20261110f';
+const ASSET_V = '20261111a';
 const toLin = v => Math.pow(v / 255, 2.2);
 const hexLin = h => { const n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map(toLin); };
 const FIN = { gloss: [1, 1], satin: [0.8, 0.4], matte: [0.6, 0.12] };   // lighting contrast, shine kept
@@ -50,6 +50,15 @@ const LIGHTS = {
   night:    { con: 1.2,  shine: 0.9, gain: 0.85, tint: [1.0, 0.92, 0.82], bands: [[0.22, 0.04, 0.55, -0.2, 0, 0.65], [0.64, 0.06, 0.25, -0.2, 0, 0.7]], bandTint: [1, 0.62, 0.25] }
 };
 const shadeCache = {};
+// Run fn once the page has finished loading and el is (nearly) on screen, so heavy demo images
+// never compete with the first view of the page.
+function whenNear(el, fn, margin = '300px') {
+  const go = () => {
+    if (!('IntersectionObserver' in window)) return fn();
+    new IntersectionObserver((es, obs) => { if (es.some(e => e.isIntersecting)) { obs.disconnect(); fn(); } }, { rootMargin: margin }).observe(el);
+  };
+  if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+}
 function loadShade(src) {
   if (!shadeCache[src]) shadeCache[src] = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
   return shadeCache[src];
@@ -146,13 +155,11 @@ function createPainter({ view, img, canvas, stage, vehicles, initial, color }) {
     };
     anim = requestAnimationFrame(step);
   }
-  setVehicle(initial, true);
-  // warm the other photos once the section is near, so switching is instant
-  new IntersectionObserver((es, obs) => {
-    if (!es[0].isIntersecting) return;
-    Object.values(vehicles).forEach(v => { loadShade(v.shade); const i = new Image(); i.src = v.img; });
-    obs.disconnect();
-  }, { rootMargin: '400px' }).observe(view);
+  // load the first car when the section is about to scroll into view; warm the others a bit later
+  whenNear(view, () => {
+    setVehicle(initial, true);
+    setTimeout(() => Object.values(vehicles).forEach(v => { loadShade(v.shade); const i = new Image(); i.src = v.img; }), 2500);
+  }, '400px');
   return {
     setVehicle,
     showOriginal(on) { hidden = on; render(); },
@@ -222,10 +229,10 @@ const caliperPaint = createPainter({
   view: caliperView, img: document.getElementById('caliper-img'), canvas: document.getElementById('caliper-paint'),
   stage: document.getElementById('cv-stage'), initial: 'sports', color: '#F0BE14',
   vehicles: {
-    sports:  { img: asset('caliper-sports.webp'),  shade: asset('caliper-sports-shade.png'),  box: [659, 274, 170, 358], alt: 'Black wheel on a red sports car' },
-    sedan:   { img: asset('caliper-sedan.webp'),   shade: asset('caliper-sedan-shade.png'),   box: [361, 484, 212, 379], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
-    truck:   { img: asset('caliper-truck.webp'),   shade: asset('caliper-truck-shade.png'),   box: [707, 347, 74, 162],  alt: 'Gloss black wheel on a grey pickup truck' },
-    closeup: { img: asset('caliper-closeup.webp'), shade: asset('caliper-closeup-shade.png'), box: [128, 24, 307, 843], alt: 'Close-up of a brake caliper beside a drilled rotor' }
+    sports:  { img: asset('caliper-sports.webp'),  shade: asset('caliper-sports-shade.webp'),  box: [659, 274, 170, 358], alt: 'Black wheel on a red sports car' },
+    sedan:   { img: asset('caliper-sedan.webp'),   shade: asset('caliper-sedan-shade.webp'),   box: [361, 484, 212, 379], size: [1320, 1227], alt: 'Gloss black wheel on a grey sedan' },
+    truck:   { img: asset('caliper-truck.webp'),   shade: asset('caliper-truck-shade.webp'),   box: [707, 347, 74, 162],  alt: 'Gloss black wheel on a grey pickup truck' },
+    closeup: { img: asset('caliper-closeup.webp'), shade: asset('caliper-closeup-shade.webp'), box: [128, 24, 307, 843], alt: 'Close-up of a brake caliper beside a drilled rotor' }
   }
 });
 wirePickers(caliperView && caliperView.closest('section'), caliperPaint, {
@@ -239,10 +246,10 @@ const wrapPaint = createPainter({
   view: document.getElementById('wrap-view'), img: document.getElementById('wrap-img'), canvas: document.getElementById('wrap-paint'),
   stage: document.getElementById('wrap-stage'), initial: 'sedan', color: '#C8102E',
   vehicles: {
-    sports: { img: asset('wrap-sports.webp'), shade: asset('wrap-sports-shade.png'), box: [74, 219, 979, 435], size: [1117, 787], alt: 'Lamborghini Huracan with its body wrapped in the selected color' },
-    sedan: { img: asset('wrap-sedan.webp'), shade: asset('wrap-sedan-shade.png'), box: [42, 86, 921, 314], size: [1005, 526], alt: 'BMW M3 sedan with its body wrapped in the selected color' },
-    suv: { img: asset('wrap-suv.webp'), shade: asset('wrap-suv-shade.png'), box: [50, 182, 1132, 459], size: [1220, 784], alt: 'Volvo XC40 SUV with its body wrapped in the selected color' },
-    truck: { img: asset('wrap-truck.webp'), shade: asset('wrap-truck-shade.png'), box: [83, 53, 838, 278], size: [990, 481], alt: 'Ram TRX pickup with its body wrapped in the selected color' }
+    sports: { img: asset('wrap-sports.webp'), shade: asset('wrap-sports-shade.webp'), box: [74, 219, 979, 435], size: [1117, 787], alt: 'Lamborghini Huracan with its body wrapped in the selected color' },
+    sedan: { img: asset('wrap-sedan.webp'), shade: asset('wrap-sedan-shade.webp'), box: [42, 86, 921, 314], size: [1005, 526], alt: 'BMW M3 sedan with its body wrapped in the selected color' },
+    suv: { img: asset('wrap-suv.webp'), shade: asset('wrap-suv-shade.webp'), box: [50, 182, 1132, 459], size: [1220, 784], alt: 'Volvo XC40 SUV with its body wrapped in the selected color' },
+    truck: { img: asset('wrap-truck.webp'), shade: asset('wrap-truck-shade.webp'), box: [83, 53, 838, 278], size: [990, 481], alt: 'Ram TRX pickup with its body wrapped in the selected color' }
   }
 });
 wirePickers(document.getElementById('wrap-view') && document.getElementById('wrap-view').closest('section'), wrapPaint);
@@ -555,7 +562,8 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   // share of each layer left after one rinse, by coating level
   const KEEP = { road: [0.4, 0.05, 0.02, 0], smear: [0.45, 0.06, 0.02, 0], bugs: [0.85, 0.3, 0.18, 0.1], drops: [0.9, 0.35, 0.2, 0.12] };
   const WEIGHT = { road: 94.6, bugs: 6, drops: 4 };          // relative amount of dirt in each layer
-  const L = {}; ['road', 'bugs', 'drops', 'smear', 'spots', 'mask'].forEach(k => { const i = new Image(); i.src = asset(k === 'mask' ? 'grime-mask.png' : `grime-${k}.webp`); L[k] = i; });
+  const L = {}; ['road', 'bugs', 'drops', 'smear', 'spots', 'mask'].forEach(k => { L[k] = new Image(); });
+  whenNear(stage, () => Object.keys(L).forEach(k => { L[k].src = asset(k === 'mask' ? 'grime-mask.png' : `grime-${k}.webp`); }), '600px');
   const A = { road: 0, bugs: 0, drops: 0, smear: 0, spots: 0 }, from = {}, to = {};
   const smearMask = document.createElement('canvas'); smearMask.width = WW; smearMask.height = HH; const smctx = smearMask.getContext('2d');
   const smearLayer = document.createElement('canvas'); smearLayer.width = WW; smearLayer.height = HH; const slctx = smearLayer.getContext('2d');
@@ -586,7 +594,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     leftEl.textContent = (peak ? Math.round(amt / peak * 100) : 0) + '%'; rinsesEl.textContent = rinses;
   }
   function drawGloss() {
-    gctx.clearRect(0, 0, WW, HH); if (!level || !L.mask.complete) return;
+    gctx.clearRect(0, 0, WW, HH); if (!level || !L.mask.naturalWidth) return;
     const g = gctx.createLinearGradient(0, 0, WW * 0.6, HH);
     g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.45, `rgba(255,255,255,${0.12 + level * 0.06})`); g.addColorStop(0.55, `rgba(200,230,255,${0.1 + level * 0.05})`); g.addColorStop(1, 'rgba(255,255,255,0)');
     gctx.fillStyle = g; gctx.fillRect(0, 0, WW, HH);
@@ -751,12 +759,13 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   const WHEELS = [[210, 296], [836, 296]], TIRE_R = 76, RIM_R = 57;
   const NEED = 0.82, CELL = 10, GW = Math.ceil(W / CELL), GH = Math.ceil(H / CELL);
   let paintCells = null, paintCount = 0, touched = new Uint8Array(GW * GH), step = -1, t0 = 0, tick = 0, done = [false, false], playing = false, down = false, last = null;
-  const imgs = {}; ['road', 'bugs', 'drops'].forEach(k => { imgs[k] = new Image(); imgs[k].src = asset(`grime-${k}.webp`); });
-  const foamTex = new Image(); foamTex.src = asset('foam-tex.webp');
+  const imgs = {}; ['road', 'bugs', 'drops'].forEach(k => { imgs[k] = new Image(); });
+  const foamTex = new Image();
+  whenNear(stage, () => { Object.keys(imgs).forEach(k => { imgs[k].src = asset(`grime-${k}.webp`); }); foamTex.src = asset('foam-tex.webp'); }, '600px');
   const fm = document.createElement('canvas'); fm.width = WW; fm.height = HH; const fmc = fm.getContext('2d');   // where foam sits, and how thick
   let parts = [], drips = [], nozzle = null, loop = 0;
   function drawFoam() {
-    const f = layers.foam; f.clearRect(0, 0, WW, HH); if (!foamTex.complete) return;
+    const f = layers.foam; f.clearRect(0, 0, WW, HH); if (!foamTex.naturalWidth) return;
     f.globalCompositeOperation = 'source-over'; f.drawImage(foamTex, 0, 0);
     f.globalCompositeOperation = 'destination-in'; f.drawImage(fm, 0, 0); f.globalCompositeOperation = 'source-over';
   }
@@ -866,7 +875,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   showBest();
   function dirty() {
     Object.values(layers).forEach(c => c.clearRect(0, 0, WW, HH)); fmc.clearRect(0, 0, WW, HH); parts = []; drips = []; nozzle = null;
-    const d = layers.dirt; ['road', 'bugs', 'drops'].forEach(n => { if (imgs[n].complete) d.drawImage(imgs[n], 0, 0); });
+    const d = layers.dirt; ['road', 'bugs', 'drops'].forEach(n => { if (imgs[n].naturalWidth) d.drawImage(imgs[n], 0, 0); });
     d.globalCompositeOperation = 'source-atop'; d.fillStyle = 'rgba(120,100,75,.10)'; d.fillRect(0, 0, WW, HH); d.globalCompositeOperation = 'source-over';
     // dull, dusty tires
     const t = layers.tires; WHEELS.forEach(([x, y]) => { t.beginPath(); t.arc(x * R, y * R, TIRE_R * R, 0, 7); t.arc(x * R, y * R, RIM_R * R, 0, 7, true); t.fillStyle = 'rgba(150,140,125,.28)'; t.fill('evenodd'); });
