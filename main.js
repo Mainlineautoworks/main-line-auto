@@ -871,7 +871,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   };
   // bigger brush on small screens so fingers can hit it, but scaled gently so phones aren't a speed run
   const k = () => Math.min(1.2, Math.max(1, Math.sqrt(760 / (stage.clientWidth || 760))));
-  let best = null; try { best = Number(localStorage.getItem('mla-detail-dash')) || null; } catch (e) {}
+  let best = null; try { best = Number(localStorage.getItem('mla-detail-dash-v2')) || null; } catch (e) {}
   const showBest = () => { $('dg-best').textContent = best ? `Best: ${best.toFixed(1)}s` : 'Best: none yet'; };
   showBest();
   function dirty() {
@@ -965,7 +965,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     document.querySelectorAll('#dg-steps li').forEach(li => { li.className = 'done'; }); bar(1);
     const s = (performance.now() - t0) / 1000; $('dg-time').textContent = s.toFixed(1) + 's';
     const stars = s < 60 ? 3 : s < 100 ? 2 : 1, isBest = !best || s < best;
-    if (isBest) { best = s; try { localStorage.setItem('mla-detail-dash', String(s)); } catch (e) {} showBest(); }
+    if (isBest) { best = s; try { localStorage.setItem('mla-detail-dash-v2', String(s)); } catch (e) {} showBest(); }
     $('dg-stars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
     $('dg-end-title').textContent = stars === 3 ? 'Pro detailer!' : stars === 2 ? 'Spotless!' : 'Clean enough!';
     $('dg-end-msg').textContent = `${s.toFixed(1)} seconds${isBest ? ', a new personal best' : ''}. Our team takes a little longer, because we do it by hand, properly.`;
