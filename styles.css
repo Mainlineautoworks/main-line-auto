@@ -935,3 +935,28 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .pc-more { text-align: center; margin: 28px 0 0; }
 .pc-compare { padding-bottom: clamp(40px, 5vw, 64px); }
 .pc-compare .protect-panels { margin-bottom: 0; }
+
+/* Window tint subpage */
+.subpage .tint { border-top: 1px solid rgba(140,149,157,.22); padding-top: clamp(48px, 6vw, 80px); }
+.tw-films { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 980px; margin: 0 auto; }
+.tw-film { position: relative; background: var(--white); border: 1px solid #DDE1E4; border-radius: 12px; padding: 30px 28px 22px; }
+.tw-film h3 { font-size: clamp(1.2rem, 1.8vw, 1.5rem); margin-bottom: 12px; }
+.tw-film > p:not(.pp-tag) { color: var(--text-mid); }
+.tw-film .ticks { margin-top: 18px; }
+.tw-film-pro { border: 2px solid var(--red); box-shadow: 0 14px 34px -18px rgba(216,30,44,.45); }
+.tw-film .coat-badge { position: absolute; top: -12px; left: 24px; }
+.tw-shades { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.tw-shade h3 { margin: 14px 0 6px; }
+.tw-shade p { color: var(--text-mid); font-size: .95rem; margin: 0; }
+.tw-glass { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden;
+  background: linear-gradient(160deg, #9FC3DE 0%, #DCE8F1 45%, #B9C7B0 46%, #7E9475 100%); }
+.tw-glass::before { content: ""; position: absolute; inset: 0; background: #0B0D10; opacity: var(--o); }
+.tw-glass::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.22) 42%, transparent 55%); }
+.tw-glass span { position: absolute; left: 12px; bottom: 10px; z-index: 1; font-family: var(--display); font-size: 1.15rem; color: var(--white); text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+.tw-law tbody th { white-space: normal; }
+.tw-fine { font-size: .9rem; color: var(--steel) !important; }
+.wp-dark .wp-table td { color: var(--text-mid); }
+@media (max-width: 1080px) { .tw-shades { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 760px) { .tw-films { grid-template-columns: 1fr; } .tw-shades { grid-template-columns: 1fr 1fr; } }
+.wp-dark .wp-table tbody th { color: var(--graphite); }
+.wp-dark .wp-table td:nth-child(2), .wp-dark .wp-table td:nth-child(3) { color: var(--graphite); }
