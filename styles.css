@@ -960,3 +960,6 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 @media (max-width: 760px) { .tw-films { grid-template-columns: 1fr; } .tw-shades { grid-template-columns: 1fr 1fr; } }
 .wp-dark .wp-table tbody th { color: var(--graphite); }
 .wp-dark .wp-table td:nth-child(2), .wp-dark .wp-table td:nth-child(3) { color: var(--graphite); }
+.tw-shade { position: relative; }
+.tw-shade .coat-badge { position: absolute; top: -11px; left: 12px; z-index: 2; }
+.tw-shade.is-popular .tw-glass { box-shadow: 0 0 0 2px var(--red), 0 14px 30px -16px rgba(216,30,44,.55); }
