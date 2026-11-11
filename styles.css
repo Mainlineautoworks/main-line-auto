@@ -1167,13 +1167,27 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .dp-size:hover { border-color: var(--steel); }
 .dp-size input { position: absolute; opacity: 0; pointer-events: none; }
 .dp-size:has(input:focus-visible) { outline: 3px solid var(--red); outline-offset: 3px; }
-.dp-size svg { width: 72px; height: 40px; margin-bottom: 6px; }
-.dp-size svg path { fill: #C9CED4; transition: fill .2s; }
-.dp-size svg circle { fill: var(--graphite); stroke: var(--white); stroke-width: 2.5; }
-.dp-size.is-selected { border-color: var(--red); box-shadow: 0 0 0 2px var(--red); }
-.dp-size.is-selected svg path { fill: var(--red); }
+.dp-size svg { width: 104px; height: 45px; margin-bottom: 8px; overflow: visible; }
+.dp-size svg .b { fill: #C9CED4; transition: fill .2s; }
+.dp-size svg .g { fill: #EEF1F4; }
+.dp-size svg .fr { fill: none; stroke: #9AA3AC; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: stroke .2s; }
+.dp-size svg .w circle { fill: var(--graphite); }
+.dp-size svg .w .rim { fill: #D5DAE0; }
+.dp-size.is-selected svg .b { fill: var(--red); }
+.dp-size.is-selected svg .fr { stroke: var(--graphite); }
+.dp-size:hover svg .b { fill: #B7BEC6; }
+.dp-size.is-selected:hover svg .b { fill: var(--red); }
 .dp-size-name { font-weight: 700; font-size: .95rem; color: var(--graphite); }
 .dp-size-sub { font-size: .8rem; color: var(--text-mid); }
 .dp-card-amt { font-family: var(--display); }
 @media (max-width: 900px) { .dp-sizes { grid-template-columns: 1fr 1fr; } }
 
+.dp-sizes { grid-template-columns: repeat(5, 1fr); }
+.dp-card .dp-was { font-family: var(--body); font-size: .9rem; color: var(--steel); margin-right: 4px; }
+.dp-moto-only.dp-card .coat-badge { left: 14px; }
+.dp-cards:has(.dp-moto-only:not([hidden])) { grid-template-columns: repeat(2, minmax(0, 300px)); }
+.dp-moto-note { margin: 24px 0 0; padding: 14px 18px; background: var(--white); border: 1px dashed #C9CED4; border-radius: 10px; color: var(--text-mid); }
+@media (max-width: 900px) { .dp-sizes { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px) { .dp-sizes { grid-template-columns: 1fr 1fr; } .dp-sizes .dp-size:first-child { grid-column: span 2; } .dp-cards:has(.dp-moto-only:not([hidden])) { grid-template-columns: 1fr 1fr; } }
+[hidden] { display: none !important; }
+.dp-size.is-selected { border-color: var(--red); box-shadow: 0 0 0 2px var(--red); }

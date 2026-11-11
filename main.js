@@ -319,13 +319,22 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   const panels = Array.from(root.querySelectorAll('.dp-panel'));
   const lines = document.getElementById('dp-lines'), total = document.getElementById('dp-total');
   const money = n => '$' + n.toLocaleString('en-US');
-  const priceOf = (input, i) => { const p = (input.dataset.prices || '').split(',').map(Number); return p.length > i ? p[i] : Number(input.dataset.price); };
+  const priceOf = (input, i) => { if (!input.dataset.prices) return Number(input.dataset.price); const p = input.dataset.prices.split(',').map(Number); return p.length > i ? p[i] : Number(input.dataset.price); };
   const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   function update() {
-    const sizeEl = sizes.find(r => r.checked) || sizes[2] || sizes[0];
-    const si = sizeEl ? Number(sizeEl.value) : 0, sizeLabel = sizeEl ? sizeEl.dataset.label : '';
+    const sizeEl = sizes.find(r => r.checked) || sizes[0];
+    const moto = sizeEl && sizeEl.value === 'moto';
+    const si = moto ? 0 : Number(sizeEl ? sizeEl.value : 0), sizeLabel = sizeEl ? sizeEl.dataset.label : '';
+    // Motorcycle shows its own packages and hides the car extras
+    root.querySelectorAll('.dp-moto-only').forEach(el => { el.hidden = !moto; });
+    root.querySelectorAll('.dp-car-only').forEach(el => { el.hidden = moto; });
+    const current = radios.find(r => r.checked);
+    const isMotoPkg = r => r.value.startsWith('moto');
+    if (moto && (!current || !isMotoPkg(current))) radios.find(r => r.value === 'moto').checked = true;
+    if (!moto && (!current || isMotoPkg(current))) (radios.find(r => r.value === 'full') || radios[0]).checked = true;
+    if (moto) boxes.forEach(b => { b.checked = false; });
     sizes.forEach(r => r.closest('.dp-size').classList.toggle('is-selected', r === sizeEl));
-    radios.forEach(r => { const amt = r.closest('.dp-card').querySelector('.dp-card-amt'); if (amt) amt.textContent = money(priceOf(r, si)); });
+    radios.forEach(r => { if (isMotoPkg(r)) return; const amt = r.closest('.dp-card').querySelector('.dp-card-amt'); if (amt) amt.textContent = money(priceOf(r, si)); });
     boxes.forEach(b => { const amt = b.closest('.dp-addon').querySelector('.dp-amt'); if (amt) amt.textContent = money(priceOf(b, si)); });
     document.querySelectorAll('[data-cmp]').forEach(el => { const r = radios.find(x => x.value === el.dataset.cmp); if (r) el.textContent = money(priceOf(r, si)); });
     const pkg = radios.find(r => r.checked) || radios[0];
