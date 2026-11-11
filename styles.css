@@ -1271,3 +1271,9 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .rc-score div { flex-direction: column; gap: 2px; }
   .rc-score span { font-size: .82rem; }
 }
+/* Rock chip test on the homepage protection section */
+.rc-inline { margin: 8px 0 48px; padding-top: 48px; border-top: 1px solid rgba(29,33,37,.12); background: none; }
+.rc-inline .coating-head { text-align: center; margin: 0 auto 22px; }
+.rc-inline .coating-head .pp-tag { margin-bottom: 8px; }
+.rc-inline .coating-head h3 { color: var(--red); font-size: clamp(1.25rem, 2.6vw, 1.9rem); -webkit-text-stroke: 0.04em currentColor; paint-order: stroke fill; letter-spacing: .02em; }
+.rc-inline .coating-head .pp-tag { color: var(--red); }
