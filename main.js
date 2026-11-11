@@ -1351,7 +1351,8 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
         status.textContent = 'Sorry, that time was just taken. Pick another one.';
         loadedKey = ''; pick = null; load();
       } else {
-        status.innerHTML = 'We couldn\'t finish booking online. <a href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services" target="_blank" rel="noopener">Book on Square instead</a> or call <a href="tel:+14845741628">(484) 574-1628</a>.';
+        status.innerHTML = 'We couldn\'t finish booking online. <a href="https://book.squareup.com/appointments/nebfqje99efjsg/location/L55RAA17AA9Y0/services" target="_blank" rel="noopener">Book on Square instead</a> or call <a href="tel:+14845741628">(484) 574-1628</a>.' +
+          '<span class="bk-err">Details: ' + String(err.message || err).replace(/[<>&]/g, '') + '</span>';
       }
     }
   });

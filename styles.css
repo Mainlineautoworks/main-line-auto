@@ -1611,3 +1611,4 @@ body:has(.dp-bar.is-on) .qa { bottom: 92px; }
 .bk-done .bk-done-when { font-size: 1.2rem; font-weight: 700; color: var(--graphite); }
 .bk-done .bk-done-fine { font-size: .9rem; margin-top: 14px; }
 .bk-done:focus { outline: none; }
+.bk-form .if-status .bk-err { display: block; margin-top: 6px; font-size: .8rem; font-weight: 400; color: var(--text-mid); }
