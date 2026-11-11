@@ -1624,3 +1624,16 @@ body:has(.dp-bar.is-on) .qa { bottom: 92px; }
 .bk-pkg input:checked + span { background: var(--graphite); border-color: var(--graphite); color: var(--white); }
 .bk-pkg input:checked + span em { color: var(--alloy); }
 .bk-pkg input:focus-visible + span { outline: 3px solid rgba(215,25,42,.45); outline-offset: 2px; }
+/* Detail Dash on phones: steps on two rows, compact start/end screens that fit the short stage */
+@media (max-width: 700px) {
+  .dg-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; overflow: visible; margin: 0 0 14px; padding: 0; }
+  .dg-steps li { justify-content: flex-start; gap: 6px; padding: 5px 10px 5px 5px; font-size: .82rem; min-width: 0; }
+  .dg-steps li span { width: 20px; height: 20px; flex: none; font-size: .7rem; }
+  .dg-panel { padding: 8px 12px; gap: 2px; }
+  .dg-panel .dg-panel-title { font-size: 1rem; line-height: 1.1; }
+  .dg-stars { font-size: 1.05rem; line-height: 1; letter-spacing: .1em; }
+  .dg-panel p:not(.dg-panel-title):not(.dg-stars) { font-size: .74rem; line-height: 1.3; max-width: 30em; }
+  .dg-end-actions { gap: 8px; flex-wrap: nowrap; margin-top: 4px; }
+  .dg-panel .btn { margin-top: 0; padding: 7px 14px; font-size: .82rem; min-height: 0; line-height: 1.2; }
+}
+@media (max-width: 380px) { .dg-panel p:not(.dg-panel-title):not(.dg-stars) { display: none; } }
