@@ -24,6 +24,7 @@ const SHOP = 'Main Line Auto Works';
 const INBOX = 'info@mainlineautoworks.com';           // where website estimate forms are sent
 const REQUESTS = 'Requests';
 const UPLOADS = 'Website form photos';                 // Google Drive folder for uploaded photos
+const WEBSITE = 'https://mainlineautoworks.github.io/main-line-auto/';   // switch to https://mainlineautoworks.com/ after the domain swap
 
 /* ---------- one-time setup ---------- */
 
@@ -218,6 +219,12 @@ function doPost(e) {
       blobs.forEach(b => links.push(folder.createFile(b.copyBlob()).getUrl()));
     }
 
+    // add the person to Square's customer list, with the request saved as a note
+    const skip = ['First name', 'Last name', 'Phone', 'Email', 'Vehicle'];
+    const details = fields.filter(f => f[1] && skip.indexOf(f[0]) < 0).map(f => f[0] + ': ' + f[1]).join('\n');
+    let inSquare = false;
+    try { if (sqToken_()) inSquare = saveLeadToSquare_(get('First name'), get('Last name'), email, phone, formName, vehicle, details); } catch (err) {}
+
     const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
     const rows = fields.filter(f => f[1]).map(f =>
       '<tr><td style="padding:6px 14px 6px 0;color:#5b636a;vertical-align:top;white-space:nowrap">' + esc(f[0]) +
@@ -228,12 +235,34 @@ function doPost(e) {
       '<p style="margin:0 0 16px;color:#5b636a">From the website · <a href="tel:' + tel + '">Call</a> · <a href="sms:' + tel + '">Text</a> · Reply to this email to answer ' + esc(name.split(' ')[0]) + '</p>' +
       '<table style="border-collapse:collapse">' + rows + '</table>' +
       (blobs.length ? '<p style="margin-top:16px">' + blobs.length + ' photo' + (blobs.length > 1 ? 's' : '') + ' attached.</p>' : '') +
+      (inSquare ? '<p style="margin-top:16px;color:#2e7d32">✓ Saved to your Square customers, with this request in their notes.</p>' : '') +
       '<p style="margin-top:16px;color:#8C959D;font-size:12px">Sent from ' + esc(clip(d.page, 300)) + '</p></div>';
     MailApp.sendEmail({
       to: INBOX, replyTo: email, name: SHOP + ' website',
       subject: formName + ' request: ' + name + (vehicle ? ' · ' + vehicle : ''),
       htmlBody: html, attachments: blobs
     });
+
+    // "we got it" email to the customer
+    try {
+      const mine = fields.filter(f => f[1] && ['First name', 'Last name', 'Phone', 'Email'].indexOf(f[0]) < 0);
+      const first = esc(get('First name'));
+      MailApp.sendEmail({
+        to: email, replyTo: INBOX, name: SHOP,
+        subject: 'We got your request · ' + SHOP,
+        htmlBody: '<div style="font-family:Arial,sans-serif;font-size:15px;color:#1D2125;max-width:560px">' +
+          '<p>Hi ' + first + ',</p>' +
+          '<p>Thanks for reaching out. We got your <b>' + esc(formName) + '</b> request and will get back to you soon with a price.</p>' +
+          '<p style="margin:20px 0 6px;color:#5b636a">Here\'s what you sent:</p>' +
+          '<table style="border-collapse:collapse">' + mine.map(f =>
+            '<tr><td style="padding:4px 14px 4px 0;color:#5b636a;vertical-align:top;white-space:nowrap">' + esc(f[0]) +
+            '</td><td style="padding:4px 0">' + esc(f[1]) + '</td></tr>').join('') + '</table>' +
+          (blobs.length ? '<p style="color:#5b636a">Plus ' + blobs.length + ' photo' + (blobs.length > 1 ? 's' : '') + '.</p>' : '') +
+          '<p style="margin-top:20px">Need us sooner? Call or text <a href="tel:+14845741628">(484) 574-1628</a>, or just reply to this email.</p>' +
+          '<p style="margin-top:24px;color:#5b636a;font-size:13px">' + SHOP + '<br>1444 Phoenixville Pike, West Chester, PA 19380<br>' +
+          '<a href="' + WEBSITE + '">' + WEBSITE.replace(/^https:\/\//, '').replace(/\/$/, '') + '</a></p></div>'
+      });
+    } catch (err) {}
 
     // log it
     const ss = SpreadsheetApp.getActive();
@@ -243,9 +272,7 @@ function doPost(e) {
       sh.getRange(1, 1, 1, 9).setValues([['Received', 'Form', 'Name', 'Phone', 'Email', 'Vehicle', 'Details', 'Photos', 'Status']]).setFontWeight('bold');
       sh.setFrozenRows(1);
     }
-    const skip = ['First name', 'Last name', 'Phone', 'Email', 'Vehicle'];
-    sh.appendRow([new Date(), formName, name, phone, email, vehicle,
-      fields.filter(f => f[1] && skip.indexOf(f[0]) < 0).map(f => f[0] + ': ' + f[1]).join('\n'), links.join('\n'), 'New']);
+    sh.appendRow([new Date(), formName, name, phone, email, vehicle, details, links.join('\n'), 'New']);
     return out({ ok: true });
   } catch (err) {
     return out({ ok: false, error: String(err && err.message || err) });
@@ -464,7 +491,7 @@ function e164_(phone) {
   return d.length === 10 ? '+1' + d : d.length === 11 && d[0] === '1' ? '+' + d : '';
 }
 
-function findOrCreateCustomer_(first, last, email, phone) {
+function findOrCreateCustomer_(first, last, email, phone, createdNote) {
   const tryFind = filter => {
     const j = sq_('post', '/customers/search', { limit: 1, query: { filter: filter } });
     return j.customers && j.customers[0] && j.customers[0].id;
@@ -474,8 +501,21 @@ function findOrCreateCustomer_(first, last, email, phone) {
   if (!id && tel) id = tryFind({ phone_number: { exact: tel } });
   if (id) return id;
   const c = sq_('post', '/customers', { idempotency_key: Utilities.getUuid(), given_name: first, family_name: last || undefined,
-    email_address: email, phone_number: tel || undefined, note: 'Added by the website booking form' });
+    email_address: email, phone_number: tel || undefined, note: createdNote || 'Added by the website booking form' });
   return c.customer.id;
+}
+
+// Website estimate request -> Square customer, newest request first in their notes
+function saveLeadToSquare_(first, last, email, phone, formName, vehicle, details) {
+  const id = findOrCreateCustomer_(first, last, email, phone, 'Added from a website estimate request');
+  try {
+    const c = sq_('get', '/customers/' + id).customer || {};
+    const entry = Utilities.formatDate(new Date(), SQ_TZ, 'MMM d, yyyy') + ': website ' + formName + ' request' +
+      (vehicle ? ' (' + vehicle + ')' : '') + (details ? '. ' + details.replace(/\n/g, '; ') : '');
+    const note = (entry + (c.note ? '\n' + c.note : '')).slice(0, 500);
+    sq_('put', '/customers/' + id, { note: note, version: c.version });
+  } catch (err) {}
+  return true;
 }
 
 function book_(d) {
