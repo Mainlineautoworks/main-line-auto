@@ -309,3 +309,37 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   compare.addEventListener('input', setSplit);
   setShade(); setSplit();
 })();
+
+// Detailing page: package + add-on builder with a running starting price
+(() => {
+  const root = document.getElementById('packages'); if (!root || !root.classList.contains('dp')) return;
+  const radios = Array.from(root.querySelectorAll('input[name="dp-package"]'));
+  const boxes = Array.from(root.querySelectorAll('.dp-addon input'));
+  const panels = Array.from(root.querySelectorAll('.dp-panel'));
+  const lines = document.getElementById('dp-lines'), total = document.getElementById('dp-total');
+  const money = n => '$' + n.toLocaleString('en-US');
+  function update() {
+    const pkg = radios.find(r => r.checked) || radios[0];
+    panels.forEach(p => { p.hidden = p.dataset.panel !== pkg.value; });
+    radios.forEach(r => r.closest('.dp-card').classList.toggle('is-selected', r === pkg));
+    boxes.forEach(b => b.closest('.dp-addon').classList.toggle('is-selected', b.checked));
+    const picked = boxes.filter(b => b.checked);
+    let sum = Number(pkg.dataset.price);
+    const rows = [`<li><span>${pkg.dataset.name}</span><span>${money(Number(pkg.dataset.price))}</span></li>`];
+    picked.forEach(b => { sum += Number(b.dataset.price); rows.push(`<li class="dp-line-add"><span>+ ${b.dataset.name}</span><span>${money(Number(b.dataset.price))}</span></li>`); });
+    lines.innerHTML = rows.join('');
+    total.textContent = money(sum);
+    const barTotal = document.getElementById('dp-bar-total'); if (barTotal) barTotal.textContent = money(sum);
+  }
+  radios.forEach(r => r.addEventListener('change', update));
+  boxes.forEach(b => b.addEventListener('change', update));
+  update();
+  // Phones: a slim bar with the running price while the builder is on screen and the summary isn't
+  const bar = document.getElementById('dp-bar'), summary = root.querySelector('.dp-summary');
+  if (bar && 'IntersectionObserver' in window) {
+    let inSection = false, summaryVisible = false;
+    const sync = () => bar.classList.toggle('is-on', inSection && !summaryVisible);
+    new IntersectionObserver(e => { inSection = e[0].isIntersecting; sync(); }, { rootMargin: '-40% 0px -20% 0px' }).observe(root.querySelector('.dp-body'));
+    new IntersectionObserver(e => { summaryVisible = e[0].isIntersecting; sync(); }).observe(summary);
+  }
+})();

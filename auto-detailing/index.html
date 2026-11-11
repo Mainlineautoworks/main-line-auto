@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110410">
+<link rel="stylesheet" href="../styles.css?v=202611110430">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -71,64 +71,234 @@
       <h1>Auto detailing in West Chester, PA</h1>
       <p class="hero-sub">Interior, exterior and full details for daily drivers and exotics alike. At our shop on Phoenixville Pike, or in your driveway.</p>
       <div class="hero-actions">
-        <a class="btn btn-red" href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book a detail</a>
+        <a class="btn btn-red" href="#packages">Build your detail</a>
         <a class="btn btn-ghost" href="tel:+14845741628">Call (484) 574-1628</a>
       </div>
     </div>
   </section>
 
-  <section class="menu-section" aria-labelledby="packages-h">
-    <div class="wrap menu-grid">
-      <div class="menu-head">
-        <h2 id="packages-h">Details</h2>
-        <p>Starting prices. Final price depends on the vehicle's size and condition; we'll confirm before we start.</p>
+  <section class="wp-section dp" id="packages" aria-labelledby="packages-h">
+    <div class="wrap">
+      <div class="wp-head">
+        <h2 id="packages-h">Build your detail</h2>
+        <p>Choose a package, add any extras, and see your starting price. Final pricing depends on your vehicle's size and condition.</p>
       </div>
-      <ul class="menu">
-        <li>
-          <div class="menu-line"><h3>Exterior detail</h3><span class="price">from $75</span></div>
-          <p>Hand wash, wheels and tires, decontamination, trim and glass, and a protective finish.</p>
-        </li>
-        <li>
-          <div class="menu-line"><h3>Interior detail</h3><span class="price">from $85</span></div>
-          <p>Vacuum, carpets, seats and upholstery, plastics, leather and glass.</p>
-        </li>
-        <li>
-          <div class="menu-line"><h3>Quick detail</h3><span class="price">from $85</span></div>
-          <p>A lighter clean inside and out, for cars that are already kept up.</p>
-        </li>
-        <li>
-          <div class="menu-line"><h3>Full vehicle detail</h3><span class="price">from $205</span></div>
-          <p>Everything in the interior and exterior details, together. About 4 to 8 hours.</p>
-        </li>
-        <li>
-          <div class="menu-line"><h3>Super car premium package</h3><span class="price">from $320</span></div>
-          <p>Our most thorough detail, for exotics and high-end performance cars.</p>
-        </li>
-        <li>
-          <div class="menu-line"><h3>Motorcycle detail</h3><span class="price">from $160</span></div>
-          <p>Paint, chrome, wheels and controls, cleaned and protected.</p>
-        </li>
-      </ul>
+
+      <fieldset class="dp-step">
+        <legend><span class="dp-num">1</span> Choose a package</legend>
+        <div class="dp-cards">
+          <label class="dp-card">
+            <input type="radio" name="dp-package" value="quick" data-name="Quick Detail" data-price="85">
+            
+            <span class="dp-card-tag">Fast refresh</span>
+            <span class="dp-card-name">Quick Detail</span>
+            <span class="dp-card-price"><small>from</small> $85</span>
+            <span class="dp-card-count">4 services included</span>
+          </label>
+          <label class="dp-card">
+            <input type="radio" name="dp-package" value="exterior" data-name="Exterior Detail" data-price="75">
+            
+            <span class="dp-card-tag">Outside only</span>
+            <span class="dp-card-name">Exterior Detail</span>
+            <span class="dp-card-price"><small>from</small> $75</span>
+            <span class="dp-card-count">10 services included</span>
+          </label>
+          <label class="dp-card">
+            <input type="radio" name="dp-package" value="interior" data-name="Interior Detail" data-price="85">
+            
+            <span class="dp-card-tag">Inside only</span>
+            <span class="dp-card-name">Interior Detail</span>
+            <span class="dp-card-price"><small>from</small> $85</span>
+            <span class="dp-card-count">12 services included</span>
+          </label>
+          <label class="dp-card is-featured">
+            <input type="radio" name="dp-package" value="full" data-name="Full Vehicle Detail" data-price="205" checked>
+            <span class="coat-badge">Most complete</span>
+            <span class="dp-card-tag">Inside & out</span>
+            <span class="dp-card-name">Full Vehicle Detail</span>
+            <span class="dp-card-price"><small>from</small> $205</span>
+            <span class="dp-card-count">22 services included</span>
+          </label>
+          <label class="dp-card">
+            <input type="radio" name="dp-package" value="supercar" data-name="Super Car Premium" data-price="320">
+            
+            <span class="dp-card-tag">Luxury & performance</span>
+            <span class="dp-card-name">Super Car Premium</span>
+            <span class="dp-card-price"><small>from</small> $320</span>
+            <span class="dp-card-count">21 services included</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="dp-body">
+        <div class="dp-main">
+          <div class="dp-panels" aria-live="polite">
+          <div class="dp-panel" data-panel="quick" hidden>
+            <div class="dp-panel-head">
+              <div><h3>Quick Detail</h3><p>A fast refresh inside and out, so your car looks and feels clean again in no time.</p></div>
+              <p class="dp-best"><span>Best for</span>Keeping a well-kept car looking sharp between full details.</p>
+            </div>
+            <div class="dp-groups"><div class="dp-group"><h4>Exterior</h4><ul><li>Exterior wash</li></ul></div><div class="dp-group"><h4>Interior</h4><ul><li>Brief interior vacuuming</li><li>General wipe-down</li><li>All glass cleaned to perfection</li></ul></div></div>
+          </div>
+          <div class="dp-panel" data-panel="exterior" hidden>
+            <div class="dp-panel-head">
+              <div><h3>Exterior Detail</h3><p>A gentle hand wash and a hand-buffed carnauba wax that brings the shine back to your paint, wheels and tires.</p></div>
+              <p class="dp-best"><span>Best for</span>Bringing back the shine and protecting the paint.</p>
+            </div>
+            <div class="dp-groups"><div class="dp-group"><h4>Wash</h4><ul><li>Foam-cannon hand wash with a premium waxing soap</li><li>Hand and warm-air blow drying</li><li>Bug and road tar remover applied if needed</li></ul></div><div class="dp-group"><h4>Wheels & tires</h4><ul><li>Wheels and tires cleaned to perfection</li><li>Rust-prevention spray on the wheels</li><li>Tires cleaned with a rubber-conditioning foaming soap</li><li>Tire dressing applied</li></ul></div><div class="dp-group"><h4>Finish</h4><ul><li>Carnauba wax applied and buffed with a dual-action polisher</li><li>Wiper blades cleaned</li><li>Gas cap area cleaned</li></ul></div></div>
+          </div>
+          <div class="dp-panel" data-panel="interior" hidden>
+            <div class="dp-panel-head">
+              <div><h3>Interior Detail</h3><p>A deep clean of the cabin, from the carpets and leather to the vents, screens and cup holders.</p></div>
+              <p class="dp-best"><span>Best for</span>Spills, kids, pets and daily-commuter cabins.</p>
+            </div>
+            <div class="dp-groups"><div class="dp-group"><h4>Floors & seats</h4><ul><li>Interior thoroughly vacuumed</li><li>Carpet floor mats shampooed if needed</li><li>Rubber floor mats scrubbed clean</li><li>Leather gently cleaned with a horsehair brush and steam when needed</li><li>Headliner spot-cleaned if needed</li></ul></div><div class="dp-group"><h4>Surfaces</h4><ul><li>All hard surfaces cleaned</li><li>Interior dusted</li><li>Screens and buttons cleaned</li><li>Cup holders, air vents and removable compartments cleaned</li></ul></div><div class="dp-group"><h4>Finish</h4><ul><li>Interior glass cleaned</li><li>Driver door jamb cleaned</li><li>Air freshener</li></ul></div></div>
+          </div>
+          <div class="dp-panel" data-panel="full">
+            <div class="dp-panel-head">
+              <div><h3>Full Vehicle Detail</h3><p>Our complete inside-and-out detail: the full exterior treatment with wax and trim care, plus a thorough interior clean with steam.</p></div>
+              <p class="dp-best"><span>Best for</span>A complete reset, seasonal cleanups and getting a car ready to sell.</p>
+            </div>
+            <div class="dp-groups"><div class="dp-group"><h4>Exterior</h4><ul><li>Foam-cannon hand wash with a premium waxing soap</li><li>Hand and air blow drying</li><li>Bug and road tar remover applied when needed</li><li>Carnauba wax applied and buffed with a dual-action polisher</li><li>Headlight lenses sealed</li><li>Back to Black on sun-damaged black trim</li><li>Rain-X water repellent on the windshield</li><li>Door jambs cleaned</li></ul></div><div class="dp-group"><h4>Wheels & tires</h4><ul><li>Wheels and tires cleaned to perfection</li><li>Rust-prevention spray on the wheels</li><li>Tires cleaned with a rubber-conditioning foaming soap</li><li>Tire dressing applied</li></ul></div><div class="dp-group"><h4>Interior</h4><ul><li>Interior thoroughly vacuumed</li><li>Carpet floor mats shampooed if needed</li><li>Rubber floor mats scrubbed clean</li><li>Headliner spot-cleaned if needed</li><li>All hard surfaces wiped clean</li><li>Pressurized steam for hard-to-reach areas</li><li>Cup holders, air vents and removable compartments cleaned</li><li>Interior windows and wiper blades cleaned</li><li>Gas cap area cleaned</li><li>Air freshener</li></ul></div></div>
+          </div>
+          <div class="dp-panel" data-panel="supercar" hidden>
+            <div class="dp-panel-head">
+              <div><h3>Super Car Premium</h3><p>Our most complete detail, with a glaze, color-specific wax and a ceramic quick-coat for a deep, hydrophobic mirror finish.</p></div>
+              <p class="dp-best"><span>Best for</span>Exotics, luxury cars and anything you want looking its absolute best.</p>
+            </div>
+            <div class="dp-groups"><div class="dp-group"><h4>Paint</h4><ul><li>Foam-cannon hand wash with a premium waxing soap, then hand and air drying</li><li>Glaze applied for a mirror finish that fills micro-swirls</li><li>Color-specific carnauba wax, buffed with a dual-action polisher</li><li>Ceramic quick-coating for hydrophobic protection</li><li>Headlights and taillights buffed with a clarifying compound</li><li>Door jambs cleaned</li></ul></div><div class="dp-group"><h4>Wheels, tires & glass</h4><ul><li>Wheels cleaned to perfection</li><li>Cream wax and sealant on the wheels to fight brake-dust corrosion</li><li>Tires cleaned with a rubber-conditioning soap and dressed</li><li>Tire pressure checked and corrected if needed</li><li>Water repellent outside and anti-fog inside the windshield</li><li>Washer fluid refilled with a hydrophobic solution</li><li>Wiper blades and interior windows cleaned</li></ul></div><div class="dp-group"><h4>Interior</h4><ul><li>Interior thoroughly vacuumed</li><li>Leather gently cleaned with a horsehair brush and steam when needed</li><li>Carpet mats shampooed and rubber mats scrubbed</li><li>Headliner spot-cleaned if needed</li><li>All hard surfaces cleaned, with steam for hard-to-reach areas</li><li>Cup holders, air vents and removable compartments cleaned</li><li>Gas cap area cleaned</li><li>Air freshener</li></ul></div></div>
+          </div>
+          </div>
+
+          <fieldset class="dp-step dp-step-addons">
+            <legend><span class="dp-num">2</span> Add extras <small>(optional)</small></legend>
+            <div class="dp-addons">
+          <label class="dp-addon">
+            <input type="checkbox" value="shampoo" data-name="Carpet & upholstery shampoo" data-price="85">
+            <span class="dp-check" aria-hidden="true"></span>
+            <span class="dp-addon-text"><strong>Carpet & upholstery shampoo</strong><small>Deep extraction for stains and ground-in dirt.</small></span>
+            <span class="dp-addon-price">from $85</span>
+          </label>
+          <label class="dp-addon">
+            <input type="checkbox" value="leather" data-name="Multi-stage leather conditioning" data-price="40">
+            <span class="dp-check" aria-hidden="true"></span>
+            <span class="dp-addon-text"><strong>Multi-stage leather conditioning</strong><small>Cleans, nourishes and protects leather seats.</small></span>
+            <span class="dp-addon-price">from $40</span>
+          </label>
+          <label class="dp-addon">
+            <input type="checkbox" value="odor" data-name="Odor elimination" data-price="30">
+            <span class="dp-check" aria-hidden="true"></span>
+            <span class="dp-addon-text"><strong>Odor elimination</strong><small>Neutralizes smoke, pet and food odors.</small></span>
+            <span class="dp-addon-price"><s>$45</s> $30<em>Sale</em></span>
+          </label>
+          <label class="dp-addon">
+            <input type="checkbox" value="headlight" data-name="Headlight restoration" data-price="40">
+            <span class="dp-check" aria-hidden="true"></span>
+            <span class="dp-addon-text"><strong>Headlight restoration</strong><small>Clears yellowed, hazy headlight lenses.</small></span>
+            <span class="dp-addon-price"><s>$60</s> $40<em>Sale</em></span>
+          </label>
+          <label class="dp-addon">
+            <input type="checkbox" value="engine" data-name="Engine bay detail" data-price="50">
+            <span class="dp-check" aria-hidden="true"></span>
+            <span class="dp-addon-text"><strong>Engine bay detail</strong><small>A clean, dressed engine bay.</small></span>
+            <span class="dp-addon-price">$50</span>
+          </label>
+          <label class="dp-addon">
+            <input type="checkbox" value="trim" data-name="Plastic trim restoration" data-price="55">
+            <span class="dp-check" aria-hidden="true"></span>
+            <span class="dp-addon-text"><strong>Plastic trim restoration</strong><small>Brings faded black trim back to deep black.</small></span>
+            <span class="dp-addon-price">from $55</span>
+          </label>
+          <label class="dp-addon">
+            <input type="checkbox" value="clay" data-name="Iron decon + clay bar" data-price="65">
+            <span class="dp-check" aria-hidden="true"></span>
+            <span class="dp-addon-text"><strong>Iron decon + clay bar</strong><small>Removes bonded contaminants for smooth paint.</small></span>
+            <span class="dp-addon-price">from $65</span>
+          </label>
+          <label class="dp-addon">
+            <input type="checkbox" value="windshield" data-name="Windshield ceramic coating" data-price="65">
+            <span class="dp-check" aria-hidden="true"></span>
+            <span class="dp-addon-text"><strong>Windshield ceramic coating</strong><small>Rain beads and rolls off the glass.</small></span>
+            <span class="dp-addon-price"><s>$85</s> $65<em>Sale</em></span>
+          </label>
+          <label class="dp-addon">
+            <input type="checkbox" value="mats" data-name="All-weather floor mats" data-price="70">
+            <span class="dp-check" aria-hidden="true"></span>
+            <span class="dp-addon-text"><strong>All-weather floor mats</strong><small>Durable mats that keep mud and snow off the carpet.</small></span>
+            <span class="dp-addon-price"><s>$85</s> $70<em>Sale</em></span>
+          </label>
+            </div>
+          </fieldset>
+        </div>
+
+        <aside class="dp-summary" aria-labelledby="dp-sum-h">
+          <h3 id="dp-sum-h"><span class="dp-num">3</span> Your detail</h3>
+          <ul class="dp-lines" id="dp-lines"></ul>
+          <div class="dp-total"><span>Starting at</span><strong id="dp-total">$205</strong></div>
+          <p class="dp-fine">"From" prices are for the smallest vehicle size. Larger vehicles and heavy soiling cost more. We'll confirm before we start.</p>
+          <a class="btn btn-red dp-book" href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book this detail</a>
+          <a class="btn btn-ghost-dark dp-call" href="tel:+14845741628">Call (484) 574-1628</a>
+          <p class="dp-pickup">Pick-up and drop-off available</p>
+        </aside>
+      </div>
+      <div class="dp-bar" id="dp-bar" aria-hidden="true">
+        <div><span>Starting at</span><strong id="dp-bar-total">$205</strong></div>
+        <a class="btn btn-red" href="#dp-sum-h" tabindex="-1">Review &amp; book</a>
+      </div>
     </div>
   </section>
 
-  <section class="menu-section menu-section-alt" aria-labelledby="addons-h">
-    <div class="wrap menu-grid">
-      <div class="menu-head">
-        <h2 id="addons-h">Add-ons</h2>
-        <p>Add any of these to a detail, or book them on their own.</p>
+  <section class="wp-section wp-alt" aria-labelledby="compare-h">
+    <div class="wrap">
+      <div class="wp-head">
+        <h2 id="compare-h">Compare packages</h2>
+        <p>See what's included at a glance.</p>
       </div>
-      <ul class="menu menu-compact">
-        <li><div class="menu-line"><h3>Iron decon and clay bar</h3><span class="price">from $65</span></div></li>
-        <li><div class="menu-line"><h3>Carpet and upholstery shampoo</h3><span class="price">from $85</span></div></li>
-        <li><div class="menu-line"><h3>Multi-stage leather conditioning</h3><span class="price">from $40</span></div></li>
-        <li><div class="menu-line"><h3>Plastic trim restoration</h3><span class="price">from $55</span></div></li>
-        <li><div class="menu-line"><h3>Headlight restoration</h3><span class="price">$40</span></div></li>
-        <li><div class="menu-line"><h3>Engine bay detail</h3><span class="price">$50</span></div></li>
-        <li><div class="menu-line"><h3>Odor elimination</h3><span class="price">$30</span></div></li>
-        <li><div class="menu-line"><h3>Windshield ceramic coating</h3><span class="price">$65</span></div></li>
-        <li><div class="menu-line"><h3>All-weather floor mats</h3><span class="price">$70</span></div></li>
-      </ul>
+      <div class="wp-table-wrap">
+        <table class="wp-table dp-compare">
+          <thead><tr><th scope="col"><span class="sr-only">Service</span></th><th scope="col">Quick<small>from $85</small></th><th scope="col">Exterior<small>from $75</small></th><th scope="col">Interior<small>from $85</small></th><th scope="col" class="dp-col-feat">Full Vehicle<small>from $205</small></th><th scope="col">Super Car<small>from $320</small></th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Exterior wash</th><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Wheels, tires & tire dressing</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Hand-buffed carnauba wax</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-part">Color-specific</span></td></tr>
+            <tr><th scope="row">Glaze & ceramic quick-coat</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Trim & headlight care</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Interior vacuum</th><td><span class="dp-part">Brief</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Hard surfaces cleaned</th><td><span class="dp-part">Wipe-down</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Steam cleaning</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Floor mats shampooed / scrubbed</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Glass cleaned</th><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-part">Interior</span></td><td><span class="dp-part">Interior</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Door jambs</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-part">Driver</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Windshield water repellent</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+            <tr><th scope="row">Tire pressure check</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="wp-section" aria-labelledby="moto-h">
+    <div class="wrap">
+      <div class="dp-moto">
+        <div>
+          <p class="pp-tag">Two wheels too</p>
+          <h2 id="moto-h">Motorcycle detail</h2>
+          <p>A careful, waterless wash for water-sensitive areas, polished chrome and metal, conditioned leather and saddle bags, and a hand-buffed carnauba wax on every painted surface.</p>
+          <ul class="ticks">
+            <li>Waterless wash, air-blown dry</li>
+            <li>Chrome, silver and finished metals polished</li>
+            <li>Leather seats and saddle bags cleaned and conditioned</li>
+            <li>Rain-X and anti-fog on the windshield, headlight sealant</li>
+            <li>Tire pressure checked and corrected</li>
+          </ul>
+        </div>
+        <div class="dp-moto-card">
+          <span class="coat-badge">Sale</span>
+          <p class="dp-moto-price"><s>$175</s> <strong>$160</strong></p>
+          <p>Add <strong>drive chain care</strong> for $40: chain cleaned of all residue and finished with a motorcycle-specific lubricant.</p>
+          <a class="btn btn-red" href="https://mainlineautoworks.square.site" target="_blank" rel="noopener">Book a motorcycle detail</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -235,6 +405,6 @@
   </div>
 </footer>
 
-<script src="../main.js?v=202611110380" defer></script>
+<script src="../main.js?v=202611110430" defer></script>
 </body>
 </html>

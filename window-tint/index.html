@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110410">
+<link rel="stylesheet" href="../styles.css?v=202611110430">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -203,13 +203,13 @@
         <a class="btn btn-red" href="#estimate">Get a tint estimate</a>
       </div>
       <div class="tv-view">
-        <div class="tv-stage" id="tv-stage" style="--split:55%">
+        <div class="tv-stage" id="tv-stage" style="--split:45%">
           <img src="../assets/img/tint-viz-side.webp?v=1" alt="Side view of a white BMW M3 sedan, with the windows tinted on one side of the slider" width="1090" height="395">
           <div class="tv-film" id="tv-film" aria-hidden="true"></div>
           <div class="tv-handle" aria-hidden="true"><span></span></div>
-          <span class="tv-tag tv-tag-on" aria-hidden="true">With tint</span>
           <span class="tv-tag tv-tag-off" aria-hidden="true">Factory glass</span>
-          <input type="range" class="tv-compare" id="tv-compare" min="0" max="100" value="55" aria-label="Drag to compare tinted and factory glass">
+          <span class="tv-tag tv-tag-on" aria-hidden="true">With tint</span>
+          <input type="range" class="tv-compare" id="tv-compare" min="0" max="100" value="45" aria-label="Drag to compare tinted and factory glass">
         </div>
         <p class="tv-hint">Drag across the car to turn the tint on and off.</p>
         <div class="tv-shade">
@@ -527,6 +527,6 @@
     <p>© <span id="year">2026</span> Main Line Auto Works</p>
   </div>
 </footer>
-<script src="../main.js?v=202611110380" defer></script>
+<script src="../main.js?v=202611110430" defer></script>
 </body>
 </html>
