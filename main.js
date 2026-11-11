@@ -310,32 +310,42 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   setShade(); setSplit();
 })();
 
-// Detailing page: package + add-on builder with a running starting price
+// Detailing page: vehicle size + package + add-on builder with a running price
 (() => {
   const root = document.getElementById('packages'); if (!root || !root.classList.contains('dp')) return;
+  const sizes = Array.from(root.querySelectorAll('input[name="dp-size"]'));
   const radios = Array.from(root.querySelectorAll('input[name="dp-package"]'));
   const boxes = Array.from(root.querySelectorAll('.dp-addon input'));
   const panels = Array.from(root.querySelectorAll('.dp-panel'));
   const lines = document.getElementById('dp-lines'), total = document.getElementById('dp-total');
   const money = n => '$' + n.toLocaleString('en-US');
+  const priceOf = (input, i) => { const p = (input.dataset.prices || '').split(',').map(Number); return p.length > i ? p[i] : Number(input.dataset.price); };
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   function update() {
+    const sizeEl = sizes.find(r => r.checked) || sizes[2] || sizes[0];
+    const si = sizeEl ? Number(sizeEl.value) : 0, sizeLabel = sizeEl ? sizeEl.dataset.label : '';
+    sizes.forEach(r => r.closest('.dp-size').classList.toggle('is-selected', r === sizeEl));
+    radios.forEach(r => { const amt = r.closest('.dp-card').querySelector('.dp-card-amt'); if (amt) amt.textContent = money(priceOf(r, si)); });
+    boxes.forEach(b => { const amt = b.closest('.dp-addon').querySelector('.dp-amt'); if (amt) amt.textContent = money(priceOf(b, si)); });
+    document.querySelectorAll('[data-cmp]').forEach(el => { const r = radios.find(x => x.value === el.dataset.cmp); if (r) el.textContent = money(priceOf(r, si)); });
     const pkg = radios.find(r => r.checked) || radios[0];
     panels.forEach(p => { p.hidden = p.dataset.panel !== pkg.value; });
     radios.forEach(r => r.closest('.dp-card').classList.toggle('is-selected', r === pkg));
     boxes.forEach(b => b.closest('.dp-addon').classList.toggle('is-selected', b.checked));
     const picked = boxes.filter(b => b.checked);
-    let sum = Number(pkg.dataset.price);
-    const rows = [`<li><span>${pkg.dataset.name}</span><span>${money(Number(pkg.dataset.price))}</span></li>`];
-    picked.forEach(b => { sum += Number(b.dataset.price); rows.push(`<li class="dp-line-add"><span>+ ${b.dataset.name}</span><span>${money(Number(b.dataset.price))}</span></li>`); });
+    let sum = priceOf(pkg, si);
+    const rows = [`<li><span>${pkg.dataset.name}</span><span>${money(sum)}</span></li>`];
+    picked.forEach(b => { const p = priceOf(b, si); sum += p; rows.push(`<li class="dp-line-add"><span>+ ${b.dataset.name}</span><span>${money(p)}</span></li>`); });
     lines.innerHTML = rows.join('');
     total.textContent = money(sum);
-    const barTotal = document.getElementById('dp-bar-total'); if (barTotal) barTotal.textContent = money(sum);
-    const pick = document.getElementById('dp-pick'), extras = document.getElementById('dp-pick-extras');
-    if (pick) pick.textContent = pkg.dataset.name;
+    setText('dp-bar-total', money(sum));
+    setText('dp-size-label', sizeLabel);
+    setText('dp-pick', pkg.dataset.name);
+    setText('dp-pick-size', sizeLabel);
+    const extras = document.getElementById('dp-pick-extras');
     if (extras) extras.textContent = picked.length ? ', then add ' + picked.map(b => b.dataset.name.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1') : '';
   }
-  radios.forEach(r => r.addEventListener('change', update));
-  boxes.forEach(b => b.addEventListener('change', update));
+  [...sizes, ...radios, ...boxes].forEach(i => i.addEventListener('change', update));
   update();
   // Phones: a slim bar with the running price while the builder is on screen and the summary isn't
   const bar = document.getElementById('dp-bar'), summary = root.querySelector('.dp-summary');

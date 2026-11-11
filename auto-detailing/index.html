@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110440">
+<link rel="stylesheet" href="../styles.css?v=202611110450">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -81,50 +81,86 @@
     <div class="wrap">
       <div class="wp-head">
         <h2 id="packages-h">Build your detail</h2>
-        <p>Choose a package, add any extras, and see your starting price. Final pricing depends on your vehicle's size and condition.</p>
+        <p>Choose your vehicle and a package, add any extras, and see your price as you go.</p>
       </div>
 
+      <fieldset class="dp-step dp-step-size">
+        <legend><span class="dp-num">1</span> Choose your vehicle</legend>
+        <div class="dp-sizes">
+          <label class="dp-size">
+            <input type="radio" name="dp-size" value="0" data-label="2-door coupe (seats 2)">
+            <svg viewBox="0 0 80 44" aria-hidden="true"><path d="M6 30 L14 22 Q20 17 30 17 L44 17 Q52 17 58 23 L66 28 Q72 29 72 33 L72 36 L6 36 Z"/><circle cx="20" cy="36" r="6"/><circle cx="60" cy="36" r="6"/></svg>
+            <span class="dp-size-name">2-door coupe</span>
+            <span class="dp-size-sub">Seats 2</span>
+          </label>
+          <label class="dp-size">
+            <input type="radio" name="dp-size" value="1" data-label="2-door coupe (seats 4)">
+            <svg viewBox="0 0 80 44" aria-hidden="true"><path d="M6 30 L14 21 Q20 16 32 16 L46 16 Q54 17 59 23 L67 28 Q73 29 73 33 L73 36 L6 36 Z"/><circle cx="20" cy="36" r="6"/><circle cx="60" cy="36" r="6"/></svg>
+            <span class="dp-size-name">2-door coupe</span>
+            <span class="dp-size-sub">Seats 4</span>
+          </label>
+          <label class="dp-size">
+            <input type="radio" name="dp-size" value="2" data-label="4-door sedan" checked>
+            <svg viewBox="0 0 80 44" aria-hidden="true"><path d="M4 30 L13 21 Q18 16 30 16 L46 16 Q53 16 58 22 L64 27 L72 28 Q76 29 76 33 L76 36 L4 36 Z"/><circle cx="20" cy="36" r="6"/><circle cx="60" cy="36" r="6"/></svg>
+            <span class="dp-size-name">4-door sedan</span>
+            <span class="dp-size-sub">Most cars</span>
+          </label>
+          <label class="dp-size">
+            <input type="radio" name="dp-size" value="3" data-label="mid-size SUV">
+            <svg viewBox="0 0 80 44" aria-hidden="true"><path d="M4 30 L4 24 L12 14 Q15 12 22 12 L56 12 Q62 12 65 16 L70 24 Q76 25 76 30 L76 36 L4 36 Z"/><circle cx="20" cy="36" r="6"/><circle cx="60" cy="36" r="6"/></svg>
+            <span class="dp-size-name">Mid-size SUV</span>
+            <span class="dp-size-sub">Crossovers & SUVs</span>
+          </label>
+          <label class="dp-size">
+            <input type="radio" name="dp-size" value="4" data-label="large truck or SUV">
+            <svg viewBox="0 0 80 44" aria-hidden="true"><path d="M3 30 L3 22 L10 12 Q12 10 18 10 L40 10 Q44 10 44 14 L44 22 L77 22 Q79 22 79 25 L79 36 L3 36 Z"/><circle cx="18" cy="36" r="6"/><circle cx="64" cy="36" r="6"/></svg>
+            <span class="dp-size-name">Large truck / SUV</span>
+            <span class="dp-size-sub">Full-size & 3-row</span>
+          </label>
+        </div>
+      </fieldset>
+
       <fieldset class="dp-step">
-        <legend><span class="dp-num">1</span> Choose a package</legend>
+        <legend><span class="dp-num">2</span> Choose a package</legend>
         <div class="dp-cards">
           <label class="dp-card">
-            <input type="radio" name="dp-package" value="quick" data-name="Quick Detail" data-price="85">
+            <input type="radio" name="dp-package" value="quick" data-name="Quick Detail" data-price="99" data-prices="85,85,99,115,135">
             
             <span class="dp-card-tag">Fast refresh</span>
             <span class="dp-card-name">Quick Detail</span>
-            <span class="dp-card-price"><small>from</small> $85</span>
+            <span class="dp-card-price"><span class="dp-card-amt">$99</span></span>
             <span class="dp-card-count">4 services included</span>
           </label>
           <label class="dp-card">
-            <input type="radio" name="dp-package" value="exterior" data-name="Exterior Detail" data-price="75">
+            <input type="radio" name="dp-package" value="exterior" data-name="Exterior Detail" data-price="120" data-prices="75,95,120,135,165">
             
             <span class="dp-card-tag">Outside only</span>
             <span class="dp-card-name">Exterior Detail</span>
-            <span class="dp-card-price"><small>from</small> $75</span>
+            <span class="dp-card-price"><span class="dp-card-amt">$120</span></span>
             <span class="dp-card-count">10 services included</span>
           </label>
           <label class="dp-card">
-            <input type="radio" name="dp-package" value="interior" data-name="Interior Detail" data-price="85">
+            <input type="radio" name="dp-package" value="interior" data-name="Interior Detail" data-price="145" data-prices="85,100,145,165,195">
             
             <span class="dp-card-tag">Inside only</span>
             <span class="dp-card-name">Interior Detail</span>
-            <span class="dp-card-price"><small>from</small> $85</span>
+            <span class="dp-card-price"><span class="dp-card-amt">$145</span></span>
             <span class="dp-card-count">12 services included</span>
           </label>
           <label class="dp-card is-featured">
-            <input type="radio" name="dp-package" value="full" data-name="Full Vehicle Detail" data-price="205" checked>
+            <input type="radio" name="dp-package" value="full" data-name="Full Vehicle Detail" data-price="225" data-prices="205,205,225,265,295" checked>
             <span class="coat-badge">Most complete</span>
             <span class="dp-card-tag">Inside & out</span>
             <span class="dp-card-name">Full Vehicle Detail</span>
-            <span class="dp-card-price"><small>from</small> $205</span>
+            <span class="dp-card-price"><span class="dp-card-amt">$225</span></span>
             <span class="dp-card-count">22 services included</span>
           </label>
           <label class="dp-card">
-            <input type="radio" name="dp-package" value="supercar" data-name="Super Car Premium" data-price="320">
+            <input type="radio" name="dp-package" value="supercar" data-name="Super Car Premium" data-price="415" data-prices="320,360,415,485,595">
             
             <span class="dp-card-tag">Luxury & performance</span>
             <span class="dp-card-name">Super Car Premium</span>
-            <span class="dp-card-price"><small>from</small> $320</span>
+            <span class="dp-card-price"><span class="dp-card-amt">$415</span></span>
             <span class="dp-card-count">21 services included</span>
           </label>
         </div>
@@ -171,78 +207,78 @@
           </div>
 
           <fieldset class="dp-step dp-step-addons">
-            <legend><span class="dp-num">2</span> Add extras <small>(optional)</small></legend>
+            <legend><span class="dp-num">3</span> Add extras <small>(optional)</small></legend>
             <div class="dp-addons">
           <label class="dp-addon">
-            <input type="checkbox" value="shampoo" data-name="Carpet & upholstery shampoo" data-price="85">
+            <input type="checkbox" value="shampoo" data-name="Carpet & upholstery shampoo" data-price="135" data-prices="85,85,135,155,195">
             <span class="dp-check" aria-hidden="true"></span>
             <span class="dp-addon-text"><strong>Carpet & upholstery shampoo</strong><small>Deep extraction for stains and ground-in dirt.</small></span>
-            <span class="dp-addon-price">from $85</span>
+            <span class="dp-addon-price"><b class="dp-amt">$135</b></span>
           </label>
           <label class="dp-addon">
-            <input type="checkbox" value="leather" data-name="Multi-stage leather conditioning" data-price="40">
+            <input type="checkbox" value="leather" data-name="Multi-stage leather conditioning" data-price="60" data-prices="40,60,60,75,90">
             <span class="dp-check" aria-hidden="true"></span>
             <span class="dp-addon-text"><strong>Multi-stage leather conditioning</strong><small>Cleans, nourishes and protects leather seats.</small></span>
-            <span class="dp-addon-price">from $40</span>
+            <span class="dp-addon-price"><b class="dp-amt">$60</b></span>
           </label>
           <label class="dp-addon">
-            <input type="checkbox" value="odor" data-name="Odor elimination" data-price="30">
+            <input type="checkbox" value="odor" data-name="Odor elimination" data-price="30" data-prices="30,30,30,30,30">
             <span class="dp-check" aria-hidden="true"></span>
             <span class="dp-addon-text"><strong>Odor elimination</strong><small>Neutralizes smoke, pet and food odors.</small></span>
-            <span class="dp-addon-price"><s>$45</s> $30<em>Sale</em></span>
+            <span class="dp-addon-price"><s>$45</s> <b class="dp-amt">$30</b><em>Sale</em></span>
           </label>
           <label class="dp-addon">
-            <input type="checkbox" value="headlight" data-name="Headlight restoration" data-price="40">
+            <input type="checkbox" value="headlight" data-name="Headlight restoration" data-price="40" data-prices="40,40,40,40,40">
             <span class="dp-check" aria-hidden="true"></span>
             <span class="dp-addon-text"><strong>Headlight restoration</strong><small>Clears yellowed, hazy headlight lenses.</small></span>
-            <span class="dp-addon-price"><s>$60</s> $40<em>Sale</em></span>
+            <span class="dp-addon-price"><s>$60</s> <b class="dp-amt">$40</b><em>Sale</em></span>
           </label>
           <label class="dp-addon">
-            <input type="checkbox" value="engine" data-name="Engine bay detail" data-price="50">
+            <input type="checkbox" value="engine" data-name="Engine bay detail" data-price="50" data-prices="50,50,50,50,50">
             <span class="dp-check" aria-hidden="true"></span>
             <span class="dp-addon-text"><strong>Engine bay detail</strong><small>A clean, dressed engine bay.</small></span>
-            <span class="dp-addon-price">$50</span>
+            <span class="dp-addon-price"><b class="dp-amt">$50</b></span>
           </label>
           <label class="dp-addon">
-            <input type="checkbox" value="trim" data-name="Plastic trim restoration" data-price="55">
+            <input type="checkbox" value="trim" data-name="Plastic trim restoration" data-price="55" data-prices="55,55,55,75,75">
             <span class="dp-check" aria-hidden="true"></span>
             <span class="dp-addon-text"><strong>Plastic trim restoration</strong><small>Brings faded black trim back to deep black.</small></span>
-            <span class="dp-addon-price">from $55</span>
+            <span class="dp-addon-price"><b class="dp-amt">$55</b></span>
           </label>
           <label class="dp-addon">
-            <input type="checkbox" value="clay" data-name="Iron decon + clay bar" data-price="65">
+            <input type="checkbox" value="clay" data-name="Iron decon + clay bar" data-price="85" data-prices="65,65,85,105,145">
             <span class="dp-check" aria-hidden="true"></span>
             <span class="dp-addon-text"><strong>Iron decon + clay bar</strong><small>Removes bonded contaminants for smooth paint.</small></span>
-            <span class="dp-addon-price">from $65</span>
+            <span class="dp-addon-price"><b class="dp-amt">$85</b></span>
           </label>
           <label class="dp-addon">
-            <input type="checkbox" value="windshield" data-name="Windshield ceramic coating" data-price="65">
+            <input type="checkbox" value="windshield" data-name="Windshield ceramic coating" data-price="65" data-prices="65,65,65,65,65">
             <span class="dp-check" aria-hidden="true"></span>
             <span class="dp-addon-text"><strong>Windshield ceramic coating</strong><small>Rain beads and rolls off the glass.</small></span>
-            <span class="dp-addon-price"><s>$85</s> $65<em>Sale</em></span>
+            <span class="dp-addon-price"><s>$85</s> <b class="dp-amt">$65</b><em>Sale</em></span>
           </label>
           <label class="dp-addon">
-            <input type="checkbox" value="mats" data-name="All-weather floor mats" data-price="70">
+            <input type="checkbox" value="mats" data-name="All-weather floor mats" data-price="70" data-prices="70,70,70,70,70">
             <span class="dp-check" aria-hidden="true"></span>
             <span class="dp-addon-text"><strong>All-weather floor mats</strong><small>Durable mats that keep mud and snow off the carpet.</small></span>
-            <span class="dp-addon-price"><s>$85</s> $70<em>Sale</em></span>
+            <span class="dp-addon-price"><s>$85</s> <b class="dp-amt">$70</b><em>Sale</em></span>
           </label>
             </div>
           </fieldset>
         </div>
 
         <aside class="dp-summary" aria-labelledby="dp-sum-h">
-          <h3 id="dp-sum-h"><span class="dp-num">3</span> Your detail</h3>
+          <h3 id="dp-sum-h"><span class="dp-num">4</span> Your detail</h3>
           <ul class="dp-lines" id="dp-lines"></ul>
-          <div class="dp-total"><span>Starting at</span><strong id="dp-total">$205</strong></div>
-          <p class="dp-fine">"From" prices are for the smallest vehicle size. Larger vehicles and heavy soiling cost more. We'll confirm before we start.</p>
+          <div class="dp-total"><span>Your price</span><strong id="dp-total">$205</strong></div>
+          <p class="dp-fine">Price for a <span id="dp-size-label">4-door sedan</span>. Heavy soiling, pet hair or stains may add to the price. We'll confirm before we start.</p>
           <a class="btn btn-red dp-book" href="#book">Pick a time</a>
           <a class="btn btn-ghost-dark dp-call" href="tel:+14845741628">Call (484) 574-1628</a>
           <p class="dp-pickup">Pick-up and drop-off available</p>
         </aside>
       </div>
       <div class="dp-bar" id="dp-bar" aria-hidden="true">
-        <div><span>Starting at</span><strong id="dp-bar-total">$205</strong></div>
+        <div><span>Your price</span><strong id="dp-bar-total">$205</strong></div>
         <a class="btn btn-red" href="#book" tabindex="-1">Pick a time</a>
       </div>
     </div>
@@ -256,7 +292,7 @@
       </div>
       <div class="dp-booking-note" id="dp-booking-note" aria-live="polite">
         <span class="dp-num">i</span>
-        <p>You picked <strong id="dp-pick">Full Vehicle Detail</strong>. Choose it in the calendar below<span id="dp-pick-extras"></span>.</p>
+        <p>You picked <strong id="dp-pick">Full Vehicle Detail</strong> for a <strong id="dp-pick-size">4-door sedan</strong>. Choose it in the calendar below<span id="dp-pick-extras"></span>.</p>
       </div>
       <div class="dp-widget">
         <!-- Start Square Appointments Embed Code --><script src='https://square.site/appointments/buyer/widget/nebfqje99efjsg/L55RAA17AA9Y0.js'></script><!-- End Square Appointments Embed Code -->
@@ -270,11 +306,11 @@
     <div class="wrap">
       <div class="wp-head">
         <h2 id="compare-h">Compare packages</h2>
-        <p>See what's included at a glance.</p>
+        <p>See what's included at a glance. Prices shown for your selected vehicle.</p>
       </div>
       <div class="wp-table-wrap">
         <table class="wp-table dp-compare">
-          <thead><tr><th scope="col"><span class="sr-only">Service</span></th><th scope="col">Quick<small>from $85</small></th><th scope="col">Exterior<small>from $75</small></th><th scope="col">Interior<small>from $85</small></th><th scope="col" class="dp-col-feat">Full Vehicle<small>from $205</small></th><th scope="col">Super Car<small>from $320</small></th></tr></thead>
+          <thead><tr><th scope="col"><span class="sr-only">Service</span></th><th scope="col">Quick<small data-cmp="quick">$99</small></th><th scope="col">Exterior<small data-cmp="exterior">$120</small></th><th scope="col">Interior<small data-cmp="interior">$145</small></th><th scope="col" class="dp-col-feat">Full Vehicle<small data-cmp="full">$225</small></th><th scope="col">Super Car<small data-cmp="supercar">$415</small></th></tr></thead>
           <tbody>
             <tr><th scope="row">Exterior wash</th><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
             <tr><th scope="row">Wheels, tires & tire dressing</th><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-no" aria-label="Not included">–</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td><td><span class="dp-yes" aria-label="Included">✓</span></td></tr>
@@ -313,7 +349,7 @@
         <div class="dp-moto-card">
           <span class="coat-badge">Sale</span>
           <p class="dp-moto-price"><s>$175</s> <strong>$160</strong></p>
-          <p>Add <strong>drive chain care</strong> for $40: chain cleaned of all residue and finished with a motorcycle-specific lubricant.</p>
+          <p>With <strong>drive chain care</strong>: <s>$225</s> <strong>$205</strong>. The chain is cleaned of all residue and finished with a motorcycle-specific lubricant.</p>
           <a class="btn btn-red" href="#book">Book a motorcycle detail</a>
         </div>
       </div>
@@ -423,6 +459,6 @@
   </div>
 </footer>
 
-<script src="../main.js?v=202611110440" defer></script>
+<script src="../main.js?v=202611110450" defer></script>
 </body>
 </html>

@@ -1159,3 +1159,21 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .dp-widget iframe { width: 100% !important; border: 0; }
 .dp-widget-alt { text-align: center; margin: 14px 0 0; font-size: .92rem; color: var(--text-mid); }
 #book { scroll-margin-top: 90px; }
+
+/* Detailing: vehicle size step */
+.dp-step-size { margin-bottom: 28px; }
+.dp-sizes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.dp-size { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 16px 10px 14px; background: var(--white); border: 1px solid #DDE1E4; border-radius: 12px; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+.dp-size:hover { border-color: var(--steel); }
+.dp-size input { position: absolute; opacity: 0; pointer-events: none; }
+.dp-size:has(input:focus-visible) { outline: 3px solid var(--red); outline-offset: 3px; }
+.dp-size svg { width: 72px; height: 40px; margin-bottom: 6px; }
+.dp-size svg path { fill: #C9CED4; transition: fill .2s; }
+.dp-size svg circle { fill: var(--graphite); stroke: var(--white); stroke-width: 2.5; }
+.dp-size.is-selected { border-color: var(--red); box-shadow: 0 0 0 2px var(--red); }
+.dp-size.is-selected svg path { fill: var(--red); }
+.dp-size-name { font-weight: 700; font-size: .95rem; color: var(--graphite); }
+.dp-size-sub { font-size: .8rem; color: var(--text-mid); }
+.dp-card-amt { font-family: var(--display); }
+@media (max-width: 900px) { .dp-sizes { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px) { .dp-sizes { grid-template-columns: 1fr 1fr; } .dp-sizes .dp-size:last-child { grid-column: span 2; } }
