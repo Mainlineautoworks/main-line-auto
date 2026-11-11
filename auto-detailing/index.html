@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1D2125">
 <link rel="icon" href="../assets/img/favicon.png">
 <link rel="preload" href="../assets/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../styles.css?v=202611110770">
+<link rel="stylesheet" href="../styles.css?v=202611110780">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -375,6 +375,48 @@
     </div>
   </section>
 
+  <section class="wp-section dg" id="detail-dash" aria-labelledby="dg-h">
+    <div class="wrap">
+      <div class="wp-head">
+        <p class="pp-tag">Play</p>
+        <h2 id="dg-h">Detail Dash</h2>
+        <p>Think you can detail this M3? Foam it, scrub it, rinse, dry, wax and dress the tires. Beat the clock for three stars.</p>
+      </div>
+      <ol class="dg-steps" id="dg-steps" aria-label="Steps">
+        <li data-step="0"><span>1</span>Foam</li><li data-step="1"><span>2</span>Scrub</li><li data-step="2"><span>3</span>Rinse</li>
+        <li data-step="3"><span>4</span>Dry</li><li data-step="4"><span>5</span>Wax</li><li data-step="5"><span>6</span>Tires</li>
+      </ol>
+      <div class="rc-stage dg-stage" id="dg-stage">
+        <img src="../assets/img/tint-viz-side.webp?v=1" alt="Side view of a dirty white BMW M3 to detail in the game" width="1090" height="395">
+        <canvas class="dg-layer dg-shine" id="dg-shine" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-tires" id="dg-tires" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-dirt" id="dg-dirt" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-paint dg-foam" id="dg-foam" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-paint dg-water" id="dg-water" aria-hidden="true"></canvas>
+        <canvas class="dg-layer dg-fx" id="dg-fx" aria-label="Drag across the car to use the current tool"></canvas>
+        <div class="dg-panel" id="dg-start">
+          <p class="dg-panel-title">Ready to detail?</p>
+          <p>Drag across the car with each tool. Fill the bar to move to the next step.</p>
+          <button type="button" class="btn btn-red" id="dg-go">Start the clock</button>
+        </div>
+        <div class="dg-panel" id="dg-end" hidden>
+          <p class="dg-stars" id="dg-stars" aria-hidden="true"></p>
+          <p class="dg-panel-title" id="dg-end-title">Spotless!</p>
+          <p id="dg-end-msg"></p>
+          <div class="dg-end-actions">
+            <a class="btn btn-red" href="#packages">Book the real thing</a>
+            <button type="button" class="btn rc-reset" id="dg-again">Play again</button>
+          </div>
+        </div>
+      </div>
+      <div class="dg-hud">
+        <div class="dg-tool"><strong id="dg-tool-name">Foam cannon</strong><span id="dg-tool-tip">Drag over the paint to cover the whole car in foam.</span></div>
+        <div class="dg-meter" aria-hidden="true"><span id="dg-bar"></span></div>
+        <div class="dg-clock"><strong id="dg-time">0.0s</strong><span id="dg-best">Best: none yet</span></div>
+      </div>
+    </div>
+  </section>
+
   <section class="reviews" aria-labelledby="reviews-h">
     <div class="wrap">
       <div class="reviews-head">
@@ -459,6 +501,6 @@
   </div>
 </footer>
 
-<script src="../main.js?v=202611110770" defer></script>
+<script src="../main.js?v=202611110790" defer></script>
 </body>
 </html>

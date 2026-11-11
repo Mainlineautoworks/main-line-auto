@@ -721,3 +721,142 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
   document.getElementById('tr-demo').addEventListener('click', () => { input.value = 'DEMO'; show('DEMO'); });
   const q = new URLSearchParams(location.search).get('job'); if (q) { input.value = q; show(q); }
 })();
+
+// Detail Dash mini game (detailing page): foam, scrub, rinse, dry, wax, tires against the clock
+(() => {
+  const stage = document.getElementById('dg-stage'); if (!stage) return;
+  const W = 1090, H = 395, R = 2, WW = W * R, HH = H * R;
+  const $ = id => document.getElementById(id);
+  const layers = {}; ['shine', 'tires', 'dirt', 'foam', 'water', 'fx'].forEach(k => { const c = $('dg-' + k); c.width = WW; c.height = HH; layers[k] = c.getContext('2d'); });
+  const maskUrl = asset('grime-mask.png');
+  stage.querySelectorAll('.dg-paint, .dg-shine, .dg-dirt').forEach(c => { c.style.webkitMaskImage = c.style.maskImage = `url(${maskUrl})`; });
+  const TOOLS = [
+    { name: 'Foam cannon', tip: 'Drag over the paint to cover the whole car in foam.', r: 34 },
+    { name: 'Wash mitt', tip: 'Scrub the foam and grime off every panel.', r: 30 },
+    { name: 'Rinse', tip: 'Hose off all the suds.', r: 40 },
+    { name: 'Drying towel', tip: 'Dry every drop so it doesn’t spot.', r: 36 },
+    { name: 'Wax & buff', tip: 'Buff wax into the paint until it shines.', r: 32 },
+    { name: 'Tire shine', tip: 'Tap both tires to dress them.', r: 0 }
+  ];
+  const WHEELS = [[210, 296], [836, 296]], TIRE_R = 76, RIM_R = 57;
+  const NEED = 0.82, CELL = 10, GW = Math.ceil(W / CELL), GH = Math.ceil(H / CELL);
+  let paintCells = null, paintCount = 0, touched = new Uint8Array(GW * GH), step = -1, t0 = 0, tick = 0, done = [false, false], playing = false, down = false, last = null;
+  const imgs = {}; ['road', 'bugs', 'drops'].forEach(k => { imgs[k] = new Image(); imgs[k].src = asset(`grime-${k}.webp`); });
+  const zi = new Image(); zi.src = asset('ppf-zones.png');
+  zi.onload = () => {
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'); x.drawImage(zi, 0, 0);
+    const d = x.getImageData(0, 0, W, H).data; paintCells = new Uint8Array(GW * GH);
+    for (let gy = 0; gy < GH; gy++) for (let gx = 0; gx < GW; gx++) {
+      let n = 0; for (let y = gy * CELL; y < Math.min(H, gy * CELL + CELL); y += 2) for (let xx = gx * CELL; xx < Math.min(W, gx * CELL + CELL); xx += 2) if (d[(y * W + xx) * 4] > 20) n++;
+      if (n > 6) { paintCells[gy * GW + gx] = 1; paintCount++; }
+    }
+  };
+  const k = () => Math.min(2.2, Math.max(1, 760 / (stage.clientWidth || 760)));
+  let best = null; try { best = Number(localStorage.getItem('mla-detail-dash')) || null; } catch (e) {}
+  const showBest = () => { $('dg-best').textContent = best ? `Best: ${best.toFixed(1)}s` : 'Best: none yet'; };
+  showBest();
+  function dirty() {
+    Object.values(layers).forEach(c => c.clearRect(0, 0, WW, HH));
+    const d = layers.dirt; ['road', 'bugs', 'drops'].forEach(n => { if (imgs[n].complete) d.drawImage(imgs[n], 0, 0); });
+    d.globalCompositeOperation = 'source-atop'; d.fillStyle = 'rgba(120,100,75,.10)'; d.fillRect(0, 0, WW, HH); d.globalCompositeOperation = 'source-over';
+    // dull, dusty tires
+    const t = layers.tires; WHEELS.forEach(([x, y]) => { t.beginPath(); t.arc(x * R, y * R, TIRE_R * R, 0, 7); t.arc(x * R, y * R, RIM_R * R, 0, 7, true); t.fillStyle = 'rgba(150,140,125,.28)'; t.fill('evenodd'); });
+  }
+  function setStep(s) {
+    step = s; touched = new Uint8Array(GW * GH);
+    document.querySelectorAll('#dg-steps li').forEach((li, i) => { li.className = i < s ? 'done' : i === s ? 'now' : ''; });
+    const tool = TOOLS[s]; $('dg-tool-name').textContent = tool.name; $('dg-tool-tip').textContent = tool.tip; bar(0);
+    stage.dataset.tool = s;
+  }
+  function bar(p) { $('dg-bar').style.width = Math.round(Math.min(1, p) * 100) + '%'; }
+  function coverage() { let n = 0; for (let i = 0; i < touched.length; i++) if (touched[i] && paintCells[i]) n++; return paintCount ? n / paintCount : 0; }
+  function mark(x, y, r) {
+    const g0x = Math.max(0, Math.floor((x - r) / CELL)), g1x = Math.min(GW - 1, Math.floor((x + r) / CELL));
+    const g0y = Math.max(0, Math.floor((y - r) / CELL)), g1y = Math.min(GH - 1, Math.floor((y + r) / CELL));
+    for (let gy = g0y; gy <= g1y; gy++) for (let gx = g0x; gx <= g1x; gx++) { const cx = gx * CELL + CELL / 2 - x, cy = gy * CELL + CELL / 2 - y; if (cx * cx + cy * cy <= r * r) touched[gy * GW + gx] = 1; }
+  }
+  function soft(ctx, x, y, r, inner, outer) { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, inner); g.addColorStop(1, outer); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); }
+  function stamp(x, y) {
+    const r = TOOLS[step].r * k(), X = x * R, Y = y * R, RR = r * R;
+    if (step === 0) { // foam: thick white suds
+      const f = layers.foam;
+      for (let i = 0; i < 14; i++) { const a = Math.random() * 6.3, d = Math.random() * RR, s = (4 + Math.random() * 10) * R;
+        const px = X + Math.cos(a) * d, py = Y + Math.sin(a) * d; soft(f, px, py, s, 'rgba(255,255,255,.95)', 'rgba(235,242,250,.0)');
+        f.beginPath(); f.arc(px - s * 0.3, py - s * 0.3, s * 0.25, 0, 7); f.fillStyle = 'rgba(255,255,255,.9)'; f.fill(); }
+    } else if (step === 1) { // scrub: grime lifts into the suds
+      const d = layers.dirt; d.globalCompositeOperation = 'destination-out'; soft(d, X, Y, RR, 'rgba(0,0,0,.9)', 'rgba(0,0,0,0)'); d.globalCompositeOperation = 'source-over';
+      const f = layers.foam; f.globalCompositeOperation = 'destination-out'; soft(f, X, Y, RR * 0.9, 'rgba(0,0,0,.35)', 'rgba(0,0,0,0)'); f.globalCompositeOperation = 'source-over';
+      soft(f, X, Y, RR * 0.6, 'rgba(205,190,165,.18)', 'rgba(205,190,165,0)');
+    } else if (step === 2) { // rinse: suds and leftover grime wash away, droplets stay
+      ['foam', 'dirt'].forEach(n => { const c = layers[n]; c.globalCompositeOperation = 'destination-out'; soft(c, X, Y, RR, 'rgba(0,0,0,1)', 'rgba(0,0,0,0)'); c.globalCompositeOperation = 'source-over'; });
+      const w = layers.water; for (let i = 0; i < 6; i++) { const a = Math.random() * 6.3, d = Math.random() * RR, s = (1.2 + Math.random() * 2.6) * R; const px = X + Math.cos(a) * d, py = Y + Math.sin(a) * d;
+        w.beginPath(); w.arc(px, py, s, 0, 7); w.fillStyle = 'rgba(170,200,225,.55)'; w.fill(); w.beginPath(); w.arc(px - s * 0.35, py - s * 0.35, s * 0.35, 0, 7); w.fillStyle = 'rgba(255,255,255,.95)'; w.fill(); }
+    } else if (step === 3) { // dry
+      const w = layers.water; w.globalCompositeOperation = 'destination-out'; soft(w, X, Y, RR, 'rgba(0,0,0,1)', 'rgba(0,0,0,0)'); w.globalCompositeOperation = 'source-over';
+    } else if (step === 4) { // wax & buff: build up a glossy sheen
+      soft(layers.shine, X, Y, RR, 'rgba(255,255,255,.16)', 'rgba(255,255,255,0)');
+    }
+    mark(x, y, r * 0.8);
+    const c = coverage(); bar(c / NEED);
+    if (c >= NEED) finishStep();
+  }
+  function finishStep() {
+    if (step === 0) { const f = layers.foam; f.fillStyle = 'rgba(255,255,255,.55)'; f.fillRect(0, 0, WW, HH); }
+    if (step === 1) { const d = layers.dirt; d.globalCompositeOperation = 'destination-out'; d.fillStyle = 'rgba(0,0,0,.85)'; d.fillRect(0, 0, WW, HH); d.globalCompositeOperation = 'source-over'; }
+    if (step === 2) { layers.foam.clearRect(0, 0, WW, HH); layers.dirt.clearRect(0, 0, WW, HH); }
+    if (step === 3) layers.water.clearRect(0, 0, WW, HH);
+    if (step === 4) { const s = layers.shine; s.clearRect(0, 0, WW, HH); const g = s.createLinearGradient(0, 0, WW * 0.7, HH);
+      g.addColorStop(0.25, 'rgba(255,255,255,0)'); g.addColorStop(0.42, 'rgba(255,255,255,.55)'); g.addColorStop(0.5, 'rgba(210,235,255,.35)'); g.addColorStop(0.62, 'rgba(255,255,255,0)'); s.fillStyle = g; s.fillRect(0, 0, WW, HH); }
+    flash(); setStep(step + 1);
+  }
+  function flash() { stage.classList.remove('dg-flash'); void stage.offsetWidth; stage.classList.add('dg-flash'); }
+  function tireTap(x, y) {
+    WHEELS.forEach(([wx, wy], i) => {
+      const d = Math.hypot(x - wx, y - wy); if (done[i] || d > TIRE_R + 12) return;
+      done[i] = true; const t = layers.tires, X = wx * R, Y = wy * R;
+      t.globalCompositeOperation = 'destination-out'; t.beginPath(); t.arc(X, Y, (TIRE_R + 2) * R, 0, 7); t.fill(); t.globalCompositeOperation = 'source-over';
+      t.beginPath(); t.arc(X, Y, TIRE_R * R, 0, 7); t.arc(X, Y, RIM_R * R, 0, 7, true); t.fillStyle = 'rgba(8,8,10,.45)'; t.fill('evenodd');
+      t.beginPath(); t.arc(X, Y, (TIRE_R - 6) * R, Math.PI * 1.1, Math.PI * 1.55); t.strokeStyle = 'rgba(255,255,255,.55)'; t.lineWidth = 3 * R; t.lineCap = 'round'; t.stroke();
+      bar((done[0] + done[1]) / 2);
+    });
+    if (done[0] && done[1]) win();
+  }
+  function cursor(x, y) {
+    const f = layers.fx; f.clearRect(0, 0, WW, HH); if (!playing || step > 4) return;
+    const r = TOOLS[step].r * k() * R; f.beginPath(); f.arc(x * R, y * R, r, 0, 7); f.strokeStyle = 'rgba(216,30,44,.85)'; f.lineWidth = 2.5 * R; f.stroke();
+    if (step === 2 && down) { f.strokeStyle = 'rgba(190,225,255,.75)'; f.lineWidth = 1.5 * R; for (let i = 0; i < 12; i++) { const ox = x * R - (60 + Math.random() * 40) * R, oy = y * R - (90 + Math.random() * 30) * R; f.beginPath(); f.moveTo(ox, oy); f.lineTo(x * R + (Math.random() - 0.5) * r, y * R + (Math.random() - 0.5) * r); f.stroke(); } }
+  }
+  const pos = e => { const b = stage.getBoundingClientRect(); return [(e.clientX - b.left) / b.width * W, (e.clientY - b.top) / b.height * H]; };
+  const fx = $('dg-fx');
+  fx.addEventListener('pointerdown', e => {
+    if (!playing || !paintCells) return; const p = pos(e);
+    if (step === 5) { tireTap(...p); return; }
+    down = true; last = p; fx.setPointerCapture(e.pointerId); stamp(...p); cursor(...p);
+  });
+  fx.addEventListener('pointermove', e => {
+    const p = pos(e); cursor(...p); if (!down || !playing || step > 4) return;
+    const dx = p[0] - last[0], dy = p[1] - last[1], d = Math.hypot(dx, dy), stepLen = Math.max(6, TOOLS[step].r * k() * 0.35);
+    for (let s = stepLen; s <= d; s += stepLen) { stamp(last[0] + dx * s / d, last[1] + dy * s / d); if (!playing || step > 4) break; }
+    if (d >= stepLen) last = p;
+  });
+  ['pointerup', 'pointercancel'].forEach(t => fx.addEventListener(t, () => { down = false; }));
+  fx.addEventListener('pointerleave', () => { if (!down) layers.fx.clearRect(0, 0, WW, HH); });
+  function start() {
+    dirty(); done = [false, false]; setStep(0); playing = true; t0 = performance.now();
+    $('dg-start').hidden = true; $('dg-end').hidden = true; stage.classList.add('is-playing');
+    clearInterval(tick); tick = setInterval(() => { $('dg-time').textContent = ((performance.now() - t0) / 1000).toFixed(1) + 's'; }, 100);
+  }
+  function win() {
+    playing = false; clearInterval(tick); stage.classList.remove('is-playing'); layers.fx.clearRect(0, 0, WW, HH);
+    document.querySelectorAll('#dg-steps li').forEach(li => { li.className = 'done'; }); bar(1);
+    const s = (performance.now() - t0) / 1000; $('dg-time').textContent = s.toFixed(1) + 's';
+    const stars = s < 60 ? 3 : s < 100 ? 2 : 1, isBest = !best || s < best;
+    if (isBest) { best = s; try { localStorage.setItem('mla-detail-dash', String(s)); } catch (e) {} showBest(); }
+    $('dg-stars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+    $('dg-end-title').textContent = stars === 3 ? 'Pro detailer!' : stars === 2 ? 'Spotless!' : 'Clean enough!';
+    $('dg-end-msg').textContent = `${s.toFixed(1)} seconds${isBest ? ', a new personal best' : ''}. Our team takes a little longer, because we do it by hand, properly.`;
+    setTimeout(() => { $('dg-end').hidden = false; }, 700);
+  }
+  $('dg-go').addEventListener('click', start); $('dg-again').addEventListener('click', start);
+  const ready = setInterval(() => { if (Object.values(imgs).every(i => i.complete && i.naturalWidth)) { clearInterval(ready); dirty(); } }, 150);
+})();

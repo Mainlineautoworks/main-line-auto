@@ -1401,3 +1401,44 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .tr-help-actions { width: 100%; } .tr-help-actions .btn { flex: 1; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) { .tr-steps li.now::before { animation: none; } }
+
+/* Detail Dash mini game */
+.dg-steps { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.dg-steps li { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 8px; border-radius: 999px; background: var(--white); border: 1px solid #DDE1E4; font-weight: 600; font-size: .9rem; color: var(--steel); transition: background .25s, color .25s, border-color .25s; }
+.dg-steps li span { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #E9ECEF; font-size: .76rem; color: var(--steel); }
+.dg-steps li.now { border-color: var(--red); color: var(--graphite); box-shadow: 0 0 0 2px var(--red); }
+.dg-steps li.now span { background: var(--red); color: #fff; }
+.dg-steps li.done { color: var(--graphite); }
+.dg-steps li.done span { background: var(--graphite); color: #fff; }
+.dg-stage .dg-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.dg-stage .dg-paint, .dg-stage .dg-shine, .dg-stage .dg-dirt { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.dg-stage .dg-fx { pointer-events: auto; touch-action: none; cursor: none; }
+.dg-stage:not(.is-playing) .dg-fx { cursor: default; }
+.dg-stage[data-tool="5"] .dg-fx { cursor: pointer; }
+.dg-stage.dg-flash::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 80% at 50% 50%, rgba(255,255,255,.55), rgba(255,255,255,0)); pointer-events: none; animation: dg-flash .6s ease-out forwards; }
+@keyframes dg-flash { to { opacity: 0; } }
+.dg-panel { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; padding: 20px; background: rgba(29,33,37,.72); color: #fff; backdrop-filter: blur(2px); z-index: 2; }
+.dg-panel p { margin: 0; max-width: 34em; color: var(--alloy); }
+.dg-panel .dg-panel-title { font-family: var(--display); text-transform: uppercase; font-size: clamp(1.1rem, 2.6vw, 1.8rem); color: #fff; }
+.dg-panel .btn { margin-top: 10px; }
+.dg-stars { font-size: clamp(1.6rem, 4vw, 2.4rem); letter-spacing: .15em; color: #F5C518 !important; }
+.dg-end-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.dg-end-actions .rc-reset { color: #fff; border-color: rgba(255,255,255,.5); }
+.dg-hud { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(120px, 1fr) auto; align-items: center; gap: 18px; max-width: 1000px; margin: 16px auto 0; }
+.dg-tool strong { display: block; font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 1.05rem; color: var(--red); }
+.dg-tool span { font-size: .92rem; color: var(--text-mid); }
+.dg-meter { height: 10px; border-radius: 99px; background: #E1E4E7; overflow: hidden; }
+.dg-meter span { display: block; height: 100%; width: 0; background: var(--red); border-radius: 99px; transition: width .15s; }
+.dg-clock { text-align: right; }
+.dg-clock strong { display: block; font-family: var(--display); font-weight: 400; font-size: 1.6rem; line-height: 1; }
+.dg-clock span { font-size: .82rem; color: var(--steel); }
+@media (max-width: 700px) {
+  .dg-steps { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: none; margin: 0 calc(-1 * var(--gutter)) 14px; padding: 2px var(--gutter); }
+  .dg-steps::-webkit-scrollbar { display: none; }
+  .dg-steps li { flex: none; }
+  .dg-hud { grid-template-columns: 1fr auto; }
+  .dg-meter { grid-column: 1 / -1; grid-row: 2; }
+  .dg-panel { padding: 12px; gap: 4px; }
+  .dg-panel p:not(.dg-panel-title):not(.dg-stars) { font-size: .82rem; }
+  .dg-panel .btn { margin-top: 4px; padding: 10px 16px; min-height: 0; }
+}
