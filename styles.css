@@ -1442,3 +1442,7 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .dg-panel p:not(.dg-panel-title):not(.dg-stars) { font-size: .82rem; }
   .dg-panel .btn { margin-top: 4px; padding: 10px 16px; min-height: 0; }
 }
+/* Detailing: tighter gap between the booking calendar and the game */
+.dp-booking { padding-bottom: clamp(28px, 4vw, 44px); }
+.dp-booking + .dg { padding-top: clamp(28px, 4vw, 44px); }
+.dg .wp-head { margin-bottom: clamp(20px, 3vw, 32px); }
