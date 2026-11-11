@@ -1230,3 +1230,5 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
   .cal-head p { font-size: inherit; }
   .cal-head { margin-bottom: clamp(28px, 6vw, 48px); }
 }
+.pickup .pp-tag { margin-bottom: 10px; color: var(--red); }
+.pickup-points { margin: 22px 0 28px; }
