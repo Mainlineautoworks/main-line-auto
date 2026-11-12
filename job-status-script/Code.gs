@@ -69,6 +69,9 @@ function onOpen() {
   SpreadsheetApp.getUi().createMenu('Job Status')
     .addItem('New job…', 'newJob')
     .addItem('Show update form link', 'showFormLink')
+    .addSeparator()
+    .addItem('Set up the phone "New job" form', 'setupNewJobForm')
+    .addItem('Show "New job" form link', 'showNewJobFormLink')
     .addToUi();
 }
 
@@ -92,6 +95,92 @@ function showFormLink() {
   const url = SpreadsheetApp.getActive().getFormUrl();
   SpreadsheetApp.getUi().alert(url ? 'Bookmark this on your phone:\n' + url.replace('/edit', '/viewform') : 'Run setup() first.');
 }
+
+/* ---------- "New job" form: start a job from your phone ----------
+ * Run once from the menu: Job Status > Set up the phone "New job" form.
+ * Each submission adds the job with a random code, posts "Checked in",
+ * emails the customer (if you gave an email) and emails YOU a one-tap
+ * "Text the customer" button that opens Messages with the link filled in.
+ */
+
+const NEW_JOB_SERVICES = ['Vinyl Wrap', 'Caliper Painting', 'PPF', 'Ceramic Coating', 'Window Tint', 'Detailing'];
+const NEW_JOB_FIRST_NOTE = 'Checked in. We’ll post updates here as we go.';
+
+function setupNewJobForm() {
+  const ui = SpreadsheetApp.getUi(), props = PropertiesService.getScriptProperties();
+  if (props.getProperty('NEW_JOB_FORM_ID')) { showNewJobFormLink(); return; }
+  const form = FormApp.create('New job · ' + SHOP)
+    .setDescription('Starts a job on the website and gives you a one-tap text with the customer’s tracking link.')
+    .setConfirmationMessage('Job created. Check your email for the “Text the customer” button.');
+  form.addTextItem().setTitle('Customer name').setRequired(true);
+  form.addTextItem().setTitle('Customer phone').setHelpText('For the text with their tracking link').setRequired(true);
+  form.addTextItem().setTitle('Customer email').setHelpText('Optional. They’ll also get each update by email.');
+  form.addTextItem().setTitle('Vehicle').setHelpText('e.g. 2023 BMW X5, white').setRequired(true);
+  form.addCheckboxItem().setTitle('Services').setChoiceValues(NEW_JOB_SERVICES).showOtherOption(true).setRequired(true);
+  form.addDateItem().setTitle('Ready date');
+  form.addParagraphTextItem().setTitle('First note for the customer').setHelpText('Leave blank for: ' + NEW_JOB_FIRST_NOTE);
+  props.setProperties({ NEW_JOB_FORM_ID: form.getId(), SHEET_ID: SpreadsheetApp.getActive().getId() });
+  ScriptApp.newTrigger('onNewJob').forForm(form).onFormSubmit().create();
+  ui.alert('“New job” form is ready', 'Bookmark this on your phone (or add it to your Home Screen):\n\n' + form.getPublishedUrl(), ui.ButtonSet.OK);
+}
+
+function showNewJobFormLink() {
+  const id = PropertiesService.getScriptProperties().getProperty('NEW_JOB_FORM_ID');
+  SpreadsheetApp.getUi().alert(id ? 'Bookmark this on your phone:\n\n' + FormApp.openById(id).getPublishedUrl()
+    : 'Run Job Status > Set up the phone "New job" form first.');
+}
+
+function onNewJob(e) {
+  const a = {};
+  e.response.getItemResponses().forEach(ir => { a[ir.getItem().getTitle()] = ir.getResponse(); });
+  const name = String(a['Customer name'] || '').trim(), first = name.split(/\s+/)[0] || 'there';
+  const phone = String(a['Customer phone'] || '').trim(), email = String(a['Customer email'] || '').trim();
+  const vehicle = String(a['Vehicle'] || '').trim();
+  const services = [].concat(a['Services'] || []).join(', ');
+  const ready = a['Ready date'] ? String(a['Ready date']) : '';           // yyyy-mm-dd
+  const note = String(a['First note for the customer'] || '').trim() || NEW_JOB_FIRST_NOTE;
+
+  const sheet = (SpreadsheetApp.getActive() || SpreadsheetApp.openById(SHEET_ID_())).getSheetByName(JOBS);
+  if (sheet.getRange(1, 9).getValue() === '') sheet.getRange(1, 9).setValue('Customer phone (private)').setFontWeight('bold');
+  const existing = sheet.getLastRow() > 1 ? sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues().flat().map(String) : [];
+  let code; do { code = 'MLA-' + randomCode(4); } while (existing.indexOf(code) >= 0);
+  const link = SITE + '?job=' + code;
+  sheet.appendRow([code, vehicle, services, ready, STAGES[0], name, email, link, phone]);
+  addUpdate(code, 0, note, '');
+
+  const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const text = 'Hi ' + first + ', your ' + vehicle + ' is checked in at ' + SHOP + '. Follow along with photos and progress here: ' + link;
+  const tel = e164_(phone) || phone.replace(/[^\d+]/g, '');
+  const sms = 'sms:' + tel + '?&body=' + encodeURIComponent(text);
+
+  // to you: one tap opens Messages with the text filled in
+  const me = Session.getEffectiveUser().getEmail() || INBOX;
+  MailApp.sendEmail({
+    to: me, name: SHOP + ' Job Status',
+    subject: 'New job ' + code + ' · ' + name + ' · ' + vehicle,
+    htmlBody: '<div style="font-family:Arial,sans-serif;font-size:16px;color:#1D2125">' +
+      '<p style="margin:0 0 6px"><b>' + esc(name) + '</b> · ' + esc(vehicle) + '</p>' +
+      '<p style="margin:0 0 18px;color:#5b636a">' + esc(services) + (ready ? ' · ready ' + esc(ready) : '') + ' · code <b>' + code + '</b></p>' +
+      '<p><a href="' + sms + '" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:6px">Text ' + esc(first) + ' the tracking link</a></p>' +
+      '<p style="margin-top:18px;color:#5b636a;font-size:14px">If the button doesn’t open Messages, copy this text:</p>' +
+      '<p style="background:#F2F3F4;padding:12px;border-radius:6px">' + esc(text) + '</p>' +
+      '<p style="font-size:14px"><a href="' + link + '">Open their Job Status page</a>' + (email ? ' · They were also emailed the link.' : '') + '</p></div>'
+  });
+
+  // to the customer, if you entered an email
+  if (email) {
+    MailApp.sendEmail({
+      to: email, replyTo: INBOX, name: SHOP,
+      subject: 'Your ' + vehicle + ' is checked in',
+      htmlBody: '<div style="font-family:Arial,sans-serif;font-size:15px;color:#1D2125"><p>Hi ' + esc(first) + ',</p>' +
+        '<p>Your ' + esc(vehicle) + ' is checked in at ' + SHOP + '. We’ll post photos and progress as we go.</p>' +
+        '<p><a href="' + link + '">Follow your car here</a> (tracking code <b>' + code + '</b>)</p>' +
+        '<p>' + SHOP + ' · (484) 574-1628</p></div>'
+    });
+  }
+}
+
+function SHEET_ID_() { return PropertiesService.getScriptProperties().getProperty('SHEET_ID'); }
 
 /* ---------- when the form is submitted ---------- */
 
