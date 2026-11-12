@@ -116,21 +116,33 @@ const NEW_JOB_FIRST_NOTE = 'Checked in. We’ll post updates here as we go.';
 
 function setupNewJobForm() {
   const ui = SpreadsheetApp.getUi(), props = PropertiesService.getScriptProperties();
-  if (props.getProperty('NEW_JOB_FORM_ID')) { repairTriggers(); showNewJobFormLink(); return; }
-  const form = FormApp.create('New job · ' + SHOP)
-    .setDescription('Starts a job on the website and gives you a one-tap text with the customer’s tracking link.')
+  let form, id = props.getProperty('NEW_JOB_FORM_ID');
+  try { form = id ? FormApp.openById(id) : null; } catch (err) { form = null; }
+  const isNew = !form;
+  if (isNew) form = FormApp.create('New job · ' + SHOP);
+  form.setDescription('Starts a job on the website. The license plate becomes the customer’s tracking code, and you get a one-tap text with their link.')
     .setConfirmationMessage('Job created. Check your email for the “Text the customer” button.');
+  buildNewJobItems_(form);
+  props.setProperties({ NEW_JOB_FORM_ID: form.getId(), SHEET_ID: SpreadsheetApp.getActive().getId() });
+  repairTriggers();
+  ui.alert(isNew ? '“New job” form is ready' : '“New job” form updated (same link as before)',
+    'Bookmark this on your phone (or add it to your Home Screen):\n\n' + form.getPublishedUrl(), ui.ButtonSet.OK);
+}
+
+// License plate first, then the car, the work, the pick-up time, then the customer
+function buildNewJobItems_(form) {
+  form.getItems().forEach(i => form.deleteItem(i));
+  form.addTextItem().setTitle('License plate').setHelpText('Becomes the customer’s tracking code. Spaces don’t matter.').setRequired(true);
+  form.addTextItem().setTitle('Vehicle').setHelpText('Year, make, model, color, e.g. 2023 BMW X5, white').setRequired(true);
+  form.addCheckboxItem().setTitle('Services').setChoiceValues(NEW_JOB_SERVICES).showOtherOption(true).setRequired(true);
+  form.addDateTimeItem().setTitle('Estimated pick-up').setHelpText('Date and time you expect it to be ready');
   form.addTextItem().setTitle('Customer name').setRequired(true);
   form.addTextItem().setTitle('Customer phone').setHelpText('For the text with their tracking link').setRequired(true);
   form.addTextItem().setTitle('Customer email').setHelpText('Optional. They’ll also get each update by email.');
-  form.addTextItem().setTitle('Vehicle').setHelpText('e.g. 2023 BMW X5, white').setRequired(true);
-  form.addCheckboxItem().setTitle('Services').setChoiceValues(NEW_JOB_SERVICES).showOtherOption(true).setRequired(true);
-  form.addDateItem().setTitle('Ready date');
   form.addParagraphTextItem().setTitle('First note for the customer').setHelpText('Leave blank for: ' + NEW_JOB_FIRST_NOTE);
-  props.setProperties({ NEW_JOB_FORM_ID: form.getId(), SHEET_ID: SpreadsheetApp.getActive().getId() });
-  ScriptApp.newTrigger('onNewJob').forForm(form).onFormSubmit().create();
-  ui.alert('“New job” form is ready', 'Bookmark this on your phone (or add it to your Home Screen):\n\n' + form.getPublishedUrl(), ui.ButtonSet.OK);
 }
+
+function cleanCode_(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''); }
 
 // Make sure each automatic task exists exactly once (safe to run any time)
 function repairTriggers() {
@@ -162,19 +174,26 @@ function onNewJob(e) {
   const phone = String(a['Customer phone'] || '').trim(), email = String(a['Customer email'] || '').trim();
   const vehicle = String(a['Vehicle'] || '').trim();
   const services = [].concat(a['Services'] || []).join(', ');
-  const ready = a['Ready date'] ? String(a['Ready date']) : '';           // yyyy-mm-dd
+  const ready = String(a['Estimated pick-up'] || a['Ready date'] || '');   // "yyyy-mm-dd HH:mm" or "yyyy-mm-dd"
+  const plate = cleanCode_(a['License plate']);
   const note = String(a['First note for the customer'] || '').trim() || NEW_JOB_FIRST_NOTE;
 
   const sheet = (SpreadsheetApp.getActive() || SpreadsheetApp.openById(SHEET_ID_())).getSheetByName(JOBS);
   if (sheet.getRange(1, 9).getValue() === '') sheet.getRange(1, 9).setValue('Customer phone (private)').setFontWeight('bold');
   const existing = sheet.getLastRow() > 1 ? sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues().flat().map(String) : [];
-  let code; do { code = 'MLA-' + randomCode(4); } while (existing.indexOf(code) >= 0);
+  const taken = c => existing.some(x => cleanCode_(x) === c);
+  let code;
+  if (plate.length >= 2) { code = plate; for (let n = 2; taken(code); n++) code = plate + '-' + n; }   // repeat customer: PLATE-2, PLATE-3
+  else { do { code = 'MLA-' + randomCode(4); } while (taken(code)); }
   const link = SITE + '?job=' + code;
   sheet.appendRow([code, vehicle, services, ready, STAGES[0], name, email, link, phone]);
+  if (/\d:\d/.test(ready)) sheet.getRange(sheet.getLastRow(), 4).setNumberFormat('yyyy-mm-dd h:mm am/pm');
   addUpdate(code, 0, note, '');
 
   const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const text = 'Hi ' + first + ', your ' + vehicle + ' is checked in at ' + SHOP + '. Follow along with photos and progress here: ' + link;
+  const when = ready ? niceWhen_(ready) : '';
+  const text = 'Hi ' + first + ', your ' + vehicle + ' is checked in at ' + SHOP + '.' + (when ? ' Estimated pick-up: ' + when + '.' : '') +
+    ' Follow along with photos and progress here: ' + link;
   const tel = e164_(phone) || phone.replace(/[^\d+]/g, '');
   const sms = 'sms:' + tel + '?&body=' + encodeURIComponent(text);
 
@@ -185,7 +204,7 @@ function onNewJob(e) {
     subject: 'New job ' + code + ' · ' + name + ' · ' + vehicle,
     htmlBody: '<div style="font-family:Arial,sans-serif;font-size:16px;color:#1D2125">' +
       '<p style="margin:0 0 6px"><b>' + esc(name) + '</b> · ' + esc(vehicle) + '</p>' +
-      '<p style="margin:0 0 18px;color:#5b636a">' + esc(services) + (ready ? ' · ready ' + esc(ready) : '') + ' · code <b>' + code + '</b></p>' +
+      '<p style="margin:0 0 18px;color:#5b636a">' + esc(services) + (when ? ' · pick-up ' + esc(when) : '') + ' · code <b>' + code + '</b></p>' +
       '<p><a href="' + sms + '" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:6px">Text ' + esc(first) + ' the tracking link</a></p>' +
       '<p style="margin-top:18px;color:#5b636a;font-size:14px">If the button doesn’t open Messages, copy this text:</p>' +
       '<p style="background:#F2F3F4;padding:12px;border-radius:6px">' + esc(text) + '</p>' +
@@ -198,11 +217,18 @@ function onNewJob(e) {
       to: email, replyTo: INBOX, name: SHOP,
       subject: 'Your ' + vehicle + ' is checked in',
       htmlBody: '<div style="font-family:Arial,sans-serif;font-size:15px;color:#1D2125"><p>Hi ' + esc(first) + ',</p>' +
-        '<p>Your ' + esc(vehicle) + ' is checked in at ' + SHOP + '. We’ll post photos and progress as we go.</p>' +
+        '<p>Your ' + esc(vehicle) + ' is checked in at ' + SHOP + '. We’ll post photos and progress as we go.' + (when ? ' Estimated pick-up: <b>' + esc(when) + '</b>.' : '') + '</p>' +
         '<p><a href="' + link + '">Follow your car here</a> (tracking code <b>' + code + '</b>)</p>' +
         '<p>' + SHOP + ' · (484) 574-1628</p></div>'
     });
   }
+}
+
+// "2026-11-15 14:30" -> "Sat, Nov 15 at 2:30 PM"
+function niceWhen_(v) {
+  const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/); if (!m) return String(v);
+  const d = new Date(+m[1], +m[2] - 1, +m[3], m[4] ? +m[4] : 12, m[5] ? +m[5] : 0);
+  return Utilities.formatDate(d, Session.getScriptTimeZone(), m[4] ? "EEE, MMM d 'at' h:mm a" : 'EEE, MMM d');
 }
 
 function SHEET_ID_() { return PropertiesService.getScriptProperties().getProperty('SHEET_ID'); }
@@ -211,7 +237,7 @@ function SHEET_ID_() { return PropertiesService.getScriptProperties().getPropert
 
 function onUpdate(e) {
   const r = e.namedValues;
-  const code = String((r['Tracking code'] || [''])[0]).trim().toUpperCase();
+  const code = cleanCode_((r['Tracking code'] || [''])[0]);
   const stage = stageIndex_((r['Stage'] || r['Progress'] || [''])[0]);
   const photo = String((r['Photo'] || [''])[0] || '');
   // make uploaded photos viewable by link, so they show on the customer's page
@@ -243,12 +269,15 @@ function doGet(e) {
     try { return out(slotsFor_(p)); }
     catch (err) { return out({ ok: false, error: err.message === 'not_connected' ? 'not_connected' : String(err.message) }); }
   }
-  const code = String(p.job || '').trim().toUpperCase();
-  if (!/^[A-Z0-9-]{4,20}$/.test(code)) return out({ error: 'not_found' });
+  const code = cleanCode_(p.job);
+  if (!/^[A-Z0-9-]{2,20}$/.test(code)) return out({ error: 'not_found' });
   const row = findJobRow(code);
   if (!row) return out({ error: 'not_found' });
   const j = SpreadsheetApp.getActive().getSheetByName(JOBS).getRange(row, 1, 1, 5).getValues()[0];
-  const ready = j[3] instanceof Date ? Utilities.formatDate(j[3], Session.getScriptTimeZone(), 'yyyy-MM-dd') : String(j[3] || '');
+  const tz = Session.getScriptTimeZone();
+  const ready = j[3] instanceof Date
+    ? Utilities.formatDate(j[3], tz, (j[3].getHours() || j[3].getMinutes()) ? "yyyy-MM-dd'T'HH:mm" : 'yyyy-MM-dd')
+    : String(j[3] || '');
   return out({
     code: code,
     vehicle: String(j[1] || ''),
@@ -264,7 +293,7 @@ function doGet(e) {
 function findJobRow(code) {
   const sheet = SpreadsheetApp.getActive().getSheetByName(JOBS); if (!sheet) return 0;
   const n = sheet.getLastRow() - 1; if (n < 1) return 0;
-  const codes = sheet.getRange(2, 1, n, 1).getValues().flat().map(c => String(c).trim().toUpperCase());
+  const codes = sheet.getRange(2, 1, n, 1).getValues().flat().map(cleanCode_);
   const i = codes.indexOf(code); return i < 0 ? 0 : i + 2;
 }
 
@@ -275,7 +304,7 @@ function updatesFor(code) {
   const cT = col('Timestamp'), cC = col('Tracking code'), cS = col('Stage') >= 0 ? col('Stage') : col('Progress'), cN = col('Note for the customer'), cP = col('Photo');
   const tz = Session.getScriptTimeZone();
   return data.slice(1)
-    .filter(r => String(r[cC]).trim().toUpperCase() === code)
+    .filter(r => cleanCode_(r[cC]) === code)
     .map(r => {
       const id = cP >= 0 ? (String(r[cP]).match(/[-\w]{25,}/) || [''])[0] : '';
       return {

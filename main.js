@@ -706,10 +706,15 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
       .then(x => x && !x.error ? { [code]: x } : loadLocal().catch(() => ({})));
   };
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const fmtDate = d => { const t = new Date(d + 'T12:00:00'); return isNaN(t) ? d : t.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
+  const fmtDate = d => {
+    const m = String(d).match(/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{1,2}):(\d{2}))?/); if (!m) return d;
+    const t = new Date(m[1] + 'T' + (m[2] ? m[2].padStart(2, '0') + ':' + m[3] : '12:00') + ':00'); if (isNaN(t)) return d;
+    const day = t.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return m[2] ? day + ' · ' + t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : day;
+  };
   const img = p => p ? new URL('../../' + p.replace(/^\/+/, ''), ASSET_BASE).href : '';
   function show(code) {
-    code = code.trim().toUpperCase(); if (!code) return;
+    code = code.toUpperCase().replace(/[^A-Z0-9-]/g, ''); if (!code) return;
     result.classList.add('is-loading');
     load(code).then(all => {
       result.classList.remove('is-loading');
