@@ -712,7 +712,8 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     const day = t.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     return m[2] ? day + ' · ' + t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : day;
   };
-  const img = p => p ? new URL('../../' + p.replace(/^\/+/, ''), ASSET_BASE).href : '';
+  // Drive photos are full web addresses; only the DEMO job uses files from this site
+  const img = p => !p ? '' : /^https?:\/\//.test(p) ? p : new URL('../../' + p.replace(/^\/+/, ''), ASSET_BASE).href;
   function show(code) {
     code = code.toUpperCase().replace(/[^A-Z0-9-]/g, ''); if (!code) return;
     result.classList.add('is-loading');
@@ -736,7 +737,8 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
           <div class="tr-entry">
             <p class="tr-meta"><span>${esc(STAGES[Math.max(0, Math.min(5, Number(u.stage) || 0))])}</span>${esc(u.date || '')}</p>
             <p>${esc(u.note || '')}</p>
-            ${u.photo ? `<img src="${esc(img(u.photo))}" alt="Photo from the shop: ${esc(u.note || 'progress update')}" loading="lazy">` : ''}
+            ${(() => { const ps = (u.photos && u.photos.length ? u.photos : (u.photo ? [u.photo] : [])).map(img).filter(Boolean);
+              return ps.length ? `<div class="tr-photos${ps.length === 1 ? ' is-one' : ''}">${ps.map((p, i) => `<a href="${esc(p.replace(/sz=w\d+/, 'sz=w2400'))}" target="_blank" rel="noopener"><img src="${esc(p)}" alt="Photo ${i + 1} from the shop${u.note ? ': ' + esc(u.note) : ''}" loading="lazy"></a>`).join('')}</div>` : ''; })()}
           </div>
         </li>`).join('') || '<li class="tr-empty">No updates yet. Check back soon.</li>';
       history.replaceState(null, '', '?job=' + encodeURIComponent(key));

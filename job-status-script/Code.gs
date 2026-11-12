@@ -153,7 +153,17 @@ function repairTriggers() {
   const nj = props.getProperty('NEW_JOB_FORM_ID');
   if (nj) once('onNewJob', () => ScriptApp.newTrigger('onNewJob').forForm(FormApp.openById(nj)).onFormSubmit().create());
   if (props.getProperty('SQ_TOKEN')) once('refreshSquare', () => ScriptApp.newTrigger('refreshSquare').timeBased().everyDays(7).create());
+  sharePostedPhotos_();
   return ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction());
+}
+
+// Photos posted while the automatic tasks were off never got shared: make each one viewable by link
+function sharePostedPhotos_() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(UPDATES); if (!sh || sh.getLastRow() < 2) return;
+  const head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String), c = head.indexOf('Photo'); if (c < 0) return;
+  sh.getRange(2, c + 1, sh.getLastRow() - 1, 1).getValues().flat().join(' ').match(/[-\w]{25,}/g)?.forEach(id => {
+    try { const f = DriveApp.getFileById(id); if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK) f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
+  });
 }
 
 function repairTriggersMenu() {
@@ -307,12 +317,14 @@ function updatesFor(code) {
   return data.slice(1)
     .filter(r => cleanCode_(r[cC]) === code)
     .map(r => {
-      const id = cP >= 0 ? (String(r[cP]).match(/[-\w]{25,}/) || [''])[0] : '';
+      const ids = cP >= 0 ? (String(r[cP]).match(/[-\w]{25,}/g) || []).slice(0, 10) : [];
+      const id = ids[0] || '';
       return {
         date: r[cT] instanceof Date ? Utilities.formatDate(r[cT], tz, 'MMM d, h:mm a') : String(r[cT]),
         stage: Math.max(0, stageIndex_(r[cS])),
         note: cN >= 0 ? String(r[cN] || '') : '',
-        photo: id ? 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1200' : ''
+        photo: id ? 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1200' : '',
+        photos: ids.map(x => 'https://drive.google.com/thumbnail?id=' + x + '&sz=w1200')
       };
     })
     .reverse();

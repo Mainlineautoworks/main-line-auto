@@ -1386,6 +1386,12 @@ address { font-style: normal; font-weight: 700; font-size: 1.5rem; line-height: 
 .tr-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; font-size: .85rem; color: var(--steel); margin-bottom: 6px !important; }
 .tr-meta span { font-weight: 700; color: var(--red); }
 .tr-entry img { display: block; width: 100%; max-width: 520px; margin-top: 12px; border-radius: 10px; }
+.tr-entry { min-width: 0; }
+.tr-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(140px, 42%), 1fr)); gap: 8px; margin-top: 12px; width: 100%; max-width: 640px; min-width: 0; }
+.tr-photos.is-one { grid-template-columns: 1fr; max-width: 520px; }
+.tr-photos a { display: block; border-radius: 10px; overflow: hidden; background: #e7e9eb; }
+.tr-photos img { margin: 0; max-width: none; width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 0; }
+.tr-photos.is-one img { aspect-ratio: auto; object-fit: contain; }
 .tr-help { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; padding: 22px 24px; border-radius: 12px; background: var(--graphite); color: var(--pearl); }
 .tr-help p { margin: 0; }
 .tr-help-actions { display: flex; gap: 10px; flex-wrap: wrap; }
