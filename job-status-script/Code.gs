@@ -187,7 +187,7 @@ function SHEET_ID_() { return PropertiesService.getScriptProperties().getPropert
 function onUpdate(e) {
   const r = e.namedValues;
   const code = String((r['Tracking code'] || [''])[0]).trim().toUpperCase();
-  const stage = STAGES.indexOf(String((r['Stage'] || [''])[0]));
+  const stage = stageIndex_((r['Stage'] || r['Progress'] || [''])[0]);
   const photo = String((r['Photo'] || [''])[0] || '');
   // make uploaded photos viewable by link, so they show on the customer's page
   (photo.match(/[-\w]{25,}/g) || []).forEach(id => { try { DriveApp.getFileById(id).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {} });
@@ -228,7 +228,7 @@ function doGet(e) {
     code: code,
     vehicle: String(j[1] || ''),
     services: String(j[2] || '').split(',').map(s => s.trim()).filter(String),
-    stage: Math.max(0, STAGES.indexOf(String(j[4]))),
+    stage: Math.max(0, stageIndex_(j[4])),
     ready: ready,
     updates: updatesFor(code)
   });
@@ -247,7 +247,7 @@ function updatesFor(code) {
   const sheet = SpreadsheetApp.getActive().getSheetByName(UPDATES); if (!sheet) return [];
   const data = sheet.getDataRange().getValues(); if (data.length < 2) return [];
   const head = data[0].map(String), col = name => head.indexOf(name);
-  const cT = col('Timestamp'), cC = col('Tracking code'), cS = col('Stage'), cN = col('Note for the customer'), cP = col('Photo');
+  const cT = col('Timestamp'), cC = col('Tracking code'), cS = col('Stage') >= 0 ? col('Stage') : col('Progress'), cN = col('Note for the customer'), cP = col('Photo');
   const tz = Session.getScriptTimeZone();
   return data.slice(1)
     .filter(r => String(r[cC]).trim().toUpperCase() === code)
@@ -255,7 +255,7 @@ function updatesFor(code) {
       const id = cP >= 0 ? (String(r[cP]).match(/[-\w]{25,}/) || [''])[0] : '';
       return {
         date: r[cT] instanceof Date ? Utilities.formatDate(r[cT], tz, 'MMM d, h:mm a') : String(r[cT]),
-        stage: Math.max(0, STAGES.indexOf(String(r[cS]))),
+        stage: Math.max(0, stageIndex_(r[cS])),
         note: cN >= 0 ? String(r[cN] || '') : '',
         photo: id ? 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1200' : ''
       };
@@ -266,8 +266,18 @@ function updatesFor(code) {
 function addUpdate(code, stageIndex, note, photo) {
   const sheet = SpreadsheetApp.getActive().getSheetByName(UPDATES); if (!sheet) return;
   const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
-  const row = head.map(h => h === 'Timestamp' ? new Date() : h === 'Tracking code' ? code : h === 'Stage' ? STAGES[stageIndex] : h === 'Note for the customer' ? note : h === 'Photo' ? photo : '');
+  const row = head.map(h => h === 'Timestamp' ? new Date() : h === 'Tracking code' ? code : (h === 'Stage' || h === 'Progress') ? STAGES[stageIndex] : h === 'Note for the customer' ? note : h === 'Photo' ? photo : '');
   sheet.appendRow(row);
+}
+
+// Match a stage however it's worded in the form or sheet ("Prep & Inspection", "Install / Detailing", ...)
+function stageIndex_(text) {
+  const t = String(text || '').toLowerCase();
+  const keys = ['checked', 'prep', 'install', 'curing', 'final', 'ready'];
+  const exact = STAGES.findIndex(s => s.toLowerCase() === t.trim());
+  if (exact >= 0) return exact;
+  const i = keys.findIndex(k => t.indexOf(k) >= 0);
+  return i;
 }
 
 function randomCode(n) {
