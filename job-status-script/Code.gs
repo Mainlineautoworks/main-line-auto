@@ -235,11 +235,15 @@ function onNewJob(e) {
   }
 }
 
-// "2026-11-15 14:30" -> "Sat, Nov 15 at 2:30 PM"
+// "2026-11-15 14:30" -> "Nov. 15th at 2:30 PM"  (same style as the website)
 function niceWhen_(v) {
   const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/); if (!m) return String(v);
-  const d = new Date(+m[1], +m[2] - 1, +m[3], m[4] ? +m[4] : 12, m[5] ? +m[5] : 0);
-  return Utilities.formatDate(d, Session.getScriptTimeZone(), m[4] ? "EEE, MMM d 'at' h:mm a" : 'EEE, MMM d');
+  const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+  const n = +m[3], nth = n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+  const day = months[+m[2] - 1] + ' ' + nth;
+  if (!m[4]) return day;
+  const h = +m[4];
+  return day + ' at ' + ((h % 12) || 12) + ':' + m[5] + ' ' + (h < 12 ? 'AM' : 'PM');
 }
 
 function SHEET_ID_() { return PropertiesService.getScriptProperties().getProperty('SHEET_ID'); }
@@ -320,7 +324,7 @@ function updatesFor(code) {
       const ids = cP >= 0 ? (String(r[cP]).match(/[-\w]{25,}/g) || []).slice(0, 10) : [];
       const id = ids[0] || '';
       return {
-        date: r[cT] instanceof Date ? Utilities.formatDate(r[cT], tz, 'MMM d, h:mm a') : String(r[cT]),
+        date: r[cT] instanceof Date ? Utilities.formatDate(r[cT], tz, "yyyy-MM-dd'T'HH:mm") : String(r[cT]),   // the website shows it as "Nov. 12th, 2:28 PM"
         stage: Math.max(0, stageIndex_(r[cS])),
         note: cN >= 0 ? String(r[cN] || '') : '',
         photo: id ? 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1200' : '',

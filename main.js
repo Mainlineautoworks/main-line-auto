@@ -706,11 +706,16 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
       .then(x => x && !x.error ? { [code]: x } : loadLocal().catch(() => ({})));
   };
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const fmtDate = d => {
-    const m = String(d).match(/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{1,2}):(\d{2}))?/); if (!m) return d;
-    const t = new Date(m[1] + 'T' + (m[2] ? m[2].padStart(2, '0') + ':' + m[3] : '12:00') + ':00'); if (isNaN(t)) return d;
-    const day = t.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    return m[2] ? day + ' · ' + t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : day;
+  // "2026-11-12T15:15" -> "Nov. 12th · 3:15 PM"; "2026-11-12" -> "Nov. 12th"; anything else shows as written
+  const MONTHS = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+  const nth = n => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+  const fmtDate = (d, sep = ' · ') => {
+    const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{1,2}):(\d{2})(?:\s*([AaPp])\.?[Mm]\.?)?)?/); if (!m) return d;
+    const day = MONTHS[+m[2] - 1] + ' ' + nth(+m[3]);
+    if (!m[4]) return day;
+    let h = +m[4]; if (m[6]) h = (h % 12) + (/p/i.test(m[6]) ? 12 : 0);   // "3:40 PM" or "15:40"
+    const ap = h < 12 ? 'AM' : 'PM';
+    return day + sep + ((h % 12) || 12) + ':' + m[5] + ' ' + ap;
   };
   // Drive photos are full web addresses; only the DEMO job uses files from this site
   const img = p => !p ? '' : /^https?:\/\//.test(p) ? p : new URL('../../' + p.replace(/^\/+/, ''), ASSET_BASE).href;
@@ -735,7 +740,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
         <li>
           <div class="tr-dot" aria-hidden="true"></div>
           <div class="tr-entry">
-            <p class="tr-meta"><span>${esc(STAGES[Math.max(0, Math.min(5, Number(u.stage) || 0))])}</span>${esc(u.date || '')}</p>
+            <p class="tr-meta"><span>${esc(STAGES[Math.max(0, Math.min(5, Number(u.stage) || 0))])}</span>${esc(fmtDate(u.date || '', ', '))}</p>
             <p>${esc(u.note || '')}</p>
             ${(() => { const ps = (u.photos && u.photos.length ? u.photos : (u.photo ? [u.photo] : [])).map(img).filter(Boolean);
               return ps.length ? `<div class="tr-photos${ps.length === 1 ? ' is-one' : ''}">${ps.map((p, i) => `<a href="${esc(p.replace(/sz=w\d+/, 'sz=w2400'))}" target="_blank" rel="noopener"><img src="${esc(p)}" alt="Photo ${i + 1} from the shop${u.note ? ': ' + esc(u.note) : ''}" loading="lazy"></a>`).join('')}</div>` : ''; })()}
