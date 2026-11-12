@@ -30,6 +30,12 @@ const WEBSITE = 'https://mainlineautoworks.com/';
 
 function setup() {
   const ss = SpreadsheetApp.getActive();
+  // already set up: never build a second form (that's what makes "Form Responses 2, 3, 4...")
+  if (ss.getSheetByName(UPDATES)) {
+    repairTriggers();
+    Logger.log('Already set up. Nothing new was created; automatic tasks were checked.');
+    return;
+  }
   let jobs = ss.getSheetByName(JOBS);
   if (!jobs) {
     jobs = ss.getSheets()[0].setName(JOBS);
@@ -72,6 +78,8 @@ function onOpen() {
     .addSeparator()
     .addItem('Set up the phone "New job" form', 'setupNewJobForm')
     .addItem('Show "New job" form link', 'showNewJobFormLink')
+    .addSeparator()
+    .addItem('Repair automatic tasks', 'repairTriggersMenu')
     .addToUi();
 }
 
@@ -108,7 +116,7 @@ const NEW_JOB_FIRST_NOTE = 'Checked in. We’ll post updates here as we go.';
 
 function setupNewJobForm() {
   const ui = SpreadsheetApp.getUi(), props = PropertiesService.getScriptProperties();
-  if (props.getProperty('NEW_JOB_FORM_ID')) { showNewJobFormLink(); return; }
+  if (props.getProperty('NEW_JOB_FORM_ID')) { repairTriggers(); showNewJobFormLink(); return; }
   const form = FormApp.create('New job · ' + SHOP)
     .setDescription('Starts a job on the website and gives you a one-tap text with the customer’s tracking link.')
     .setConfirmationMessage('Job created. Check your email for the “Text the customer” button.');
@@ -122,6 +130,23 @@ function setupNewJobForm() {
   props.setProperties({ NEW_JOB_FORM_ID: form.getId(), SHEET_ID: SpreadsheetApp.getActive().getId() });
   ScriptApp.newTrigger('onNewJob').forForm(form).onFormSubmit().create();
   ui.alert('“New job” form is ready', 'Bookmark this on your phone (or add it to your Home Screen):\n\n' + form.getPublishedUrl(), ui.ButtonSet.OK);
+}
+
+// Make sure each automatic task exists exactly once (safe to run any time)
+function repairTriggers() {
+  const ss = SpreadsheetApp.getActive(), props = PropertiesService.getScriptProperties();
+  const have = name => ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === name);
+  const once = (name, make) => { const t = have(name); t.slice(1).forEach(x => ScriptApp.deleteTrigger(x)); if (!t.length) make(); };
+  once('onUpdate', () => ScriptApp.newTrigger('onUpdate').forSpreadsheet(ss).onFormSubmit().create());
+  const nj = props.getProperty('NEW_JOB_FORM_ID');
+  if (nj) once('onNewJob', () => ScriptApp.newTrigger('onNewJob').forForm(FormApp.openById(nj)).onFormSubmit().create());
+  if (props.getProperty('SQ_TOKEN')) once('refreshSquare', () => ScriptApp.newTrigger('refreshSquare').timeBased().everyDays(7).create());
+  return ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction());
+}
+
+function repairTriggersMenu() {
+  const list = repairTriggers();
+  SpreadsheetApp.getUi().alert('Automatic tasks are set', list.join('\n'), SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
 function showNewJobFormLink() {
