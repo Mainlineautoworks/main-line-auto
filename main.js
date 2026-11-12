@@ -717,6 +717,14 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     const ap = h < 12 ? 'AM' : 'PM';
     return day + sep + ((h % 12) || 12) + ':' + m[5] + ' ' + ap;
   };
+  // A Drive photo that won't load: try Google's other image address once, then hide it instead of showing a broken box
+  document.addEventListener('error', e => {
+    const im = e.target; if (!(im instanceof HTMLImageElement) || !im.closest('.tr-photos')) return;
+    const id = (im.src.match(/[?&]id=([-\w]{25,})/) || [])[1];
+    if (id && !im.dataset.retry) { im.dataset.retry = '1'; im.src = 'https://lh3.googleusercontent.com/d/' + id + '=w1200'; return; }
+    const a = im.closest('a'), g = im.closest('.tr-photos'); (a || im).remove();
+    if (g && !g.querySelector('img')) g.remove(); else if (g && g.querySelectorAll('img').length === 1) g.classList.add('is-one');
+  }, true);
   // Drive photos are full web addresses; only the DEMO job uses files from this site
   const img = p => !p ? '' : /^https?:\/\//.test(p) ? p : new URL('../../' + p.replace(/^\/+/, ''), ASSET_BASE).href;
   function show(code) {

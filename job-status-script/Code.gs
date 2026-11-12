@@ -365,7 +365,6 @@ function photoIdsForRows_(sheet, data, rows) {
       const v = data[i][c];
       if (v && typeof v === 'object' && !(v instanceof Date)) {                    // a picture placed in the cell
         try { const u = v.getUrl && v.getUrl(); if (u) { const d = idsIn(u); d.length ? ids.push(...d) : ids.push(u); } } catch (err) {}
-        try { const u = v.getContentUrl && v.getContentUrl(); if (u && !ids.length) ids.push(u); } catch (err) {}
       } else ids.push(...idsIn(v));
       try {                                                                        // link chips show a file name; the link is underneath
         const rt = sheet.getRange(i + 1, c + 1).getRichTextValue();
