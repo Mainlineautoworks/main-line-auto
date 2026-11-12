@@ -142,7 +142,20 @@ function buildNewJobItems_(form) {
   form.addParagraphTextItem().setTitle('First note for the customer').setHelpText('Leave blank for: ' + NEW_JOB_FIRST_NOTE);
 }
 
+// The Job update form with this job's code already filled in
+function updateFormLink_(code) {
+  try {
+    const ss = SpreadsheetApp.getActive() || SpreadsheetApp.openById(SHEET_ID_());
+    const url = ss.getSheetByName(UPDATES).getFormUrl() || ss.getFormUrl();
+    const form = FormApp.openByUrl(url);
+    const item = form.getItems().find(i => /tracking code|plate/i.test(i.getTitle()) && i.getType() === FormApp.ItemType.TEXT);
+    return item ? form.createResponse().withItemResponse(item.asTextItem().createResponse(code)).toPrefilledUrl() : form.getPublishedUrl();
+  } catch (err) { return ''; }
+}
+
 function cleanCode_(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''); }
+// Compare codes ignoring spaces and dashes, so "ZTC 8491", "ztc-8491" and "ZTC8491" are the same job
+function codeKey_(c) { return cleanCode_(c).replace(/-/g, ''); }
 
 // Make sure each automatic task exists exactly once (safe to run any time)
 function repairTriggers() {
@@ -160,10 +173,9 @@ function repairTriggers() {
 // Photos posted while the automatic tasks were off never got shared: make each one viewable by link
 function sharePostedPhotos_() {
   const sh = SpreadsheetApp.getActive().getSheetByName(UPDATES); if (!sh || sh.getLastRow() < 2) return;
-  const head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String), c = head.indexOf('Photo'); if (c < 0) return;
-  sh.getRange(2, c + 1, sh.getLastRow() - 1, 1).getValues().flat().join(' ').match(/[-\w]{25,}/g)?.forEach(id => {
-    try { const f = DriveApp.getFileById(id); if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK) f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
-  });
+  const data = sh.getDataRange().getValues(), rows = data.map((r, i) => i).slice(1);
+  const ids = photoIdsForRows_(sh, data, rows);
+  Object.keys(ids).forEach(k => sharePhotos_(ids[k]));
 }
 
 function repairTriggersMenu() {
@@ -210,6 +222,7 @@ function onNewJob(e) {
 
   // to you: one tap opens Messages with the text filled in
   const me = Session.getEffectiveUser().getEmail() || INBOX;
+  const upd = updateFormLink_(code);
   MailApp.sendEmail({
     to: me, name: SHOP + ' Job Status',
     subject: 'New job ' + code + ' · ' + name + ' · ' + vehicle,
@@ -219,6 +232,7 @@ function onNewJob(e) {
       '<p><a href="' + sms + '" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:6px">Text ' + esc(first) + ' the tracking link</a></p>' +
       '<p style="margin-top:18px;color:#5b636a;font-size:14px">Or copy this text:</p>' +
       '<p style="background:#F2F3F4;padding:12px;border-radius:6px">' + esc(text) + '</p>' +
+      (upd ? '<p><a href="' + upd + '" style="display:inline-block;background:#1D2125;color:#fff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:6px">Post an update for ' + code + '</a><br><span style="font-size:13px;color:#5b636a">Save this one: it opens the update form with their code filled in. Use it as many times as you like; each update gets its own time.</span></p>' : '') +
       '<p style="font-size:14px"><a href="' + link + '">Open their Job Status page</a>' + (email ? ' · They were also emailed the link.' : '') + '</p></div>'
   });
 
@@ -254,9 +268,9 @@ function onUpdate(e) {
   const r = e.namedValues;
   const code = cleanCode_((r['Tracking code'] || [''])[0]);
   const stage = stageIndex_((r['Stage'] || r['Progress'] || [''])[0]);
-  const photo = String((r['Photo'] || [''])[0] || '');
   // make uploaded photos viewable by link, so they show on the customer's page
-  (photo.match(/[-\w]{25,}/g) || []).forEach(id => { try { DriveApp.getFileById(id).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {} });
+  Object.keys(r).filter(k => /photo|picture|image|pic/i.test(k)).forEach(k => sharePhotos_(String(r[k][0] || '').match(/[-\w]{25,}/g) || []));
+  try { sharePostedPhotos_(); } catch (err) {}
   const row = findJobRow(code);
   if (!row || stage < 0) return;
   const sheet = SpreadsheetApp.getActive().getSheetByName(JOBS);
@@ -308,30 +322,87 @@ function doGet(e) {
 function findJobRow(code) {
   const sheet = SpreadsheetApp.getActive().getSheetByName(JOBS); if (!sheet) return 0;
   const n = sheet.getLastRow() - 1; if (n < 1) return 0;
-  const codes = sheet.getRange(2, 1, n, 1).getValues().flat().map(cleanCode_);
-  const i = codes.indexOf(code); return i < 0 ? 0 : i + 2;
+  const codes = sheet.getRange(2, 1, n, 1).getValues().flat().map(codeKey_);
+  const i = codes.indexOf(codeKey_(code)); return i < 0 ? 0 : i + 2;
 }
 
 function updatesFor(code) {
   const sheet = SpreadsheetApp.getActive().getSheetByName(UPDATES); if (!sheet) return [];
   const data = sheet.getDataRange().getValues(); if (data.length < 2) return [];
   const head = data[0].map(String), col = name => head.indexOf(name);
-  const cT = col('Timestamp'), cC = col('Tracking code'), cS = col('Stage') >= 0 ? col('Stage') : col('Progress'), cN = col('Note for the customer'), cP = col('Photo');
+  const cT = col('Timestamp'), cC = col('Tracking code'), cS = col('Stage') >= 0 ? col('Stage') : col('Progress'), cN = col('Note for the customer');
   const tz = Session.getScriptTimeZone();
-  return data.slice(1)
-    .filter(r => cleanCode_(r[cC]) === code)
-    .map(r => {
-      const ids = cP >= 0 ? (String(r[cP]).match(/[-\w]{25,}/g) || []).slice(0, 10) : [];
-      const id = ids[0] || '';
-      return {
-        date: r[cT] instanceof Date ? Utilities.formatDate(r[cT], tz, "yyyy-MM-dd'T'HH:mm") : String(r[cT]),   // the website shows it as "Nov. 12th, 2:28 PM"
-        stage: Math.max(0, stageIndex_(r[cS])),
-        note: cN >= 0 ? String(r[cN] || '') : '',
-        photo: id ? 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1200' : '',
-        photos: ids.map(x => 'https://drive.google.com/thumbnail?id=' + x + '&sz=w1200')
-      };
-    })
-    .reverse();
+  const rows = [];
+  data.forEach((r, i) => { if (i > 0 && codeKey_(r[cC]) === codeKey_(code)) rows.push(i); });
+  const photoIds = photoIdsForRows_(sheet, data, rows);
+  return rows.map(i => {
+    const r = data[i], ids = (photoIds[i] || []).slice(0, 10);
+    sharePhotos_(ids);
+    const url = x => /^https?:/.test(x) ? x : 'https://drive.google.com/thumbnail?id=' + x + '&sz=w1200';
+    return {
+      date: r[cT] instanceof Date ? Utilities.formatDate(r[cT], tz, "yyyy-MM-dd'T'HH:mm") : String(r[cT]),   // the website shows it as "Nov. 12th, 2:28 PM"
+      stage: Math.max(0, stageIndex_(r[cS])),
+      note: cN >= 0 ? String(r[cN] || '') : '',
+      photo: ids.length ? url(ids[0]) : '',
+      photos: ids.map(url)
+    };
+  }).reverse();
+}
+
+/* Photos for each update row. Looks everywhere a photo can hide:
+ * - any column with "photo", "picture" or "image" in its name, however the question is worded
+ * - plain Drive links, link chips (the link behind the file name) and pictures placed in the cell
+ * - and, most reliably, the Job update form's own answers, matched by the time it was sent */
+function photoIdsForRows_(sheet, data, rows) {
+  const out = {}; if (!rows.length) return out;
+  const head = data[0].map(String);
+  const pcols = head.map((h, c) => /photo|picture|image|pic\b|pics/i.test(h) ? c : -1).filter(c => c >= 0);
+  const cT = head.indexOf('Timestamp');
+  const idsIn = v => (String(v || '').match(/[-\w]{25,}/g) || []).filter(x => !/^https?/.test(x));
+  rows.forEach(i => {
+    const ids = [];
+    pcols.forEach(c => {
+      const v = data[i][c];
+      if (v && typeof v === 'object' && !(v instanceof Date)) {                    // a picture placed in the cell
+        try { const u = v.getUrl && v.getUrl(); if (u) { const d = idsIn(u); d.length ? ids.push(...d) : ids.push(u); } } catch (err) {}
+        try { const u = v.getContentUrl && v.getContentUrl(); if (u && !ids.length) ids.push(u); } catch (err) {}
+      } else ids.push(...idsIn(v));
+      try {                                                                        // link chips show a file name; the link is underneath
+        const rt = sheet.getRange(i + 1, c + 1).getRichTextValue();
+        if (rt) [rt.getLinkUrl()].concat(rt.getRuns().map(x => x.getLinkUrl())).forEach(u => ids.push(...idsIn(u)));
+      } catch (err) {}
+    });
+    out[i] = ids;
+  });
+  // the form's own answers: file uploads are stored there as Drive file IDs
+  try {
+    const url = sheet.getFormUrl(); if (!url || cT < 0) throw 0;
+    const resp = FormApp.openByUrl(url).getResponses();
+    rows.forEach(i => {
+      const t = data[i][cT]; if (!(t instanceof Date)) return;
+      const m = resp.find(x => Math.abs(x.getTimestamp().getTime() - t.getTime()) < 3000);
+      if (!m) return;
+      m.getItemResponses().forEach(ir => {
+        if (ir.getItem().getType() !== FormApp.ItemType.FILE_UPLOAD) return;
+        [].concat(ir.getResponse() || []).forEach(id => out[i].push(String(id)));
+      });
+    });
+  } catch (err) {}
+  Object.keys(out).forEach(k => { out[k] = out[k].filter((x, n, a) => x && a.indexOf(x) === n); });
+  return out;
+}
+
+// Make photos viewable by link so they show on the customer's page (checked once every few hours per photo)
+function sharePhotos_(ids) {
+  const cache = CacheService.getScriptCache();
+  ids.filter(id => !/^https?:/.test(id)).forEach(id => {
+    if (cache.get('sh_' + id)) return;
+    try {
+      const f = DriveApp.getFileById(id);
+      if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK) f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      cache.put('sh_' + id, '1', 21600);
+    } catch (err) {}
+  });
 }
 
 function addUpdate(code, stageIndex, note, photo) {
