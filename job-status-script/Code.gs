@@ -195,7 +195,8 @@ function onNewJob(e) {
   const text = 'Hi ' + first + ', your ' + vehicle + ' is checked in at ' + SHOP + '.' + (when ? ' Estimated pick-up: ' + when + '.' : '') +
     ' Follow along with photos and progress here: ' + link;
   const tel = e164_(phone) || phone.replace(/[^\d+]/g, '');
-  const sms = 'sms:' + tel + '?&body=' + encodeURIComponent(text);
+  // Gmail strips sms: links, so the button opens a tiny page on the website that opens Messages (details stay after the #)
+  const sms = WEBSITE + 'text/#to=' + encodeURIComponent(tel) + '&body=' + encodeURIComponent(text);
 
   // to you: one tap opens Messages with the text filled in
   const me = Session.getEffectiveUser().getEmail() || INBOX;
@@ -206,7 +207,7 @@ function onNewJob(e) {
       '<p style="margin:0 0 6px"><b>' + esc(name) + '</b> · ' + esc(vehicle) + '</p>' +
       '<p style="margin:0 0 18px;color:#5b636a">' + esc(services) + (when ? ' · pick-up ' + esc(when) : '') + ' · code <b>' + code + '</b></p>' +
       '<p><a href="' + sms + '" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:6px">Text ' + esc(first) + ' the tracking link</a></p>' +
-      '<p style="margin-top:18px;color:#5b636a;font-size:14px">If the button doesn’t open Messages, copy this text:</p>' +
+      '<p style="margin-top:18px;color:#5b636a;font-size:14px">Or copy this text:</p>' +
       '<p style="background:#F2F3F4;padding:12px;border-radius:6px">' + esc(text) + '</p>' +
       '<p style="font-size:14px"><a href="' + link + '">Open their Job Status page</a>' + (email ? ' · They were also emailed the link.' : '') + '</p></div>'
   });
@@ -385,7 +386,7 @@ function doPost(e) {
     const tel = phone.replace(/[^\d+]/g, '');
     const html = '<div style="font-family:Arial,sans-serif;font-size:15px;color:#1D2125">' +
       '<h2 style="margin:0 0 4px">' + esc(formName) + ' request</h2>' +
-      '<p style="margin:0 0 16px;color:#5b636a">From the website · <a href="tel:' + tel + '">Call</a> · <a href="sms:' + tel + '">Text</a> · Reply to this email to answer ' + esc(name.split(' ')[0]) + '</p>' +
+      '<p style="margin:0 0 16px;color:#5b636a">From the website · <a href="tel:' + tel + '">Call</a> · <a href="' + WEBSITE + 'text/#to=' + encodeURIComponent(tel) + '">Text</a> · Reply to this email to answer ' + esc(name.split(' ')[0]) + '</p>' +
       '<table style="border-collapse:collapse">' + rows + '</table>' +
       (blobs.length ? '<p style="margin-top:16px">' + blobs.length + ' photo' + (blobs.length > 1 ? 's' : '') + ' attached.</p>' : '') +
       (inSquare ? '<p style="margin-top:16px;color:#2e7d32">✓ Saved to your Square customers, with this request in their notes.</p>' : '') +

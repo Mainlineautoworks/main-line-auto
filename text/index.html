@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Text the customer · Main Line Auto Works</title>
+<style>
+ body{margin:0;font-family:-apple-system,"Segoe UI",Arial,sans-serif;background:#1D2125;color:#EEF0F1;display:grid;min-height:100vh;place-items:center}
+ main{max-width:440px;width:100%;padding:28px 22px;box-sizing:border-box;text-align:center}
+ h1{font-size:22px;margin:0 0 6px} .to{color:#B9C0C6;margin:0 0 20px}
+ .msg{background:#2A2F34;border-radius:10px;padding:14px;text-align:left;line-height:1.45;margin:0 0 20px;word-wrap:break-word}
+ a.btn,button{display:block;width:100%;box-sizing:border-box;border:0;border-radius:8px;padding:16px;font-size:17px;font-weight:700;text-decoration:none;cursor:pointer;margin-bottom:10px}
+ a.btn{background:#C8102E;color:#fff} button{background:#3A4046;color:#EEF0F1} #ok{color:#7fd48a;min-height:1.2em}
+</style></head><body><main>
+<h1>Text the customer</h1>
+<p class="to" id="to"></p>
+<p class="msg" id="msg"></p>
+<a class="btn" id="open" href="#">Open Messages</a>
+<button id="copy" type="button">Copy text</button>
+<p id="ok" aria-live="polite"></p>
+</main>
+<script>
+// Everything comes from the part after "#", which the browser never sends to a server.
+const h = new URLSearchParams(location.hash.slice(1));
+const to = (h.get('to') || '').replace(/[^\d+]/g, ''), body = h.get('body') || '';
+const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const sms = 'sms:' + to + (body ? (ios ? '&' : '?') + 'body=' + encodeURIComponent(body) : '');
+document.getElementById('to').textContent = to ? 'To ' + to.replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3') : 'No phone number in this link';
+document.getElementById('msg').textContent = body || '(no message)';
+document.getElementById('open').href = sms;
+document.getElementById('copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(body); document.getElementById('ok').textContent = 'Copied ✓'; }
+  catch (e) { document.getElementById('ok').textContent = 'Press and hold the message above to copy it.'; }
+});
+if (to) setTimeout(() => { location.href = sms; }, 300);   // open Messages right away
+</script></body></html>
