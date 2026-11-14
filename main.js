@@ -699,8 +699,8 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
     const removal = sv.some(s => /remov/i.test(s)), install = sv.some(s => !/detail|remov/i.test(s));
     const cure = sv.some(s => /tint|ppf|protection film|ceramic|coating|wrap|vinyl|caliper|paint/i.test(s) && !/remov/i.test(s));
     const work = [install && 'Installation', removal && 'Removal', detail && 'Detailing'].filter(Boolean);
-    const step3 = !work.length ? 'Installation' : work.length === 1 ? work[0] : work.slice(0, -1).join(', ') + ' & ' + work[work.length - 1].toLowerCase();
-    return ['Checked in', 'Prep & inspection', step3.replace(/, (\w)/g, (m, c) => ', ' + c.toLowerCase()), cure || !sv.length ? 'Curing & finishing' : 'Finishing touches', 'Final inspection', 'Ready for pick-up'];
+    const step3 = !work.length ? 'Installation' : work.length === 1 ? work[0] : work.slice(0, -1).join(', ') + ' & ' + work[work.length - 1];
+    return ['Checked In', 'Prep & Inspection', step3, cure || !sv.length ? 'Curing & Finishing' : 'Finishing Touches', 'Final Inspection', 'Ready for Pick-Up'];
   };
   let STAGES = stagesFor();
   const dataUrl = new URL('../../jobs.json', ASSET_BASE).href;
@@ -751,7 +751,7 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
       document.getElementById('tr-code-out').textContent = (key === 'DEMO' ? 'Sample job · ' : 'Tracking code · ') + key;
       document.getElementById('tr-vehicle').textContent = job.vehicle || 'Your vehicle';
       document.getElementById('tr-services').innerHTML = (job.services || []).map(s => `<li>${esc(s)}</li>`).join('');
-      document.getElementById('tr-ready').textContent = st === 5 ? 'Ready now' : (job.ready ? fmtDate(job.ready) : 'We’ll confirm soon');
+      document.getElementById('tr-ready').textContent = st === 5 ? 'Ready Now' : (job.ready ? fmtDate(job.ready) : 'We’ll confirm soon');
       document.getElementById('tr-status').textContent = STAGES[st];
       document.querySelectorAll('#tr-steps li').forEach((li, i) => { li.className = i < st ? 'done' : i === st ? 'now' : ''; li.removeAttribute('aria-current'); if (i === st) li.setAttribute('aria-current', 'step'); });
       document.getElementById('tr-steps').style.setProperty('--f', st / 5);

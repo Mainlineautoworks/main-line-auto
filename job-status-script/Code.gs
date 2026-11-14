@@ -23,9 +23,9 @@ function stagesFor_(services) {
   const removal = sv.some(x => /remov/i.test(x)), install = sv.some(x => !/detail|remov/i.test(x));
   const cure = sv.some(x => /tint|ppf|protection film|ceramic|coating|wrap|vinyl|caliper|paint/i.test(x) && !/remov/i.test(x));
   const work = [install && 'Installation', removal && 'Removal', detail && 'Detailing'].filter(Boolean);
-  const w = work.map((x, i) => i ? x.toLowerCase() : x);
+  const w = work;
   const step3 = !w.length ? 'Installation' : w.length === 1 ? w[0] : w.slice(0, -1).join(', ') + ' & ' + w[w.length - 1];
-  return ['Checked in', 'Prep & inspection', step3, cure || !sv.length ? 'Curing & finishing' : 'Finishing touches', 'Final inspection', 'Ready for pick-up'];
+  return ['Checked In', 'Prep & Inspection', step3, cure || !sv.length ? 'Curing & Finishing' : 'Finishing Touches', 'Final Inspection', 'Ready for Pick-Up'];
 }
 const JOBS = 'Jobs';
 const UPDATES = 'Updates';
