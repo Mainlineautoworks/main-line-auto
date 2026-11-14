@@ -198,7 +198,10 @@ function updateProgressChoices() {
   if (t === FormApp.ItemType.LIST) item.asListItem().setChoiceValues(names);
   else if (t === FormApp.ItemType.MULTIPLE_CHOICE) item.asMultipleChoiceItem().setChoiceValues(names);
   else throw new Error('Stage question is a ' + t);
-  Logger.log('Updated "' + item.getTitle() + '" choices: ' + names.join(' | '));
+  const code = form.getItems().find(i => /tracking code/i.test(i.getTitle()));
+  if (code) code.setHelpText('License plate, e.g. ZTC8491 (spaces don’t matter)');
+  const now = (t === FormApp.ItemType.LIST ? item.asListItem() : item.asMultipleChoiceItem()).getChoices().map(c => c.getValue());
+  Logger.log('"' + item.getTitle() + '" choices now: ' + now.join(' | '));
 }
 
 function repairTriggersMenu() {
