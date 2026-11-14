@@ -188,6 +188,19 @@ function sharePostedPhotos_() {
   Object.keys(ids).forEach(k => sharePhotos_(ids[k]));
 }
 
+// Sets the Job update form's step choices to the current names (safe to run any time)
+function updateProgressChoices() {
+  const form = FormApp.openByUrl(SpreadsheetApp.getActive().getSheetByName(UPDATES).getFormUrl());
+  const item = form.getItems().find(i => /^(stage|progress)$/i.test(i.getTitle().trim()));
+  if (!item) throw new Error('No Stage/Progress question found');
+  const names = ['Checked In', 'Prep & Inspection', 'Installation / Detailing', 'Curing & Finishing', 'Final Inspection', 'Ready for Pick-Up'];
+  const t = item.getType();
+  if (t === FormApp.ItemType.LIST) item.asListItem().setChoiceValues(names);
+  else if (t === FormApp.ItemType.MULTIPLE_CHOICE) item.asMultipleChoiceItem().setChoiceValues(names);
+  else throw new Error('Stage question is a ' + t);
+  Logger.log('Updated "' + item.getTitle() + '" choices: ' + names.join(' | '));
+}
+
 function repairTriggersMenu() {
   const list = repairTriggers();
   SpreadsheetApp.getUi().alert('Automatic tasks are set', list.join('\n'), SpreadsheetApp.getUi().ButtonSet.OK);
@@ -284,9 +297,11 @@ function onUpdate(e) {
   const row = findJobRow(code);
   if (!row || stage < 0) return;
   const sheet = SpreadsheetApp.getActive().getSheetByName(JOBS);
+  const before = stageIndex_(sheet.getRange(row, 5).getValue());
   sheet.getRange(row, 5).setValue(STAGES[stage]);
   const email = String(sheet.getRange(row, 7).getValue() || '').trim();
-  if (email) {
+  // email the customer only when the car moves to a new step (more photos/notes on the same step don't email)
+  if (email && stage !== before) {
     const vehicle = sheet.getRange(row, 2).getValue(), step = stagesFor_(sheet.getRange(row, 3).getValue())[stage];
     MailApp.sendEmail({
       to: email, name: SHOP,
