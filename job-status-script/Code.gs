@@ -224,8 +224,8 @@ function onNewJob(e) {
 
   const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const when = ready ? niceWhen_(ready) : '';
-  const text = 'Hi ' + first + ', your ' + vehicle + ' is checked in at ' + SHOP + '.' + (when ? ' Estimated pick-up: ' + when + '.' : '') +
-    ' Follow along with photos and progress here: ' + link;
+  const text = 'Hi ' + first + ', your ' + vehicle + ' is checked in at ' + SHOP + '!' + (when ? ' Estimated pick-up: ' + when + '.' : '') +
+    '\n\nTap the link below for photos and progress updates:\n' + link + '\n\nQuestions? Just reply to this text.';
   const tel = e164_(phone) || phone.replace(/[^\d+]/g, '');
   // Gmail strips sms: links, so the button opens a tiny page on the website that opens Messages (details stay after the #)
   const sms = WEBSITE + 'text/#to=' + encodeURIComponent(tel) + '&body=' + encodeURIComponent(text);
@@ -241,7 +241,7 @@ function onNewJob(e) {
       '<p style="margin:0 0 18px;color:#5b636a">' + esc(services) + (when ? ' · pick-up ' + esc(when) : '') + ' · code <b>' + code + '</b></p>' +
       '<p><a href="' + sms + '" style="display:inline-block;background:#C8102E;color:#fff;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:6px">Text ' + esc(first) + ' the tracking link</a></p>' +
       '<p style="margin-top:18px;color:#5b636a;font-size:14px">Or copy this text:</p>' +
-      '<p style="background:#F2F3F4;padding:12px;border-radius:6px">' + esc(text) + '</p>' +
+      '<p style="background:#F2F3F4;padding:12px;border-radius:6px;white-space:pre-line">' + esc(text) + '</p>' +
       (upd ? '<p><a href="' + upd + '" style="display:inline-block;background:#1D2125;color:#fff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:6px">Post an update for ' + code + '</a><br><span style="font-size:13px;color:#5b636a">Save this one: it opens the update form with their code filled in. Use it as many times as you like; each update gets its own time.</span></p>' : '') +
       '<p style="font-size:14px"><a href="' + link + '">Open their Job Status page</a>' + (email ? ' · They were also emailed the link.' : '') + '</p></div>'
   });
