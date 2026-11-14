@@ -693,7 +693,16 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
 (() => {
   const form = document.getElementById('tr-form'); if (!form) return;
   const input = document.getElementById('tr-code'), result = document.getElementById('tr-result'), missing = document.getElementById('tr-missing');
-  const STAGES = ['Checked in', 'Prep & inspection', 'Install', 'Curing & finishing', 'Final inspection', 'Ready for pick-up'];
+  // Step names fit the job: detailing doesn't cure, tint removal isn't an install
+  const stagesFor = (services = []) => {
+    const sv = services.map(String), detail = sv.some(s => /detail/i.test(s));
+    const removal = sv.some(s => /remov/i.test(s)), install = sv.some(s => !/detail|remov/i.test(s));
+    const cure = sv.some(s => /tint|ppf|protection film|ceramic|coating|wrap|vinyl|caliper|paint/i.test(s) && !/remov/i.test(s));
+    const work = [install && 'Installation', removal && 'Removal', detail && 'Detailing'].filter(Boolean);
+    const step3 = !work.length ? 'Installation' : work.length === 1 ? work[0] : work.slice(0, -1).join(', ') + ' & ' + work[work.length - 1].toLowerCase();
+    return ['Checked in', 'Prep & inspection', step3.replace(/, (\w)/g, (m, c) => ', ' + c.toLowerCase()), cure || !sv.length ? 'Curing & finishing' : 'Finishing touches', 'Final inspection', 'Ready for pick-up'];
+  };
+  let STAGES = stagesFor();
   const dataUrl = new URL('../../jobs.json', ASSET_BASE).href;
   // Live jobs come from the shop's Google Sheet (via its Apps Script web app, set in data-api on the form);
   // the DEMO job and any fallback jobs come from jobs.json.
@@ -737,6 +746,8 @@ const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent =
       result.hidden = !job; missing.hidden = !!job;
       if (!job) { missing.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
       const st = Math.max(0, Math.min(5, Number(job.stage) || 0));
+      STAGES = stagesFor(job.services || []);
+      document.querySelectorAll('#tr-steps li').forEach((li, i) => { li.textContent = STAGES[i]; });
       document.getElementById('tr-code-out').textContent = (key === 'DEMO' ? 'Sample job · ' : 'Tracking code · ') + key;
       document.getElementById('tr-vehicle').textContent = job.vehicle || 'Your vehicle';
       document.getElementById('tr-services').innerHTML = (job.services || []).map(s => `<li>${esc(s)}</li>`).join('');

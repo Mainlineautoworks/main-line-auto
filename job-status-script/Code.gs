@@ -17,6 +17,16 @@
  */
 
 const STAGES = ['Checked in', 'Prep & inspection', 'Install', 'Curing & finishing', 'Final inspection', 'Ready for pick-up'];
+// What the customer sees: step names that fit the job (same as the website). Detailing doesn't cure; tint removal isn't an install.
+function stagesFor_(services) {
+  const sv = String(services || '').split(',').map(x => x.trim()).filter(String), detail = sv.some(x => /detail/i.test(x));
+  const removal = sv.some(x => /remov/i.test(x)), install = sv.some(x => !/detail|remov/i.test(x));
+  const cure = sv.some(x => /tint|ppf|protection film|ceramic|coating|wrap|vinyl|caliper|paint/i.test(x) && !/remov/i.test(x));
+  const work = [install && 'Installation', removal && 'Removal', detail && 'Detailing'].filter(Boolean);
+  const w = work.map((x, i) => i ? x.toLowerCase() : x);
+  const step3 = !w.length ? 'Installation' : w.length === 1 ? w[0] : w.slice(0, -1).join(', ') + ' & ' + w[w.length - 1];
+  return ['Checked in', 'Prep & inspection', step3, cure || !sv.length ? 'Curing & finishing' : 'Finishing touches', 'Final inspection', 'Ready for pick-up'];
+}
 const JOBS = 'Jobs';
 const UPDATES = 'Updates';
 const SITE = 'https://mainlineautoworks.com/track/';
@@ -277,11 +287,11 @@ function onUpdate(e) {
   sheet.getRange(row, 5).setValue(STAGES[stage]);
   const email = String(sheet.getRange(row, 7).getValue() || '').trim();
   if (email) {
-    const vehicle = sheet.getRange(row, 2).getValue();
+    const vehicle = sheet.getRange(row, 2).getValue(), step = stagesFor_(sheet.getRange(row, 3).getValue())[stage];
     MailApp.sendEmail({
       to: email, name: SHOP,
-      subject: 'Your ' + vehicle + ': ' + STAGES[stage],
-      htmlBody: '<p>Your ' + vehicle + ' just moved to <b>' + STAGES[stage] + '</b>.</p>' +
+      subject: 'Your ' + vehicle + ': ' + step,
+      htmlBody: '<p>Your ' + vehicle + ' just moved to <b>' + step + '</b>.</p>' +
         ((r['Note for the customer'] || [''])[0] ? '<p>' + (r['Note for the customer'][0]) + '</p>' : '') +
         '<p><a href="' + SITE + '?job=' + code + '">See photos and progress</a></p><p>' + SHOP + ' · (484) 574-1628</p>'
     });
@@ -414,11 +424,11 @@ function addUpdate(code, stageIndex, note, photo) {
 // Match a stage however it's worded in the form or sheet ("Prep & Inspection", "Install / Detailing", ...)
 function stageIndex_(text) {
   const t = String(text || '').toLowerCase();
-  const keys = ['checked', 'prep', 'install', 'curing', 'final', 'ready'];
   const exact = STAGES.findIndex(s => s.toLowerCase() === t.trim());
   if (exact >= 0) return exact;
-  const i = keys.findIndex(k => t.indexOf(k) >= 0);
-  return i;
+  // checked in / prep / the work itself / curing or finishing / final check / ready
+  const keys = [/checked|check-in|arriv/, /prep/, /install|detail|remov|in progress|working/, /cur|finishing/, /final|inspect/, /ready|pick/];
+  return keys.findIndex(k => k.test(t));
 }
 
 function randomCode(n) {
